@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# Environments
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ---------------------------------------------------------------------------
+# Patient data must never be committed. CareScribe does not write PHI to disk,
+# but exported care notes and de-identified documents land in your Downloads or
+# wherever you save them — keep them out of the repo if you ever move them here.
+# ---------------------------------------------------------------------------
+*_deidentified.txt
+*_deidentified.md
+*_carenote.txt
+*_carenote.md
+*_carenote_PHI.txt
+*_carenote_PHI.md
+patient_data/
+phi/

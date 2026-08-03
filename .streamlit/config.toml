@@ -1,0 +1,15 @@
+# CareScribe — privacy-first Streamlit configuration.
+
+[browser]
+# Disable Streamlit's usage statistics. No telemetry leaves this machine.
+gatherUsageStats = false
+
+[server]
+# Bind to loopback only — the app is never exposed on the local network.
+address = "127.0.0.1"
+headless = false
+# Uploaded clinical documents can be large; 50MB is plenty and bounds memory.
+maxUploadSize = 50
+
+[runner]
+magicEnabled = false
