@@ -1,0 +1,33 @@
+RIVERSIDE MEDICAL PRACTICE
+Skipton, North Yorkshire
+
+Patient ID: 7781234
+Case Number: 990214
+
+Referral for: Elspeth Mackenzie-Ford
+Known as: "Ellie"
+Date of Birth: 22 February 1980
+NHS No: 943 476 5919
+Address: 8 Otley Road, Skipton, BD23 1EL
+Email: e.mackenzieford@example.co.uk
+
+Date of assessment: 4 March 2026
+Next review: 18 March 2026
+
+Mrs Mackenzie-Ford attends with a two-week history of abdominal pain. Elspeth
+reports the pain is worse after eating. E.M.F. was investigated for similar
+symptoms three years ago. Ellie has no known allergies.
+
+She travelled in from Leeds for the previous appointment and found the journey
+manageable.
+
+Examination was unremarkable. Bloods showed a normal FBC and LFT. Amylase was
+not raised. No growth of S. aureus on the wound swab. T3/T4 normal.
+
+  Omeprazole 20mg once daily
+  Paracetamol 1g four times daily as required
+
+Reviewed by Dr H. Okonkwo.
+Present: R. Ellis (OT), A. Whitfield.
+
+Typed by L. Fitzgerald.

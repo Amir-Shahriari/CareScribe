@@ -74,7 +74,17 @@ def _extract_docx(data: bytes) -> str:
         for table in document.tables:
             for row in table.rows:
                 cells = [cell.text.strip() for cell in row.cells]
-                if any(cells):
+                if not any(cells):
+                    continue
+                # A two-column table is a details grid — "Hospital No" in one
+                # cell, the number in the next. Rendering it as "label: value"
+                # is how it reads, and is what lets the label-anchored rules see
+                # the pair at all: joined with " | ", or split across lines, the
+                # anchor cannot reach the value and a labelled MRN sails through.
+                if len(cells) == 2:
+                    label, value = cells
+                    parts.append(f"{label}: {value}" if label and value else label or value)
+                else:
                     parts.append(" | ".join(cells))
 
         return "\n".join(parts).strip()

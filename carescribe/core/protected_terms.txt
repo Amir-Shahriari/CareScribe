@@ -1,0 +1,136 @@
+# Protected terms — never redacted.
+#
+# Any detected span that overlaps one of these is dropped before redaction. This
+# is the list that stops the NER layer turning "Mental Health Act" into a clinic
+# and "HoNOS" into an organisation, which makes the resulting note useless to a
+# clinician even though nothing leaked.
+#
+# One term per line, case-insensitive, matched on whole words. Lines starting
+# with # are comments. Edit this file directly — no code change needed.
+
+# --- Legal / statutory -----------------------------------------------------
+Mental Health Act
+Mental Capacity Act
+MHA
+Section 2
+Section 3
+Section 5
+Section 17
+Section 117
+Section 135
+Section 136
+Deprivation of Liberty
+DoLS
+Care Programme Approach
+CPA
+Best Interests
+Court of Protection
+
+# --- Rating scales and instruments -----------------------------------------
+HoNOS
+PHQ-9
+PHQ9
+GAD-7
+GAD7
+MMSE
+MoCA
+AUDIT-C
+CGI
+BPRS
+PANSS
+HCR-20
+ECOG
+GCS
+
+# --- Diagnoses and clinical terms ------------------------------------------
+EUPD
+NSTEMI
+STEMI
+ECG
+EEG
+ECT
+COPD
+CKD
+AKI
+NAD
+DNACPR
+ITU
+ICU
+HDU
+MDT
+OCD
+PTSD
+ADHD
+ASD
+
+# --- Labs and measurements -------------------------------------------------
+T3
+T4
+eGFR
+BMI
+FBC
+LFT
+U&E
+CRP
+ESR
+INR
+HbA1c
+TSH
+FEV1
+FVC
+Hb
+WCC
+Platelets
+Troponin
+Amylase
+
+# --- Common drug names -----------------------------------------------------
+Aspirin
+Atorvastatin
+Bisoprolol
+Ticagrelor
+Clopidogrel
+Ramipril
+Amlodipine
+Metformin
+Omeprazole
+Lansoprazole
+Paracetamol
+Ibuprofen
+Codeine
+Sertraline
+Fluoxetine
+Citalopram
+Escitalopram
+Mirtazapine
+Venlafaxine
+Duloxetine
+Quetiapine
+Olanzapine
+Risperidone
+Aripiprazole
+Haloperidol
+Clozapine
+Lithium
+Lamotrigine
+Sodium Valproate
+Carbamazepine
+Diazepam
+Lorazepam
+Zopiclone
+Promethazine
+Salbutamol
+Beclometasone
+Prednisolone
+Levothyroxine
+Warfarin
+Apixaban
+Rivaroxaban
+Furosemide
+Spironolactone
+Gabapentin
+Pregabalin
+Naltrexone
+Acamprosate
+Thiamine
+Pabrinex

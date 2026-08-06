@@ -1,0 +1,23 @@
+Write a SOAP-structured care note from the source text below.
+
+Use exactly these four headings, in this order:
+
+S - Subjective
+    What the patient reported: presenting complaint, history, symptoms in their
+    own account, relevant social and family context.
+O - Objective
+    Observations, examination findings, investigations, results, and current
+    medication as documented.
+A - Assessment
+    The documented diagnosis or clinical impression. Do not add a differential
+    the source does not state.
+P - Plan
+    Management, medication changes, follow-up, referrals, and safety-netting as
+    documented.
+
+Any heading with no supporting information in the source gets [not documented].
+
+SOURCE TEXT (de-identified):
+---
+{document}
+---

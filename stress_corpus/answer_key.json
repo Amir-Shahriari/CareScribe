@@ -1,0 +1,197 @@
+{
+  "_comment": [
+    "Ground truth for the stress corpus. EVERYTHING IN THESE DOCUMENTS IS FABRICATED:",
+    "invented names, format-valid fake NHS numbers, Ofcom 01632 960xxx drama-range phone",
+    "numbers, example.co.uk email addresses. No real patient, clinician or site appears.",
+    "",
+    "must_redact  - the string must NOT appear in the de-identified output.",
+    "must_preserve - the string MUST appear in the de-identified output. Over-redaction",
+    "                damages clinical meaning, which is the failure the reviewer cannot",
+    "                catch by reading the output alone.",
+    "",
+    "Comparison normalises whitespace on both sides, so a name split across a line break",
+    "still matches its single-line spelling."
+  ],
+  "documents": [
+    {
+      "file": "doc01_community_mh_letter.txt",
+      "covers": ["bug1-mrn", "bug2-location", "bug3-initials", "bug4-identity", "bug5-dates"],
+      "must_redact": [
+        "Mohammed Al-Rashid", "Mr Al-Rashid", "Mohammed", "M.A.R.", "Mo",
+        "Yusuf Al-Rashid",
+        "4471982", "943 476 5919", "01632 960 447", "m.alrashid71@example.co.uk",
+        "22 Beckwith Close", "HG2 8QT",
+        "Harrogate, North Yorkshire",
+        "A. Whitfield", "J. O'Connor", "R. Ellis", "S. Nowak", "R. Patel",
+        "3 April 1971", "2 June 2026", "14 June 2026", "20 June 2026", "5 August 2026"
+      ],
+      "must_preserve": [
+        "T3/T4", "S. aureus", "PHQ-9 was 18", "age 55",
+        "Sertraline 100mg", "Mirtazapine 15mg", "once daily", "nocte",
+        "three-day history", "low mood", "poor sleep",
+        "from Leeds to attend",
+        "NEXT OF KIN", "Date typed:", "Next review:"
+      ]
+    },
+    {
+      "file": "doc02_cardiology_discharge.txt",
+      "covers": ["bug1-mrn", "bug3-initials", "bug4-identity", "bug5-dates"],
+      "must_redact": [
+        "Margaret Elizabeth Chen", "Margaret Chen", "Mrs Chen", "Peggy", "M.E.C.",
+        "David Chen", "Aoife O'Sullivan", "Dr O'Sullivan", "Sister Docherty",
+        "Dr Patel", "K. Osei", "A. Whitfield",
+        "990214", "943 476 5919", "01632 960 188",
+        "14 Leeds Road", "LS9 4TT", "12/03/1948",
+        "St. Aidan's", "Riverside Medical Practice",
+        "4 June 2026", "21 July 2026", "24 July 2026"
+      ],
+      "must_preserve": [
+        "ECG", "ST depression", "NSTEMI", "LAD", "troponin", "stent",
+        "chest pain", "anterior leads", "drug-eluting", "stenosis",
+        "Aspirin 75mg", "Ticagrelor 90mg", "Bisoprolol 2.5mg", "Atorvastatin 80mg",
+        "once daily", "twice daily", "nocte",
+        "visiting family in Leeds", "six weeks",
+        "Angiography on 06/06/2026",
+        "NEXT OF KIN", "Follow-up at"
+      ]
+    },
+    {
+      "file": "doc03_outpatient_clinic_letter.txt",
+      "covers": ["bug1-mrn", "bug2-location", "bug3-initials", "bug4-identity", "bug5-dates"],
+      "must_redact": [
+        "Ngozi Okafor", "Ms Okafor", "Ngozi", "Amara Okafor", "Yusuf Okafor",
+        "Nwachukwu", "T. Adeyemi", "L. Fitzgerald", "M. Rahman", "S. Nowak",
+        "33-201-45", "4471982", "7781234",
+        "Bolton, Greater Manchester",
+        "19 November 1962", "12/09/2026", "3 December 2026",
+        "BOLTON ROAD HEALTH CENTRE"
+      ],
+      "must_preserve": [
+        "FEV1 of 68% predicted", "CXR was clear",
+        "Salbutamol 100mcg", "Beclometasone 200mcg", "twice daily", "as required",
+        "six-week history", "breathlessness on exertion",
+        "Spirometry showed",
+        "NEXT OF KIN", "Next review:", "respiratory clinic"
+      ]
+    },
+    {
+      "file": "doc04_ward_handover.txt",
+      "covers": ["bug1-mrn", "bug3-initials", "bug4-identity", "bug5-dates"],
+      "must_redact": [
+        "Aiden Braithwaite", "Mr Braithwaite", "A. Braithwaite", "Braithwaite",
+        "Fiona Braithwaite",
+        "82911", "5567013", "07/07/1955", "01632 960 902",
+        "R. Patel", "F. Docherty", "A. Whitfield", "J. O'Connor",
+        "11 May 2026", "12 May 2026"
+      ],
+      "must_preserve": [
+        "S. aureus", "T3/T4", "PHQ-9 18", "age 68",
+        "Hb 118", "INR 2.4", "CRP 41",
+        "four-hourly observations", "transferred from ITU",
+        "NEXT OF KIN", "Admission date:", "Date typed:"
+      ]
+    },
+    {
+      "file": "doc05_gp_referral.txt",
+      "covers": ["bug1-mrn", "bug2-location", "bug3-initials", "bug4-identity", "bug5-dates"],
+      "must_redact": [
+        "Elspeth Mackenzie-Ford", "Mrs Mackenzie-Ford", "Elspeth", "E.M.F.", "Ellie",
+        "7781234", "990214", "943 476 5919",
+        "8 Otley Road", "BD23 1EL", "e.mackenzieford@example.co.uk",
+        "Skipton, North Yorkshire",
+        "22 February 1980", "4 March 2026", "18 March 2026",
+        "H. Okonkwo", "R. Ellis", "A. Whitfield", "L. Fitzgerald",
+        "RIVERSIDE MEDICAL PRACTICE"
+      ],
+      "must_preserve": [
+        "S. aureus", "T3/T4", "normal FBC and LFT", "Amylase was",
+        "Omeprazole 20mg", "Paracetamol 1g", "once daily", "four times daily",
+        "two-week history", "abdominal pain", "worse after eating",
+        "from Leeds for the previous appointment",
+        "Next review:", "Date of assessment:"
+      ]
+    },
+    {
+      "file": "doc06_psych_clinic_letter.txt",
+      "covers": ["A2-identity", "A3-protected", "A4-ward", "A6-cpa"],
+      "must_redact": [
+        "Priya Venkataraman", "Mrs Venkataraman", "Priya",
+        "Rajesh Venkataraman",
+        "943 476 5919", "8 October 1979",
+        "CPA-4471-B",
+        "Cedar Ward",
+        "Ilkley, West Yorkshire",
+        "H. Okonkwo", "L. Fitzgerald"
+      ],
+      "must_preserve": [
+        "Mental Health Act", "Section 3", "Section 117",
+        "HoNOS", "PHQ-9", "EUPD",
+        "Care Programme Approach", "the CPA review",
+        "Quetiapine 200mg", "Sertraline 100mg", "nocte", "once daily",
+        "three months"
+      ]
+    },
+    {
+      "file": "doc07_cmht_family_review.txt",
+      "covers": ["A2-identity", "A4-ward", "A9-appointment-dates"],
+      "must_redact": [
+        "Wei Chen", "Mei Chen", "David Chen",
+        "14 January 1988", "Cedar Ward",
+        "21 July 2026", "10:15", "4 May 2026",
+        "Otley, West Yorkshire", "R. Patel", "A. Whitfield"
+      ],
+      "must_preserve": [
+        "three-day history", "disturbed sleep",
+        "Mirtazapine 15mg", "at night",
+        "HoNOS", "outpatient department"
+      ]
+    },
+    {
+      "file": "doc08_wrapped_referral.txt",
+      "covers": ["A1-lf-wrap", "A4-ward", "A5-case-no", "A7-org-wrap"],
+      "must_redact": [
+        "Oluwaseun Adeyinka", "Oluwaseun", "Adeyinka",
+        "990214", "Ashdown Ward",
+        "Kirkstall Lane Surgery",
+        "Guiseley, West Yorkshire",
+        "12 June 2026", "M. Rahman", "S. Nowak"
+      ],
+      "must_preserve": [
+        "normal FBC and eGFR", "BMI was 24",
+        "S. aureus", "T3/T4",
+        "reviewed on the ward", "day unit", "remains on the caseload"
+      ]
+    },
+    {
+      "file": "doc09_crisis_contact_log.txt",
+      "covers": ["A3-protected", "A4-ward", "A9-contact-dates"],
+      "must_redact": [
+        "Tomasz Wisniewski", "943 476 5919", "Ashdown Ward",
+        "3 August 2026", "4 August 2026", "6 August 2026", "14:30",
+        "Shipley, West Yorkshire", "K. Osei", "J. O'Connor"
+      ],
+      "must_preserve": [
+        "Mental Health Act", "GAD-7",
+        "four-week history", "low mood", "poor appetite",
+        "Olanzapine 10mg", "Diazepam 2mg", "twice daily", "at night",
+        "low immediate risk"
+      ]
+    },
+    {
+      "file": "doc10_mha_assessment.txt",
+      "covers": ["A3-protected", "A4-ward", "A5-case-no", "A8-initials"],
+      "must_redact": [
+        "Mariam Aisha Rahman", "Mrs Rahman", "M.A.R.",
+        "2 September 1990", "990214", "Ashdown Ward",
+        "Baildon, West Yorkshire",
+        "H. Okonkwo", "A. Whitfield", "L. Fitzgerald"
+      ],
+      "must_preserve": [
+        "Mental Health Act", "Mental Capacity Act",
+        "Section 136", "Section 2", "Section 117", "Section 3",
+        "HoNOS", "PHQ-9", "GAD-7", "EUPD", "PTSD", "ECG", "eGFR",
+        "Lorazepam 1mg", "Promethazine 25mg", "place of safety"
+      ]
+    }
+  ]
+}

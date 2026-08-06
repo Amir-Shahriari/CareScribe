@@ -1,0 +1,21 @@
+Write an outpatient clinic letter to the patient's GP from the source text below.
+
+Structure:
+
+    Re: [PATIENT]
+    Diagnosis / problem list
+    Reason for referral or review
+    History and findings
+    Investigations and results
+    Management and medication
+    Plan and follow-up
+    Actions requested of the GP
+
+Keep the tone of a letter between colleagues: brief, factual, no filler. Address
+the GP directly where the source names one; otherwise open with "Dear Doctor".
+Any section without supporting information gets [not documented].
+
+SOURCE TEXT (de-identified):
+---
+{document}
+---

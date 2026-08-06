@@ -1,0 +1,23 @@
+Revise the draft below according to the clinician's instruction.
+
+Change only what the instruction asks for. Everything else — headings, wording,
+clinical content — stays as it is. Do not introduce any fact that is not in the
+source text, and preserve every bracketed placeholder exactly.
+
+Return the COMPLETE revised document, not a description of the changes and not
+only the changed section.
+
+CLINICIAN'S INSTRUCTION:
+---
+{instruction}
+---
+
+CURRENT DRAFT:
+---
+{draft}
+---
+
+SOURCE TEXT (de-identified):
+---
+{document}
+---

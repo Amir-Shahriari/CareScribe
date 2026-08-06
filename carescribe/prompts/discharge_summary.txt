@@ -1,0 +1,23 @@
+Write an inpatient discharge summary from the source text below.
+
+Use these headings:
+
+    Patient details (as placeholders only)
+    Admission and discharge dates
+    Presenting complaint
+    Diagnosis on discharge
+    Investigations and results
+    Procedures
+    Clinical course during admission
+    Medication on discharge
+    Follow-up arrangements
+    Information given to the patient
+
+The medication list must be reproduced exactly as documented: same drugs, same
+doses, same frequencies. Do not normalise, convert, or complete it. Any heading
+without supporting information gets [not documented].
+
+SOURCE TEXT (de-identified):
+---
+{document}
+---

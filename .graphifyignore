@@ -1,0 +1,7 @@
+# Keep the graph about CareScribe, not about the tooling that indexes it.
+# Without this, a rebuild pulls CLAUDE.md, GRAPHIFY.md and .claude/settings.json
+# into the corpus and mints communities named after the graph's own docs.
+.claude/
+graphify-out/
+CLAUDE.md
+GRAPHIFY.md

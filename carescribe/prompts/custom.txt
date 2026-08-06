@@ -1,0 +1,14 @@
+Follow the clinician's own template and instructions below exactly. Their house
+format takes precedence over any structure you would otherwise choose. The rules
+in the system prompt still apply in full — in particular, do not invent content
+to fill their template, and preserve every bracketed placeholder exactly.
+
+CLINICIAN'S TEMPLATE / INSTRUCTIONS:
+---
+{instruction}
+---
+
+SOURCE TEXT (de-identified):
+---
+{document}
+---

@@ -26,37 +26,59 @@ from typing import Iterable
 
 logger = logging.getLogger(__name__)
 
-# Canonical entity types the de-identification prompt is allowed to emit.
+# Canonical entity types the detection layers are allowed to emit.
 ENTITY_TYPES: tuple[str, ...] = (
     "PATIENT_NAME",
+    "RELATIVE_NAME",
+    "PROVIDER_NAME",
+    "PERSON",
     "DOB",
     "MRN",
+    "CPA_NO",
     "NHS_NUMBER",
     "ADDRESS",
+    "LOCATION",
+    "WARD",
     "PHONE",
     "FAX",
     "EMAIL",
     "SSN",
-    "PROVIDER_NAME",
     "FACILITY",
     "DATE",
     "OTHER_ID",
 )
 
-# Shorter, friendlier placeholder stems for a few verbose types.
+# Shorter, friendlier placeholder stems for a few verbose types. These are what
+# the reviewer actually sees in the redacted text: [PATIENT], [RELATIVE_1],
+# [CLINICIAN_1], [CLINIC_1], [NHS_NO].
 _PLACEHOLDER_STEMS = {
     "PATIENT_NAME": "PATIENT",
-    "PROVIDER_NAME": "PROVIDER",
+    "RELATIVE_NAME": "RELATIVE",
+    "PROVIDER_NAME": "CLINICIAN",
+    "FACILITY": "CLINIC",
+    "NHS_NUMBER": "NHS_NO",
 }
 
 # Types whose values name a person — these get name-variant expansion.
-PERSON_TYPES = frozenset({"PATIENT_NAME", "PROVIDER_NAME"})
+PERSON_TYPES = frozenset({"PATIENT_NAME", "RELATIVE_NAME", "PROVIDER_NAME", "PERSON"})
 
 # Types whose values name an organisation — these get org-variant expansion.
 FACILITY_TYPES = frozenset({"FACILITY"})
 
 # Types vague enough that a colliding, more specific type should win on merge.
-GENERIC_TYPES = frozenset({"DATE", "OTHER_ID"})
+# PERSON is here on purpose: any layer that can say *which kind* of person this
+# is (patient / relative / clinician) should win over a bare NER "PERSON".
+GENERIC_TYPES = frozenset({"DATE", "OTHER_ID", "PERSON"})
+
+# Rows the reviewer has marked "Keep" are shown in the table but excluded from
+# redaction — the escape hatch for a false positive they don't want to delete.
+KEEP = "Keep"
+REDACT = "Redact"
+
+
+def normalise_action(raw: object) -> str:
+    """Coerce a table cell to :data:`REDACT` or :data:`KEEP`. Defaults to redact."""
+    return KEEP if str(raw or "").strip().casefold() == KEEP.casefold() else REDACT
 
 # Values shorter than this are too risky to blanket-replace (a two-letter
 # "value" would shred the document), so we skip them during redaction.
@@ -69,12 +91,15 @@ _TITLE_LOOKUP = frozenset(t.lower().rstrip(".") for t in TITLES)
 # Trailing organisation descriptors stripped to produce facility short forms.
 # Longest first so "General Hospital" is tried before "Hospital".
 ORG_DESCRIPTORS = (
+    "NHS Foundation Trust",
+    "NHS Trust",
     "General Hospital",
     "Medical Practice",
     "Medical Centre",
     "Medical Center",
     "Health Centre",
     "Health Center",
+    "Group Practice",
     "Hospital",
     "Practice",
     "Clinic",
@@ -82,6 +107,8 @@ ORG_DESCRIPTORS = (
     "Surgery",
     "Centre",
     "Center",
+    "Infirmary",
+    "Hospice",
 )
 
 # Facility short forms below this length are dropped — a two-letter fragment
@@ -98,9 +125,13 @@ def normalise_type(raw: str | None) -> str:
         return candidate
     # A few aliases the models (and the regex pre-pass) reach for.
     aliases = {
-        "NAME": "PATIENT_NAME",
+        "NAME": "PERSON",
         "PATIENT": "PATIENT_NAME",
-        "PERSON": "PATIENT_NAME",
+        "RELATIVE": "RELATIVE_NAME",
+        "NEXT_OF_KIN": "RELATIVE_NAME",
+        "FAMILY_MEMBER": "RELATIVE_NAME",
+        "CLINICIAN": "PROVIDER_NAME",
+        "DATE_TIME": "DATE",
         "DATE_OF_BIRTH": "DOB",
         "BIRTHDATE": "DOB",
         "MEDICAL_RECORD_NUMBER": "MRN",
@@ -116,6 +147,8 @@ def normalise_type(raw: str | None) -> str:
         "ORG": "FACILITY",
         "PRACTICE": "FACILITY",
         "FACILITY_NAME": "FACILITY",
+        "ORGANIZATION": "FACILITY",
+        "ORGANISATION": "FACILITY",
         "TELEPHONE": "PHONE",
         "PHONE_NUMBER": "PHONE",
         "UK_PHONE": "PHONE",
@@ -123,8 +156,20 @@ def normalise_type(raw: str | None) -> str:
         "ZIP": "ADDRESS",
         "POSTCODE": "ADDRESS",
         "UK_POSTCODE": "ADDRESS",
-        "LOCATION": "ADDRESS",
+        "STREET_ADDRESS": "ADDRESS",
+        # A bare place name is not a postal address. Keeping them apart lets the
+        # reviewer see that a letterhead town was redacted while a street
+        # address was redacted for a different reason, and lets the address gate
+        # stay strict about "visiting family in Leeds".
+        "GPE": "LOCATION",
+        "LOC": "LOCATION",
+        "PLACE": "LOCATION",
+        "TOWN": "LOCATION",
+        "CITY": "LOCATION",
+        "COUNTY": "LOCATION",
         "ID": "OTHER_ID",
+        "US_SSN": "SSN",
+        "UK_NHS": "NHS_NUMBER",
     }
     return aliases.get(candidate, "OTHER_ID")
 
@@ -134,16 +179,27 @@ def dedupe_entities(entities: Iterable[dict]) -> list[dict]:
 
     Duplicates are matched case-insensitively on the value; the first spelling
     encountered wins, so re-identification restores the document's own casing.
+    The reviewer's Redact/Keep choice rides along — a duplicate row must not
+    silently re-enable a value they turned off.
     """
     seen: dict[str, dict] = {}
     for entity in entities:
-        value = str(entity.get("value", "") or "").strip()
+        # Collapse internal whitespace so a value the document wrapped across a
+        # line ("Oluwaseun\nAdeyinka") is the same entity as the same name
+        # written inline. Matching stays whitespace-tolerant either way, but the
+        # canonical key, the review table and the approved map all want one
+        # spelling rather than two.
+        value = " ".join(str(entity.get("value", "") or "").split())
         if len(value) < MIN_VALUE_LENGTH:
             continue
         key = value.casefold()
         if key in seen:
             continue
-        seen[key] = {"type": normalise_type(entity.get("type")), "value": value}
+        seen[key] = {
+            "type": normalise_type(entity.get("type")),
+            "value": value,
+            "action": normalise_action(entity.get("action")),
+        }
     return list(seen.values())
 
 
@@ -184,6 +240,7 @@ def assign_placeholders(entities: Iterable[dict]) -> list[dict]:
                 "type": entity_type,
                 "value": str(entity.get("value", "")).strip(),
                 "placeholder": placeholder,
+                "action": normalise_action(entity.get("action")),
             }
         )
     return result
@@ -192,6 +249,87 @@ def assign_placeholders(entities: Iterable[dict]) -> list[dict]:
 # --------------------------------------------------------------------------
 # Surface-form expansion
 # --------------------------------------------------------------------------
+
+def name_core(full_name: str) -> list[str]:
+    """Split a name into its parts with any leading honorific removed.
+
+    "Mrs Margaret Chen" -> ["Margaret", "Chen"]. Used by both variant expansion
+    and :func:`canonical_person_key` so the two always agree on what counts as
+    the name proper.
+    """
+    parts = [p for p in re.split(r"\s+", (full_name or "").strip()) if p]
+    if len(parts) > 1 and parts[0].strip(".,").lower() in _TITLE_LOOKUP:
+        parts = parts[1:]
+    return parts
+
+
+def canonical_person_key(full_name: str) -> str:
+    """A stable identity key for one person: full given name plus surname.
+
+    This collapses "Margaret Elizabeth Chen", "Mrs Margaret Chen" and "Margaret
+    Chen" onto one identity (middle names are not part of the key) while keeping
+    people who share only a surname apart.
+
+    The given name is held in **full**, not reduced to an initial. Keying on the
+    initial merged a patient with their sibling — "Wei Chen" and "Mei Chen" are
+    two people, and collapsing them scrambled who was who in the review table
+    even though nothing leaked. An initial-only form ("W. Chen") is deliberately
+    given the initial-shaped key so it can still attach to "Wei Chen", and the
+    caller refuses that attachment when more than one identity would match.
+
+    A single-token value ("Mohammed", "Chen") carries no second part, so it gets
+    a bare key; those are resolved against full-name anchors by the caller
+    rather than merged blindly here.
+    """
+    parts = name_core(full_name)
+    if not parts:
+        return ""
+    surname = parts[-1].strip(".,'’").casefold()
+    if len(parts) == 1:
+        return f"{surname}|"
+    given = parts[0].strip(".,'’").casefold()
+    # "W." is an initial standing in for a given name, not a given name.
+    if len(given) <= 1 or parts[0].rstrip(".").__len__() <= 1:
+        return f"{surname}|{given[:1]}."
+    return f"{surname}|{given}"
+
+
+def keys_are_compatible(a: str, b: str) -> bool:
+    """True if two canonical keys can denote the same person.
+
+    Exact match, or one side is the initial form of the other ("chen|w." against
+    "chen|wei"). Two different full given names never match.
+    """
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    surname_a, _, given_a = a.partition("|")
+    surname_b, _, given_b = b.partition("|")
+    if surname_a != surname_b or not given_a or not given_b:
+        return False
+    if given_a.endswith(".") and not given_b.endswith("."):
+        return given_b.startswith(given_a[:-1])
+    if given_b.endswith(".") and not given_a.endswith("."):
+        return given_a.startswith(given_b[:-1])
+    return False
+
+
+def _initial_letters(parts: list[str]) -> list[str]:
+    """Initials for a name, with hyphenated components contributing each part.
+
+    "Mohammed Al-Rashid" gives M, A, R — so "M.A.R." is generated and the
+    document's own shorthand for the patient collapses onto their placeholder
+    instead of standing in the clear.
+    """
+    letters: list[str] = []
+    for part in parts:
+        for piece in re.split(r"[-–—]", part):
+            piece = piece.strip(".,'’")
+            if piece[:1].isalpha():
+                letters.append(piece[0].upper())
+    return letters
+
 
 def expand_name_variants(full_name: str, known_as: str | None = None) -> set[str]:
     """Return every plausible written form of one person's name.
@@ -216,12 +354,16 @@ def expand_name_variants(full_name: str, known_as: str | None = None) -> set[str
     variants = {full_name.strip()}
 
     # Derive from the name proper, not from an honorific.
-    core = parts
-    if len(parts) > 1 and parts[0].strip(".,").lower() in _TITLE_LOOKUP:
-        core = parts[1:]
+    core = name_core(full_name)
 
     for part in core:
         cleaned = part.strip(".,'")
+        # A short abbreviated token ("St.", "M.", "Dr.") is never safe as a
+        # standalone form. NER occasionally hands back an organisation as a
+        # person, and emitting "St" from "St. Aidan's" would redact every
+        # "ST depression" in the document.
+        if part.endswith(".") and len(cleaned) <= 3:
+            continue
         if len(cleaned) >= 2:
             variants.add(cleaned)  # first / middle / surname standalone
 
@@ -238,11 +380,26 @@ def expand_name_variants(full_name: str, known_as: str | None = None) -> set[str
     if len(core) > 2:
         variants.add(f"{first} {surname}")
 
-    initials = [p[0].upper() for p in core if p[:1].isalpha()]
+    # "A. Braithwaite" — the form a handover writes for someone the header
+    # already named in full. Without it the surname redacts and the initial is
+    # left stranded as "A. [PATIENT]".
+    if len(core) > 1 and core[0][:1].isalpha():
+        variants.add(f"{core[0][0].upper()}. {surname}")
+        variants.add(f"{core[0][0].upper()}.{surname}")
+
+    initials = _initial_letters(core)
     if len(initials) >= 2:
-        variants.add("".join(initials))
+        # Dotted forms only, for two initials. An undotted two-letter form is a
+        # menace: "Ngozi Okafor" would emit "NO" and redact the "No" in
+        # "NHS No:". Three letters is short enough to still be safe.
         variants.add(".".join(initials) + ".")
         variants.add(f"{initials[0]}.{initials[-1]}.")
+    if len(initials) >= 3:
+        # Trailing-dot and bare forms both appear in correspondence ("M.A.R.",
+        # "M.A.R", "MAR"), and a parenthesised token is just one of these inside
+        # brackets, which the matcher's non-word guards already allow.
+        variants.add("".join(initials))
+        variants.add(".".join(initials))
 
     if known_as:
         variants.add(known_as.strip().strip('"').strip("'"))
@@ -274,6 +431,11 @@ def expand_facility_variants(name: str) -> set[str]:
     return {v for v in variants if len(v) >= MIN_FACILITY_FORM_LENGTH}
 
 
+# The name the pipeline spec uses. `expand_facility_variants` predates it and is
+# kept as an alias so existing call sites and tests keep working.
+expand_org_variants = expand_facility_variants
+
+
 _KNOWN_AS_RE = re.compile(
     r"\b(?:known\s+as|preferred\s+name|goes\s+by)\b\s*[:\-]?\s*[\"“']?([A-Za-z][\w'\-]{1,30})",
     re.IGNORECASE,
@@ -303,6 +465,8 @@ def surface_forms(entities: Iterable[dict], known_as: str | None = None) -> Surf
     genuinely share a form ("Chen" for both Margaret Chen and David Chen), the
     first entity in table order keeps it and the collision is reported — the
     string still gets redacted either way, which is what matters for recall.
+
+    Rows the reviewer marked "Keep" contribute nothing: no value, no variants.
     """
     result = SurfaceForms()
 
@@ -317,7 +481,12 @@ def surface_forms(entities: Iterable[dict], known_as: str | None = None) -> Surf
         elif existing != placeholder:
             result.ambiguous.append((form, existing, placeholder))
 
-    ordered = [e for e in entities if str(e.get("placeholder", "") or "").strip()]
+    ordered = [
+        e
+        for e in entities
+        if str(e.get("placeholder", "") or "").strip()
+        and normalise_action(e.get("action")) == REDACT
+    ]
 
     # Pass 1 — exact entity values.
     for entity in ordered:
@@ -418,6 +587,8 @@ def build_map(entities: Iterable[dict]) -> dict[str, str]:
     """
     mapping: dict[str, str] = {}
     for entity in entities:
+        if normalise_action(entity.get("action")) != REDACT:
+            continue  # nothing was replaced, so there is nothing to restore
         placeholder = str(entity.get("placeholder", "") or "").strip()
         value = str(entity.get("value", "") or "").strip()
         if placeholder and value and placeholder not in mapping:
@@ -440,8 +611,11 @@ def residual_values(text: str, entities: Iterable[dict], known_as: str | None = 
     expanded = surface_forms(list(entities), known_as)
 
     # Report the longest leaking form per placeholder; the short variants of a
-    # name that leaked would otherwise bury the signal.
-    for form in sorted(expanded.forms, key=len, reverse=True):
+    # name that leaked would otherwise bury the signal. Iterating the original
+    # spellings (not the casefolded keys) keeps the reviewer's search-and-find
+    # working against the document.
+    original_forms = [form for forms in expanded.by_placeholder.values() for form in forms]
+    for form in sorted(original_forms, key=len, reverse=True):
         pattern = _form_pattern(form)
         if pattern and pattern.search(text) and form.casefold() not in seen:
             seen.add(form.casefold())
@@ -576,3 +750,101 @@ def reidentify(text: str, mapping: dict[str, str]) -> str:
     text. Corrupted placeholders are repaired where a confident match exists.
     """
     return reidentify_detailed(text, mapping).text
+
+
+# --------------------------------------------------------------------------
+# Placeholder integrity — what a small model does to bracketed tokens
+# --------------------------------------------------------------------------
+
+ISSUE_MANGLED = "mangled"
+ISSUE_UNKNOWN = "unknown"
+ISSUE_MISSING = "missing"
+
+
+@dataclass(frozen=True)
+class Issue:
+    """One placeholder problem found in a generated draft."""
+
+    kind: str
+    token: str
+    suggestion: str = ""
+    detail: str = ""
+
+
+def check_placeholder_integrity(draft: str, known_placeholders: Iterable[str]) -> list[Issue]:
+    """Compare a draft's bracketed tokens against the placeholders it should use.
+
+    An 8B model writing a long note will occasionally corrupt one — we saw
+    ``[PATIENT_2]`` come back as ``[MATIENT_2]``. Left alone that either lands a
+    stray bracket in a filed report or, worse, silently drops an identity from
+    the re-identified version. Neither is acceptable, and neither is asking the
+    model to be more careful: the check belongs in Python.
+
+    Reports three kinds:
+
+    ``mangled``  a token close enough to a known placeholder to repair.
+    ``unknown``  a bracketed token that resolves to nothing — possibly invented.
+    ``missing``  a known placeholder absent from the draft entirely.
+    """
+    known = [p for p in known_placeholders if p]
+    text = draft or ""
+    issues: list[Issue] = []
+
+    seen: set[str] = set()
+    for match in PLACEHOLDER_RE.finditer(text):
+        token = match.group(0)
+        if token in seen:
+            continue
+        seen.add(token)
+        if token in known:
+            continue
+        repaired = resolve_placeholder(token, known)
+        if repaired is not None:
+            issues.append(
+                Issue(ISSUE_MANGLED, token, repaired,
+                      f"{token} looks like {repaired}")
+            )
+        else:
+            issues.append(
+                Issue(ISSUE_UNKNOWN, token, "",
+                      f"{token} matches no known placeholder")
+            )
+
+    repaired_targets = {issue.suggestion for issue in issues if issue.suggestion}
+    for placeholder in known:
+        if placeholder not in seen and placeholder not in repaired_targets:
+            issues.append(
+                Issue(ISSUE_MISSING, placeholder, "",
+                      f"{placeholder} does not appear in the draft")
+            )
+    return issues
+
+
+def reidentify_document(
+    draft: str, mapping: dict[str, str], tolerant: bool = True
+) -> tuple[str, list[str]]:
+    """Local re-identification of a generated draft. Returns ``(text, unresolved)``.
+
+    The model is never in this loop. It produced placeholders; Python swaps them
+    for the real values held in session state, which is what keeps the model's
+    view identical whether it runs on this machine or, one day, somewhere else.
+
+    With ``tolerant`` (the default) a mangled placeholder is repaired first via
+    :func:`check_placeholder_integrity`, so ``[MATIENT_2]`` resolves rather than
+    being filed as-is. ``unresolved`` lists every bracketed token still standing
+    afterwards — the caller must treat a non-empty list as blocking, because a
+    report containing a literal ``[PATIENT]`` is worse than no report.
+    """
+    text = draft or ""
+    if not text or not mapping:
+        return text, sorted({m.group(0) for m in PLACEHOLDER_RE.finditer(text)})
+
+    if tolerant:
+        for issue in check_placeholder_integrity(text, mapping):
+            if issue.kind == ISSUE_MANGLED and issue.suggestion:
+                text = text.replace(issue.token, issue.suggestion)
+
+    result = reidentify_detailed(text, mapping)
+    survivors = sorted({m.group(0) for m in PLACEHOLDER_RE.finditer(result.text)})
+    unresolved = sorted(set(result.unresolved) | set(survivors))
+    return result.text, unresolved

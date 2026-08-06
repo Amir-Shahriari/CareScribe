@@ -1,0 +1,122 @@
+{
+  "carescribe/__init__.py": {
+    "mtime": 1785732007.6339984,
+    "ast_hash": "533e72a4166008742fe4d6516435cf00",
+    "semantic_hash": "533e72a4166008742fe4d6516435cf00"
+  },
+  "carescribe/app.py": {
+    "mtime": 1785844325.3833096,
+    "ast_hash": "d60c3b1fbfb3ed1ea5cfe9fdf1894320",
+    "semantic_hash": "d60c3b1fbfb3ed1ea5cfe9fdf1894320"
+  },
+  "carescribe/core/__init__.py": {
+    "mtime": 1785732010.235447,
+    "ast_hash": "636336c3fa332fba5764f7906032f96b",
+    "semantic_hash": "636336c3fa332fba5764f7906032f96b"
+  },
+  "carescribe/core/batch.py": {
+    "mtime": 1785844313.5638626,
+    "ast_hash": "817cc8bcfb9ac8b952eb581109678317",
+    "semantic_hash": "817cc8bcfb9ac8b952eb581109678317"
+  },
+  "carescribe/core/carenotes.py": {
+    "mtime": 1785843425.0815473,
+    "ast_hash": "87aaa9e62d61e3a1f3115d9dd02f25ce",
+    "semantic_hash": "87aaa9e62d61e3a1f3115d9dd02f25ce"
+  },
+  "carescribe/core/deidentify.py": {
+    "mtime": 1785844237.3359623,
+    "ast_hash": "f94101ad5454258ed63dbff0fe179c26",
+    "semantic_hash": "f94101ad5454258ed63dbff0fe179c26"
+  },
+  "carescribe/core/ingest.py": {
+    "mtime": 1785732054.8867807,
+    "ast_hash": "be5197df0d90d1cdbb4451ad70008aab",
+    "semantic_hash": "be5197df0d90d1cdbb4451ad70008aab"
+  },
+  "carescribe/core/mapping.py": {
+    "mtime": 1785844169.2525206,
+    "ast_hash": "32bdb80f64da88c58d5f06207babe070",
+    "semantic_hash": "32bdb80f64da88c58d5f06207babe070"
+  },
+  "carescribe/core/ollama_client.py": {
+    "mtime": 1785732037.3718743,
+    "ast_hash": "bd02a8ffe92bbcaeece226fac5b25a88",
+    "semantic_hash": "bd02a8ffe92bbcaeece226fac5b25a88"
+  },
+  "carescribe/prompts/__init__.py": {
+    "mtime": 1785732012.16356,
+    "ast_hash": "b240c84d295fbb0e1aec49be85f9e991",
+    "semantic_hash": "b240c84d295fbb0e1aec49be85f9e991"
+  },
+  "carescribe/prompts/carenotes_prompt.py": {
+    "mtime": 1785732125.6177905,
+    "ast_hash": "87c012a9eb2c5fdbc55014df95e559b3",
+    "semantic_hash": "87c012a9eb2c5fdbc55014df95e559b3"
+  },
+  "carescribe/prompts/deid_prompt.py": {
+    "mtime": 1785757590.9740949,
+    "ast_hash": "17a81be0902f5ef855a292dba3352843",
+    "semantic_hash": "17a81be0902f5ef855a292dba3352843"
+  },
+  "tests/__init__.py": {
+    "mtime": 1785757346.4855685,
+    "ast_hash": "e3924f6e31383ae67aa383e3618f9298",
+    "semantic_hash": "e3924f6e31383ae67aa383e3618f9298"
+  },
+  "tests/conftest.py": {
+    "mtime": 1785843592.5827816,
+    "ast_hash": "e2b5df315a3e5df4c47b5a552237074d",
+    "semantic_hash": "e2b5df315a3e5df4c47b5a552237074d"
+  },
+  "tests/fixtures.py": {
+    "mtime": 1785843586.6847372,
+    "ast_hash": "61f8621e9c28175b804e38852397f780",
+    "semantic_hash": "61f8621e9c28175b804e38852397f780"
+  },
+  "tests/run_all.py": {
+    "mtime": 1785843840.0214415,
+    "ast_hash": "82d30542b9ac377f0c3c8f748ca6029e",
+    "semantic_hash": "82d30542b9ac377f0c3c8f748ca6029e"
+  },
+  "tests/test_app.py": {
+    "mtime": 1785843801.9668734,
+    "ast_hash": "6f5e818f5daab0e7323df58b3cac0e81",
+    "semantic_hash": "6f5e818f5daab0e7323df58b3cac0e81"
+  },
+  "tests/test_batch.py": {
+    "mtime": 1785844342.0148313,
+    "ast_hash": "3e8a2e4bd011e50421cda5cecb1dff81",
+    "semantic_hash": "3e8a2e4bd011e50421cda5cecb1dff81"
+  },
+  "tests/test_deid_pipeline.py": {
+    "mtime": 1785844090.1357656,
+    "ast_hash": "667f3dad8da897e9b40a932c0759d443",
+    "semantic_hash": "667f3dad8da897e9b40a932c0759d443"
+  },
+  "tests/test_ingest.py": {
+    "mtime": 1785843730.1474605,
+    "ast_hash": "7578b898c8f7017b4987a06f1a8a2caa",
+    "semantic_hash": "7578b898c8f7017b4987a06f1a8a2caa"
+  },
+  "tests/test_mapping.py": {
+    "mtime": 1785843699.5169582,
+    "ast_hash": "47e1798722e3de4410e807fb166c3d87",
+    "semantic_hash": "47e1798722e3de4410e807fb166c3d87"
+  },
+  "README.md": {
+    "mtime": 1785844386.89894,
+    "ast_hash": "b184486e3457dd2863f6d92b34c58c47",
+    "semantic_hash": "b184486e3457dd2863f6d92b34c58c47"
+  },
+  "requirements.txt": {
+    "mtime": 1785843557.3575404,
+    "ast_hash": "b1bb27c481ee9c583f0b116f980cf8d7",
+    "semantic_hash": "b1bb27c481ee9c583f0b116f980cf8d7"
+  },
+  "tests/synthetic_patient_discharge_summary.txt": {
+    "mtime": 1785842868.4657786,
+    "ast_hash": "c631409e68733b011ae307f461faba7b",
+    "semantic_hash": "c631409e68733b011ae307f461faba7b"
+  }
+}

@@ -1,0 +1,36 @@
+RIVERSIDE COMMUNITY MENTAL HEALTH TEAM
+Harrogate, North Yorkshire
+
+Patient:            Mohammed Al-Rashid
+Known as:           "Mo"
+Date of Birth:      3 April 1971
+NHS No:             943 476 5919
+Hospital No (MRN):  4471982
+Address:            22 Beckwith Close, Harrogate, HG2 8QT
+Telephone:          01632 960 447
+Email:              m.alrashid71@example.co.uk
+
+Admission date:     2 June 2026
+Discharge date:     14 June 2026
+Date typed:         20 June 2026
+Next review:        5 August 2026
+
+Mr Al-Rashid was admitted on 2 June 2026 following a three-day history of low
+mood and poor sleep. Mohammed reported early morning waking and reduced
+appetite. The patient travelled in from Leeds to attend the assessment, and
+M.A.R. was noted in earlier correspondence under the same record.
+
+Present: R. Ellis (OT), S. Nowak (CPN), J. O'Connor.
+Care coordinator: A. Whitfield.
+
+Reviewed by Dr R. Patel on the ward. Bloods showed normal T3/T4 and no growth
+of S. aureus on culture. PHQ-9 was 18 at assessment and the patient is age 55.
+
+MEDICATION ON DISCHARGE
+  Sertraline 100mg once daily
+  Mirtazapine 15mg nocte
+
+NEXT OF KIN
+  Yusuf Al-Rashid (son) is the main contact.
+
+Typed by A. Whitfield.

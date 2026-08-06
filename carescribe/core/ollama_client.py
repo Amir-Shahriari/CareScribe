@@ -1,182 +1,211 @@
 """
-Thin wrapper around a *local* Ollama server.
+Local Ollama client — pinned to the loopback interface.
 
-Design notes
-------------
-* The host is hard-pinned to loopback. We deliberately do NOT honour the
-  ``OLLAMA_HOST`` environment variable, because a stray value there could
-  silently ship PHI to a remote machine. If you genuinely need a different
-  local port, change ``OLLAMA_HOST`` below.
-* Every entry point degrades gracefully: if the server is down or has no
-  models installed, callers get ``False`` / ``[]`` / a clear ``OllamaError``
-  instead of a traceback.
+Generation is the first part of CareScribe that talks to anything at all, so
+the surface it can talk to is deliberately tiny: one hard-coded host,
+``127.0.0.1:11434``, and nothing else.
+
+``OLLAMA_HOST`` is **ignored on purpose**. It is the documented way to point an
+Ollama client at another machine, which is precisely what must not be possible
+here — a variable set for an unrelated reason would quietly turn a local-only
+tool into one that ships clinical text off the box. Never reading it is a
+stronger guarantee than reading it and validating it.
+
+Even so, what reaches this module is de-identified text full of placeholders.
+The loopback pin is the second line of defence, not the first.
+
+Talks to the HTTP API through the standard library rather than the ``ollama``
+package: that package is deliberately absent from ``requirements.txt``, and
+leaving it uninstalled keeps "this stage has no third-party network client" a
+checkable property.
 """
 
 from __future__ import annotations
 
-from typing import Any, Iterator
+import json
+import urllib.error
+import urllib.request
+from typing import Iterator
 
-import ollama
+# Not configurable. See the module docstring.
+OLLAMA_HOST = "127.0.0.1"
+OLLAMA_PORT = 11434
+BASE_URL = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}"
 
-# Pinned to loopback on purpose — see module docstring.
-OLLAMA_HOST = "http://127.0.0.1:11434"
+# A weak CPU box takes a while to produce the first token of an 8B model, so the
+# connect probe is short and the generation read is generous.
+CONNECT_TIMEOUT = 3
+GENERATE_TIMEOUT = 900
 
-# Short timeout for "is the server there?" probes, long one for generation.
-PROBE_TIMEOUT = 3.0
-CHAT_TIMEOUT = 600.0
+# Preference order when auto-detecting. An 8B-class instruct model is the sweet
+# spot for a clinical draft on CPU; smaller models lose the structure.
+PREFERRED_MODELS = (
+    "llama3.1:8b",
+    "llama3.1:8b-instruct-q4_K_M",
+    "llama3:8b",
+    "qwen2.5:7b",
+    "mistral:7b",
+    "phi3:medium",
+)
+
+DAEMON_DOWN_MESSAGE = (
+    "Ollama does not appear to be running on 127.0.0.1:11434.\n\n"
+    "Start it and try again:\n"
+    "    ollama serve\n\n"
+    "On Windows, launching the Ollama app starts the daemon."
+)
 
 
 class OllamaError(RuntimeError):
     """Raised for any recoverable problem talking to the local Ollama server."""
 
 
-# The message we show the user whenever the server can't be reached.
-NOT_RUNNING_HINT = (
-    "Ollama does not appear to be running on 127.0.0.1:11434.\n\n"
-    "Start Ollama and run:  `ollama pull llama3.1:8b`"
-)
+def missing_model_message(model: str, available: list[str] | None = None) -> str:
+    """The exact command to fix a missing model, plus what is installed."""
+    lines = [
+        f"The model '{model}' is not installed locally.",
+        "",
+        "Pull it with:",
+        f"    ollama pull {model}",
+    ]
+    if available:
+        lines += ["", "Installed models: " + ", ".join(available)]
+    return "\n".join(lines)
 
 
-def _client(timeout: float) -> ollama.Client:
-    """Build a client bound to the local server with an explicit timeout."""
-    return ollama.Client(host=OLLAMA_HOST, timeout=timeout)
+def _request(path: str, payload: dict | None = None, timeout: int = CONNECT_TIMEOUT):
+    """Open a request against the pinned loopback base URL."""
+    data = json.dumps(payload).encode("utf-8") if payload is not None else None
+    request = urllib.request.Request(
+        f"{BASE_URL}{path}", data=data, headers={"Content-Type": "application/json"}
+    )
+    return urllib.request.urlopen(request, timeout=timeout)  # noqa: S310 — fixed loopback URL
 
 
-def is_available() -> bool:
-    """Return True if the local Ollama server responds, False otherwise.
-
-    Never raises — the UI uses this for a status indicator.
-    """
+def is_up() -> bool:
+    """True if the local Ollama daemon answers. Never raises."""
     try:
-        _client(PROBE_TIMEOUT).list()
-        return True
-    except Exception:
+        with _request("/api/tags") as response:
+            return response.status == 200
+    except Exception:  # noqa: BLE001 — "is it up?" must not throw
         return False
 
 
-def _model_name(entry: Any) -> str | None:
-    """Pull the model name out of one ``list()`` entry.
-
-    The ollama client has changed shape across versions: older releases return
-    plain dicts keyed ``"name"``, newer ones return pydantic objects with a
-    ``.model`` attribute. Handle both rather than pinning ourselves to one.
-    """
-    for attr in ("model", "name"):
-        value = getattr(entry, attr, None)
-        if isinstance(value, str) and value:
-            return value
-    if isinstance(entry, dict):
-        for key in ("model", "name"):
-            value = entry.get(key)
-            if isinstance(value, str) and value:
-                return value
-    return None
-
-
 def list_models() -> list[str]:
-    """Return the names of locally-installed models, sorted.
-
-    Returns an empty list if the server is unreachable or nothing is pulled;
-    the UI distinguishes the two cases via :func:`is_available`.
-    """
+    """Locally-installed model names, sorted. Empty list if the daemon is down."""
     try:
-        response = _client(PROBE_TIMEOUT).list()
-    except Exception:
+        with _request("/api/tags") as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception:  # noqa: BLE001
         return []
-
-    # Same version dance as _model_name: object with .models, or dict.
-    entries = getattr(response, "models", None)
-    if entries is None and isinstance(response, dict):
-        entries = response.get("models", [])
-    entries = entries or []
-
-    names = {name for name in (_model_name(e) for e in entries) if name}
-    return sorted(names)
+    names = [
+        str(item.get("name") or item.get("model") or "").strip()
+        for item in payload.get("models", [])
+    ]
+    return sorted(name for name in names if name)
 
 
-def _extract_content(chunk: Any) -> str:
-    """Get ``message.content`` out of a chat response/chunk, dict or object."""
-    message = getattr(chunk, "message", None)
-    if message is None and isinstance(chunk, dict):
-        message = chunk.get("message")
-    if message is None:
-        return ""
+def default_model(available: list[str] | None = None) -> str | None:
+    """The best installed model to draft with, or ``None`` if none are installed.
 
-    content = getattr(message, "content", None)
-    if content is None and isinstance(message, dict):
-        content = message.get("content")
-    return content or ""
+    Never raises on a missing model — the caller surfaces the pull command.
+    """
+    models = available if available is not None else list_models()
+    if not models:
+        return None
+    for preferred in PREFERRED_MODELS:
+        if preferred in models:
+            return preferred
+    for model in models:
+        lowered = model.lower()
+        if "8b" in lowered or "7b" in lowered:
+            return model
+    return models[0]
 
 
-def chat(
+def status() -> dict:
+    """Everything the UI needs to describe the local generation backend."""
+    up = is_up()
+    models = list_models() if up else []
+    return {
+        "up": up,
+        "host": f"{OLLAMA_HOST}:{OLLAMA_PORT}",
+        "models": models,
+        "default_model": default_model(models) if models else None,
+        "message": "" if up else DAEMON_DOWN_MESSAGE,
+    }
+
+
+def generate(
     model: str,
     system: str,
-    user: str,
-    stream: bool = False,
-    timeout: float = CHAT_TIMEOUT,
-    temperature: float = 0.1,
-    num_ctx: int | None = 8192,
-) -> str | Iterator[str]:
-    """Send a single-turn system+user chat to a local model.
+    prompt: str,
+    stream: bool = True,
+    *,
+    temperature: float = 0.2,
+) -> Iterator[str]:
+    """Stream a completion from the local model, yielding text chunks.
 
-    With ``stream=False`` returns the full response text. With ``stream=True``
-    returns a generator of text deltas, suitable for ``st.write_stream``.
-
-    Raises :class:`OllamaError` with an actionable message on any failure.
+    Low temperature by default: this is clinical documentation, and the failure
+    mode that matters is the model inventing a plausible-looking detail.
     """
-    if not model:
-        raise OllamaError("No model selected. Pick one in the sidebar.")
+    if not is_up():
+        raise OllamaError(DAEMON_DOWN_MESSAGE)
 
-    options: dict[str, Any] = {"temperature": temperature}
-    if num_ctx:
-        # 8k context fits comfortably alongside a Q4_K_M 7-9B model on 8GB VRAM.
-        options["num_ctx"] = num_ctx
+    installed = list_models()
+    if model not in installed:
+        raise OllamaError(missing_model_message(model, installed))
 
-    messages = [
-        {"role": "system", "content": system},
-        {"role": "user", "content": user},
-    ]
+    payload = {
+        "model": model,
+        "system": system,
+        "prompt": prompt,
+        "stream": bool(stream),
+        "options": {"temperature": float(temperature)},
+    }
 
-    client = _client(timeout)
+    try:
+        response = _request("/api/generate", payload, timeout=GENERATE_TIMEOUT)
+    except urllib.error.URLError as exc:
+        raise OllamaError(f"Could not reach the local Ollama server: {exc}") from exc
 
-    if not stream:
-        try:
-            response = client.chat(model=model, messages=messages, options=options)
-        except Exception as exc:  # noqa: BLE001 - surfaced verbatim to the UI
-            raise OllamaError(_friendly_error(exc, model)) from exc
-        return _extract_content(response)
+    with response:
+        if not stream:
+            body = json.loads(response.read().decode("utf-8"))
+            text = str(body.get("response", ""))
+            if text:
+                yield text
+            return
 
-    def _stream() -> Iterator[str]:
-        try:
-            for chunk in client.chat(
-                model=model, messages=messages, options=options, stream=True
-            ):
-                text = _extract_content(chunk)
-                if text:
-                    yield text
-        except Exception as exc:  # noqa: BLE001
-            raise OllamaError(_friendly_error(exc, model)) from exc
+        for raw_line in response:
+            line = raw_line.decode("utf-8").strip()
+            if not line:
+                continue
+            try:
+                chunk = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if chunk.get("error"):
+                raise OllamaError(str(chunk["error"]))
+            piece = chunk.get("response")
+            if piece:
+                yield piece
+            if chunk.get("done"):
+                break
 
-    return _stream()
 
-
-def _friendly_error(exc: Exception, model: str) -> str:
-    """Turn a client/transport exception into something a user can act on."""
-    text = str(exc)
-    lowered = text.lower()
-
-    if any(s in lowered for s in ("connection", "refused", "connect", "max retries")):
-        return NOT_RUNNING_HINT
-    if "timeout" in lowered or "timed out" in lowered:
-        return (
-            f"The model `{model}` timed out. Long documents on an 8GB GPU can be "
-            "slow — try a shorter document or a smaller model."
-        )
-    if "not found" in lowered or "no such model" in lowered:
-        return f"Model `{model}` is not installed locally. Run:  `ollama pull {model}`"
-    if "memory" in lowered or "vram" in lowered:
-        return (
-            f"Not enough VRAM to load `{model}`. On 8GB, stick to a 7-9B Q4_K_M model "
-            "and use the same model for both stages."
-        )
-    return f"Ollama call failed: {text}"
+__all__ = [
+    "BASE_URL",
+    "CONNECT_TIMEOUT",
+    "DAEMON_DOWN_MESSAGE",
+    "GENERATE_TIMEOUT",
+    "OLLAMA_HOST",
+    "OLLAMA_PORT",
+    "OllamaError",
+    "default_model",
+    "generate",
+    "is_up",
+    "list_models",
+    "missing_model_message",
+    "status",
+]
