@@ -430,3 +430,53 @@ def combine_sources(
         parts.append(f"--- Source {index} ---\n{rewritten}")
 
     return "\n\n".join(parts), merged
+
+
+from typing import Iterable, Iterator
+
+from . import carenotes
+
+
+def generate_form_document(
+    combined_text: str,
+    form_spec: FormSpec,
+    backend,
+    stream: bool = True,
+    *,
+    phi_values: Iterable[str] | None = None,
+) -> Iterator[str]:
+    system, user = build_prompt(form_spec, combined_text)
+    return carenotes.generate_document(
+        combined_text, form_spec.form_id, backend, stream,
+        phi_values=phi_values, system=system, user_prompt=user,
+    )
+
+
+def refine_form_document(
+    combined_text: str,
+    draft_marker_text: str,
+    instruction: str,
+    form_spec: FormSpec,
+    backend,
+    stream: bool = True,
+    *,
+    history: list[tuple[str, str]] | None = None,
+    phi_values: Iterable[str] | None = None,
+) -> Iterator[str]:
+    system, _ = build_prompt(form_spec, combined_text)
+    return carenotes.refine_document(
+        combined_text, draft_marker_text, instruction, backend, stream,
+        history=history, phi_values=phi_values,
+        system=system, refine_prompt_name="refine_form.txt",
+    )
+
+
+def render_preview(form_spec: FormSpec, field_values: dict[str, str]) -> str:
+    """Human-readable rendering for display only — the marker text in
+    ``draft_state`` (not this) is what gets refined, re-identified and
+    exported."""
+    lines = [f"#### {form_spec.title}"]
+    for field in form_spec.fields:
+        lines.append(f"\n**{field.label}**\n")
+        lines.append(field_values.get(field.key) or "Not documented")
+    return "\n".join(lines)
