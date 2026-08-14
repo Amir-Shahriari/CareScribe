@@ -1588,12 +1588,24 @@ def _form_draft_state(key: str) -> dict:
         key,
         {
             "deidentified": "",       # marker text — refine/reidentify/export source of truth
-            "reidentified": "",
             "unresolved": [],
             "history": [],
             "field_values": {},       # parsed {field_key: text}, deidentified
         },
     )
+
+
+def _invalidate_form_export(draft: dict) -> None:
+    """Drop any previously re-identified/exportable content — called
+    whenever the underlying draft text changes (fresh generation or a
+    refinement), so a stale export can never be served after the content
+    it was built from is gone. render_form_reidentification decides
+    whether to show "Re-identified" and render the download button purely
+    off ``resolved_field_values``; nothing here about ``reidentified`` —
+    the clinical-form path never had that key to begin with, unlike the
+    free-form draft dict it was modeled on."""
+    draft.pop("resolved_field_values", None)
+    draft["unresolved"] = []
 
 
 def _header_values_complete(form_spec, header_values: dict) -> bool:
@@ -1689,8 +1701,7 @@ def _run_form_generation(docs: dict, selected_names: list[str], spec, draft: dic
     placeholder.empty()
     draft["deidentified"] = raw
     draft["field_values"] = clinical_forms.parse_fields(spec, raw)
-    draft["reidentified"] = ""
-    draft["unresolved"] = []
+    _invalidate_form_export(draft)
     draft["history"] = []
     st.rerun()
 
@@ -1741,8 +1752,7 @@ def render_form_refinement(docs: dict, selected_names: list[str], spec, draft: d
             draft["history"].append((instruction, ""))
             draft["deidentified"] = revised
             draft["field_values"] = clinical_forms.parse_fields(spec, revised)
-            draft["reidentified"] = ""
-            draft["unresolved"] = []
+            _invalidate_form_export(draft)
             st.rerun()
 
 
@@ -1807,6 +1817,20 @@ This makes Clinical form mode return early from `section_handoff`, leaving
 every line below it — the entire existing free-form flow — untouched and
 unreached when the practitioner is in Clinical form mode, and vice versa.
 
+**Register the new session state with the app's PHI-wipe mechanism.**
+`carescribe/app.py` has a `PHI_KEYS` dict (near the top of the file) listing
+every `st.session_state` key that can hold PHI or PHI-derived data —
+`wipe_phi()` (the sidebar "Clear session / wipe PHI" button's handler)
+clears exactly that list. `form_drafts` (introduced in Step 3a above) holds
+`merged_phi_map`, `resolved_field_values`, and `header_values` — all real
+patient identifiers — and MUST be added to `PHI_KEYS`, or the wipe button
+silently leaves a clinical-form session's PHI in memory. The per-header
+widget keys (`f"hdr_{draft_key}_{header.key}"`, Step 3b) are dynamically
+named and can't be listed statically; `wipe_phi()` must additionally delete
+every session-state key starting with `"hdr_"` (and, for cleanliness,
+`"form_type"`/`"form_sources"`). Add a test asserting
+`"form_drafts" in app.PHI_KEYS`.
+
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `python -m pytest tests/test_app_clinical_forms.py -v`
@@ -1858,3 +1882,32 @@ git commit -m "feat: add Clinical form mode to the generation step"
   `carenotes.py` are additive optional kwargs with defaults matching
   current behavior exactly, verified by the "default behaviour is
   unchanged" tests in that task.
+
+**Post-implementation correction (final whole-branch review, 2026-08-14):**
+the version of this document originally executed had two defects the
+per-task reviews could not catch because each is a property of the *whole*
+session-state lifecycle, not of any one task's diff:
+
+1. Task 11's `_form_draft_state` and Step 3c never registered the new
+   `form_drafts` session key (nor the dynamically-keyed `hdr_*` header
+   widget keys) with `app.py`'s `PHI_KEYS`/`wipe_phi()` mechanism — the
+   sidebar "Clear session / wipe PHI" button silently left real patient
+   identifiers in memory for the clinical-form path. Task 11's own spec
+   coverage checklist (§3 "header fields") never named this as a
+   requirement, and no other task owned it either.
+2. `_run_form_generation` and `render_form_refinement` reset a dead
+   `draft["reidentified"]` key (copied from the free-form draft dict this
+   code was modeled on) instead of invalidating `resolved_field_values` —
+   the key `render_form_reidentification` actually reads to decide whether
+   to serve a download. A refine or regenerate could leave a *stale*,
+   previously-re-identified export sitting next to freshly-refined draft
+   text, so the practitioner could review revision N and download
+   revision N-1.
+
+Both are fixed in the code shown above (Steps 1, 3a, 3b, 3c) as this
+document now reads — the corrected version is what a future re-run of
+this plan will produce. The actual fix, at the time it was needed, landed
+as a separate final-review fix-round commit rather than by re-running
+Task 11; see the SDD ledger (`.superpowers/sdd/2026-08-13-clinical-forms/
+progress.md`, since deleted after the branch finished — see git history
+around commit `bd1e84d`) for the full finding-by-finding record.
