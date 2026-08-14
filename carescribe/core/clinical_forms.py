@@ -20,6 +20,8 @@ from pathlib import Path
 
 import docx
 
+from . import mapping as _mapping  # PLACEHOLDER_RE, reused rather than reimplemented
+
 TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
 
 
@@ -388,3 +390,31 @@ def parse_fields(form_spec: FormSpec, raw_output: str) -> dict[str, str]:
         field.key: found.get(field.key) or "Not documented"
         for field in form_spec.fields
     }
+
+
+def combine_sources(
+    sources: list[tuple[str, str, dict[str, str]]]
+) -> tuple[str, dict[str, str]]:
+    """Concatenate several documents' de-identified text into one source.
+
+    ``sources`` is ``(name, redacted_text, phi_map)`` per contributing
+    document. Every placeholder is prefixed with that document's position
+    (``[PATIENT]`` -> ``[DOC1_PATIENT]``) so two documents that each define
+    their own ``[PATIENT]`` never collide once merged — each keeps
+    resolving to its own real value at re-identification time.
+    """
+    if not sources:
+        raise ClinicalFormError("No source documents were selected.")
+
+    parts = []
+    merged: dict[str, str] = {}
+    for index, (name, text, phi_map) in enumerate(sources, start=1):
+        prefix = f"DOC{index}_"
+        rewritten = _mapping.PLACEHOLDER_RE.sub(
+            lambda m, p=prefix: f"[{p}{m.group(0)[1:]}", text or ""
+        )
+        parts.append(f"--- Source: {name} ---\n{rewritten}")
+        for placeholder, value in (phi_map or {}).items():
+            merged[f"[{prefix}{placeholder[1:]}"] = value
+
+    return "\n\n".join(parts), merged
