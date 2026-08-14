@@ -1,0 +1,28 @@
+Revise the draft below according to the clinician's instruction.
+
+Change only what the instruction asks for. Everything else stays as it is.
+Do not introduce any fact that is not in the source text, and preserve every
+bracketed placeholder exactly.
+
+The draft is structured as a series of fields, each starting with a
+<<FIELD:key>> marker on its own line. Preserve every marker exactly as
+written, in the same order, and keep every field present even if its
+content does not change. Do not add, remove, rename, or reorder markers.
+
+Return the COMPLETE revised draft, marker by marker — not a description of
+the changes and not only the changed field.
+
+CLINICIAN'S INSTRUCTION:
+---
+{instruction}
+---
+
+CURRENT DRAFT:
+---
+{draft}
+---
+
+SOURCE TEXT (de-identified):
+---
+{document}
+---

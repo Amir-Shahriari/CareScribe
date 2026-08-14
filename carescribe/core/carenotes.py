@@ -145,20 +145,29 @@ def generate_document(
     *,
     custom_instruction: str = "",
     phi_values: Iterable[str] | None = None,
+    system: str | None = None,
+    user_prompt: str | None = None,
 ) -> Iterator[str]:
     """Stream a drafted document from approved de-identified text.
 
     ``phi_values`` is the mapping's real values, passed **only** so this
     function can assert they are absent. They are never forwarded to a backend.
+
+    ``system``/``user_prompt`` let a caller (the clinical-form pipeline)
+    supply a fully-built prompt instead of looking one up by ``template``
+    label — ``template`` is then unused but still required positionally for
+    backward compatibility with existing callers.
     """
     if not deidentified_text or not deidentified_text.strip():
         raise CareNoteError("There is no de-identified text to work from.")
 
     assert_deidentified(deidentified_text, phi_values)
-    prompt = render_prompt(deidentified_text, template, custom_instruction)
+    prompt = user_prompt if user_prompt is not None else render_prompt(
+        deidentified_text, template, custom_instruction
+    )
     assert_deidentified(prompt, phi_values)
 
-    return backend.generate(system_prompt(), prompt, stream)
+    return backend.generate(system or system_prompt(), prompt, stream)
 
 
 def refine_document(
@@ -170,6 +179,8 @@ def refine_document(
     *,
     history: list[tuple[str, str]] | None = None,
     phi_values: Iterable[str] | None = None,
+    system: str | None = None,
+    refine_prompt_name: str = "refine.txt",
 ) -> Iterator[str]:
     """Revise an existing draft against a follow-up instruction.
 
@@ -178,6 +189,10 @@ def refine_document(
     properties of the first pass. ``history`` is a short list of
     ``(instruction, note)`` pairs, included so the model does not undo an
     earlier request while satisfying the current one.
+
+    ``system``/``refine_prompt_name`` let a caller supply a different system
+    prompt and refine-instruction template (the clinical-form pipeline uses
+    ``refine_form.txt``, which adds a field-marker-preservation rule).
     """
     if not draft or not draft.strip():
         raise CareNoteError("There is no draft to refine yet.")
@@ -196,14 +211,14 @@ def refine_document(
         )
 
     prompt = (
-        load_prompt("refine.txt")
+        load_prompt(refine_prompt_name)
         .replace("{document}", deidentified_text)
         .replace("{draft}", draft)
         .replace("{instruction}", steer)
     )
     assert_deidentified(prompt, phi_values)
 
-    return backend.generate(system_prompt(), prompt, stream)
+    return backend.generate(system or system_prompt(), prompt, stream)
 
 
 def with_banner(draft: str) -> str:

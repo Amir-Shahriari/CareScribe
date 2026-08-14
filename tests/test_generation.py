@@ -363,3 +363,49 @@ def test_drafts_are_wiped_with_the_rest_of_the_session():
     from carescribe import app as carescribe_app
 
     assert "drafts" in carescribe_app.PHI_KEYS
+
+
+# ==========================================================================
+# Task 8 — generate/refine overrides for the clinical-form pipeline
+# ==========================================================================
+
+def test_generate_document_accepts_a_system_and_user_prompt_override():
+    backend = RecordingBackend()
+    list(carenotes.generate_document(
+        "irrelevant for this call",
+        "SOAP care note",  # ignored — user_prompt short-circuits render_prompt
+        backend,
+        stream=False,
+        user_prompt="MY CUSTOM PROMPT",
+        system="MY CUSTOM SYSTEM",
+    ))
+    assert backend.system == "MY CUSTOM SYSTEM"
+    assert backend.prompt == "MY CUSTOM PROMPT"
+
+
+def test_generate_document_default_behaviour_is_unchanged():
+    backend = RecordingBackend()
+    list(carenotes.generate_document(
+        "Patient: [PATIENT]\nSeen in clinic.", "SOAP care note", backend, stream=False,
+    ))
+    assert backend.system == carenotes.system_prompt()
+    assert "Patient: [PATIENT]" in backend.prompt
+
+
+def test_refine_document_accepts_a_system_and_refine_prompt_override():
+    backend = RecordingBackend()
+    list(carenotes.refine_document(
+        "source", "draft with <<FIELD:x>> content", "make it shorter", backend,
+        stream=False, system="MY CUSTOM SYSTEM", refine_prompt_name="refine_form.txt",
+    ))
+    assert backend.system == "MY CUSTOM SYSTEM"
+    assert "<<FIELD:" in backend.prompt
+    assert "make it shorter" in backend.prompt
+
+
+def test_refine_document_default_behaviour_is_unchanged():
+    backend = RecordingBackend()
+    list(carenotes.refine_document(
+        "source", "draft text", "make it shorter", backend, stream=False,
+    ))
+    assert backend.system == carenotes.system_prompt()
