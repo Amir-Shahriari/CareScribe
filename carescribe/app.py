@@ -33,8 +33,8 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from carescribe.core import (  # noqa: E402
-    batch, carenotes, deidentify, ingest, mapping, ollama_client,
-    review_checklist, review_flags,
+    applog, backends, batch, carenotes, deidentify, desktop, generation_status,
+    ingest, mapping, model_setup, ollama_client, review_checklist, review_flags,
 )
 
 st.set_page_config(page_title="CareScribe", page_icon="🩺", layout="wide")
@@ -85,6 +85,65 @@ def wipe_phi() -> None:
 init_state()
 
 
+@st.cache_resource(show_spinner=False)
+def load_detection_engine() -> dict:
+    """Load the NER model once per session, not once per rerun.
+
+    Streamlit re-runs the whole script on every interaction. Without this cache
+    the engine would be rebuilt on each click, which on a weak laptop is the
+    difference between a responsive app and one that appears to hang every time
+    the user touches anything.
+    """
+    import time as _time
+
+    started = _time.monotonic()
+    engine = deidentify.get_analyzer()
+    status = deidentify.engine_status()
+    return {
+        "engine": engine,
+        "model": status.get("ner_model"),
+        "error": status.get("ner_error"),
+        "elapsed": _time.monotonic() - started,
+    }
+
+
+def ensure_engine_ready() -> dict:
+    """Load the model at startup, behind a visible spinner.
+
+    Deliberately not lazy. If the first "De-identify" click is what triggers a
+    multi-second load, the click looks like it did nothing.
+    """
+    if "engine_state" in st.session_state:
+        return st.session_state["engine_state"]
+
+    with st.spinner(
+        "Loading the de-identification model — first start can take up to a "
+        "minute on this computer."
+    ):
+        state = load_detection_engine()
+    st.session_state["engine_state"] = state
+
+    if state["error"]:
+        applog.warn("detection engine unavailable at startup")
+    else:
+        applog.log(
+            "detection engine ready model=%s elapsed=%.1fs",
+            state["model"], state["elapsed"],
+        )
+    return state
+
+
+def render_engine_failure(state: dict) -> None:
+    """A missing model must stop loudly, never fall back to fetching one."""
+    st.error(
+        "**De-identification is not available — the language model could not "
+        "be loaded.**\n\nNothing has been sent anywhere and no document has "
+        "been changed."
+    )
+    st.code(state["error"] or "unknown error", language="text")
+    st.caption(f"Full detail is in the log: `{applog.log_path()}`")
+
+
 def documents() -> dict[str, batch.Document]:
     return st.session_state.docs
 
@@ -111,7 +170,8 @@ def refresh(document: batch.Document, entities: list[dict]) -> None:
 
 def render_sidebar() -> None:
     st.sidebar.title("🩺 CareScribe")
-    st.sidebar.caption("Local, CPU-only. No network calls in this stage.")
+    with st.sidebar:
+        privacy_indicator()
 
     st.sidebar.subheader("Detection layers")
     status = deidentify.engine_status()
@@ -797,46 +857,253 @@ def _draft_state(name: str) -> dict:
     )
 
 
-def render_generation_status() -> dict:
-    """Daemon and model status, with the fix if something is missing."""
-    status = ollama_client.status()
-    if not status["up"]:
-        st.error("Local model backend is not running.")
-        st.code(status["message"], language="text")
-        return status
-    if not status["models"]:
-        st.warning("Ollama is running but no model is installed.")
-        st.code("ollama pull llama3.1:8b", language="bash")
-        return status
-    st.success(
-        f"Ollama running on {status['host']} · "
-        f"{len(status['models'])} model(s) installed"
+def _form_draft_key(document_names: list[str], form_id: str) -> str:
+    return "|".join(sorted(document_names)) + "::" + form_id
+
+
+def _form_draft_state(key: str) -> dict:
+    return st.session_state.setdefault("form_drafts", {}).setdefault(
+        key,
+        {
+            "deidentified": "",       # marker text — refine/reidentify/export source of truth
+            "reidentified": "",
+            "unresolved": [],
+            "history": [],
+            "field_values": {},       # parsed {field_key: text}, deidentified
+        },
     )
-    return status
+
+
+def _header_values_complete(form_spec, header_values: dict) -> bool:
+    required = [h for h in form_spec.header_fields if h.key != "reason_for_referral"]
+    return all((header_values.get(h.key) or "").strip() for h in required)
+
+
+def privacy_indicator() -> None:
+    """A persistent, honest statement of where data goes.
+
+    It must change when cloud generation is configured. An indicator that says
+    "fully offline" while text is leaving the machine is worse than no
+    indicator, because it is the thing a clinician would point at.
+    """
+    if backends.cloud_enabled():
+        st.warning(
+            f"**Cloud generation is enabled ({backends.cloud_provider()}).** "
+            "De-identification and review happen entirely on this computer. "
+            "For generation, the **approved de-identified text** — placeholders "
+            "only, never real identifiers — is sent to "
+            f"{backends.cloud_provider()}. Generation still requires your "
+            "approval and a clean safety sweep first.",
+            icon="☁",
+        )
+    elif st.session_state.get("downloading_model"):
+        st.info(
+            "**Downloading the AI model onto this computer.** Weights are "
+            "coming *in*; no patient data is going out. Nothing about any "
+            "document is part of this request.",
+            icon="⬇",
+        )
+    else:
+        st.success(
+            "**Running fully offline — no data leaves this computer.** "
+            "Documents are read into memory, de-identified, reviewed and "
+            "drafted here. Nothing is uploaded.",
+            icon="🔒",
+        )
+
+
+def render_generation_status() -> dict:
+    """Which backend will be used, and the fix if none is available."""
+    state = backends.describe_backends()
+
+    verdict = desktop.ram_verdict()
+    if not verdict["ok"]:
+        st.warning(verdict["message"])
+
+    if state["ollama"]["available"]:
+        st.success(
+            f"Generating with **Ollama · {state['ollama']['default_model']}** "
+            "on this computer."
+        )
+    elif state["local"]["available"]:
+        name = Path(state["local"]["model_path"]).name
+        st.success(f"Generating with the **built-in model** (`{name}`) on this computer.")
+        st.caption(
+            "The built-in model is small enough to run on an ordinary laptop. "
+            "For longer or more complex documents, installing Ollama and "
+            "pulling an 8B model gives noticeably better drafts — CareScribe "
+            "will use it automatically."
+        )
+    elif state["cloud"]["available"]:
+        st.warning(
+            f"No local model available. Generating via **{state['cloud']['provider']}** "
+            "with de-identified text only."
+        )
+    else:
+        st.error("No generation backend is available.")
+        st.code(
+            "De-identification and review still work.\n\n"
+            "For generation, either reinstall CareScribe so the built-in model\n"
+            "is present, or install Ollama and run:\n"
+            "    ollama pull qwen2.5:3b",
+            language="text",
+        )
+    return state
+
+
+SETUP_CARD_HEADING = "Set up generation"
+
+
+def render_setup_card() -> None:
+    """Shown instead of an empty panel when no model is available yet.
+
+    An empty generation panel reads as a broken app. This is the alternative:
+    say what is missing, in plain words, and offer the one click that fixes it.
+    """
+    status = generation_status.generation_status()
+
+    st.markdown(f"#### {SETUP_CARD_HEADING}")
+    st.info(
+        f"{generation_status.missing_reason(status)}\n\n"
+        "**De-identification and review work now — this is only needed for "
+        "drafting notes and letters.** Setting it up is a one-time step."
+    )
+
+    option_a, option_b = st.columns(2)
+
+    with option_a:
+        st.markdown("**Option A — Download the built-in model**")
+        st.caption(
+            f"Recommended. About "
+            f"{desktop.MODEL_APPROX_BYTES / 1e9:.1f} GB, downloaded once.\n\n"
+            "This downloads the AI model **onto this computer** — a one-time "
+            "setup. No patient data is involved and nothing is sent anywhere."
+        )
+        if st.button("⬇ Download the model", type="primary", key="setup_download"):
+            run_model_download()
+
+    with option_b:
+        st.markdown("**Option B — Use Ollama (better quality)**")
+        if status.ollama_running:
+            st.caption(
+                "Ollama is running on this computer but has no model yet. "
+                "Downloading one here gives noticeably better drafts."
+            )
+            if st.button("⬇ Download llama3.1:8b via Ollama", key="setup_pull"):
+                run_ollama_pull()
+        else:
+            st.caption(
+                "Free, installed separately, and produces better drafts than "
+                "the built-in model."
+            )
+            st.markdown(f"[Install Ollama]({model_setup.OLLAMA_INSTALL_URL})")
+            for step in model_setup.OLLAMA_STEPS:
+                st.markdown(f"- {step}")
+            if st.button("↻ Refresh", key="setup_refresh"):
+                st.rerun()
+
+    if status.cloud:
+        st.caption(
+            f"Cloud generation is configured ({status.cloud_provider}). It is "
+            "off by default and only ever receives approved de-identified text."
+        )
+
+
+def run_model_download() -> None:
+    """Option A. The only outbound request the app makes, on an explicit click."""
+    st.session_state["downloading_model"] = True
+    bar = st.progress(0.0, text="Starting download…")
+    try:
+        model_setup.download_model(
+            on_progress=lambda p: bar.progress(
+                p.fraction, text=f"Downloading the model — {p.message}"
+            )
+        )
+    except model_setup.ModelSetupError as exc:
+        st.session_state["downloading_model"] = False
+        bar.empty()
+        st.error(str(exc))
+        if st.button("Discard the partial download and start over", key="setup_clear"):
+            model_setup.clear_partial_download()
+            st.rerun()
+        return
+    st.session_state["downloading_model"] = False
+    bar.empty()
+    st.success("Model downloaded. Generation is ready.")
+    st.rerun()
+
+
+def run_ollama_pull(model: str = "llama3.1:8b") -> None:
+    """Option B. Ollama does the fetching; the request goes to loopback."""
+    bar = st.progress(0.0, text=f"Asking Ollama for {model}…")
+    try:
+        for progress in model_setup.pull_ollama_model(model):
+            bar.progress(progress.fraction, text=f"{model} — {progress.message}")
+    except model_setup.ModelSetupError as exc:
+        bar.empty()
+        st.error(str(exc))
+        return
+    bar.empty()
+    st.success(f"{model} is installed. Generation is ready.")
+    st.rerun()
+
+
+def render_test_generation() -> None:
+    """A concrete "it works", rather than asking the clinician to trust a flag."""
+    if st.button("Test generation", key="gen_selftest"):
+        with st.spinner("Running a short test on this computer…"):
+            try:
+                _, backend, label = backends.select_backend()
+                sample = "".join(
+                    carenotes.generate_document(
+                        "Patient: [PATIENT]\nSeen in clinic. Sertraline 50mg daily.\n",
+                        "SOAP care note", backend, stream=False,
+                    )
+                )
+            except (carenotes.CareNoteError, backends.BackendError) as exc:
+                st.error(f"Generation is not working yet:\n\n{exc}")
+                return
+        if sample.strip():
+            st.success(f"Generation is ready ✓  ({label})")
+            with st.expander("What it produced"):
+                st.code(sample[:600], language="markdown")
+        else:
+            st.error("The model returned nothing. Try the other setup option.")
 
 
 def render_generation_panel(document: batch.Document) -> None:
-    """Generate, refine, re-identify and export — for one approved document."""
-    state = _draft_state(document.name)
-    status = render_generation_status()
+    """Generate, refine, re-identify and export — for one approved document.
 
-    left, right = st.columns([1, 1])
-    with left:
-        model = st.selectbox(
-            "Model",
-            status["models"] or ["(none installed)"],
-            index=(
-                status["models"].index(status["default_model"])
-                if status["default_model"] in (status["models"] or [])
-                else 0
-            ),
-            key=f"model_{document.name}",
-            disabled=not status["models"],
+    Two dictionaries are in play and they are NOT interchangeable:
+
+    * ``draft`` — this document's generated output. ``draft["deidentified"]`` is
+      the drafted note *with placeholders still in it*.
+    * ``backends_available`` — which generation backends are usable right now.
+
+    They were both called ``state`` until one silently overwrote the other.
+    """
+    # Generation must never run on text a human has not approved. Reaching here
+    # without approved text is a bug elsewhere, but a clinician must get a
+    # sentence rather than a traceback.
+    if not document.approved or not (document.redacted_text or "").strip():
+        st.info(
+            "This document hasn't been approved for generation yet — approve "
+            "it in step 3 first."
         )
-    with right:
-        template = st.selectbox(
-            "Template", carenotes.template_names(), key=f"tpl_{document.name}"
-        )
+        return
+
+    draft = _draft_state(document.name)
+
+    if not generation_status.generation_status().ready:
+        render_setup_card()
+        return
+
+    backends_available = render_generation_status()
+    render_test_generation()
+
+    template = st.selectbox(
+        "Template", carenotes.template_names(), key=f"tpl_{document.name}"
+    )
 
     custom = ""
     if template == carenotes.CUSTOM_TEMPLATE:
@@ -847,17 +1114,19 @@ def render_generation_panel(document: batch.Document) -> None:
             placeholder="Paste your house format here…",
         )
 
-    ready = bool(status["up"] and status["models"])
+    ready = any(
+        backends_available[kind]["available"] for kind in ("ollama", "local", "cloud")
+    )
     if st.button(
         "✨ Generate draft",
         type="primary",
         disabled=not ready,
         key=f"gen_{document.name}",
     ):
-        _run_generation(document, model, template, custom, state)
+        _run_generation(document, template, custom, draft)
 
-    if state["deidentified"]:
-        render_draft(document, state)
+    if draft.get("deidentified"):
+        render_draft(document, draft)
 
 
 def _stream_into(placeholder, chunks, started: float) -> str:
@@ -872,76 +1141,77 @@ def _stream_into(placeholder, chunks, started: float) -> str:
     return "".join(collected)
 
 
-def _run_generation(document, model, template, custom, state) -> None:
+def _run_generation(document, template, custom, draft_state) -> None:
     """First-pass generation. The model receives de-identified text only."""
     placeholder = st.empty()
     started = time.monotonic()
     try:
-        with st.spinner("Drafting locally — an 8B model on CPU takes a minute…"):
+        with st.spinner("Generating on this computer — this can take a minute. Nothing leaves your device."):
+            _, backend, _label = backends.select_backend()
             chunks = carenotes.generate_document(
                 document.redacted_text,
                 template,
-                carenotes.OllamaBackend(model),
+                backend,
                 stream=True,
                 custom_instruction=custom,
                 # Passed only so generation can assert these are absent.
                 phi_values=list(document.phi_map.values()),
             )
             draft = _stream_into(placeholder, chunks, started)
-    except carenotes.CareNoteError as exc:
+    except (carenotes.CareNoteError, backends.BackendError) as exc:
         placeholder.empty()
         st.error(str(exc))
         return
 
     placeholder.empty()
-    state["deidentified"] = carenotes.with_banner(draft)
-    state["reidentified"] = ""
-    state["unresolved"] = []
-    state["history"] = []
+    draft_state["deidentified"] = carenotes.with_banner(draft)
+    draft_state["reidentified"] = ""
+    draft_state["unresolved"] = []
+    draft_state["history"] = []
     st.rerun()
 
 
-def render_draft(document: batch.Document, state: dict) -> None:
+def render_draft(document: batch.Document, draft_state: dict) -> None:
     """The de-identified draft, refinement, re-identification, and exports."""
     st.markdown("#### Draft (de-identified)")
     st.caption(
         "Still contains placeholders — safe to display, share, and save. This "
         "is what the model produced."
     )
-    st.markdown(state["deidentified"])
+    st.markdown(draft_state["deidentified"])
 
     stem = batch.safe_stem(document.name)
     col_md, col_txt, col_docx = st.columns(3)
     with col_md:
         st.download_button(
-            "⬇ .md", state["deidentified"], file_name=f"{stem}.draft.md",
+            "⬇ .md", draft_state["deidentified"], file_name=f"{stem}.draft.md",
             mime="text/markdown", key=f"dl_md_{document.name}",
         )
     with col_txt:
         st.download_button(
-            "⬇ .txt", state["deidentified"], file_name=f"{stem}.draft.txt",
+            "⬇ .txt", draft_state["deidentified"], file_name=f"{stem}.draft.txt",
             mime="text/plain", key=f"dl_txt_{document.name}",
         )
     with col_docx:
         st.download_button(
-            "⬇ .docx", _as_docx(state["deidentified"]),
+            "⬇ .docx", _as_docx(draft_state["deidentified"]),
             file_name=f"{stem}.draft.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             key=f"dl_docx_{document.name}",
         )
 
-    render_refinement(document, state)
-    render_reidentification(document, state)
+    render_refinement(document, draft_state)
+    render_reidentification(document, draft_state)
 
 
-def render_refinement(document: batch.Document, state: dict) -> None:
+def render_refinement(document: batch.Document, draft_state: dict) -> None:
     """Follow-up instructions, on de-identified text only."""
     with st.expander("Refine this draft", expanded=False):
         st.caption(
             "Refinement runs on the same de-identified source and the current "
             "draft. No real identifier enters this loop."
         )
-        for instruction, _ in state["history"]:
+        for instruction, _ in draft_state["history"]:
             st.markdown(f"- _{instruction}_")
         instruction = st.text_input(
             "What would you like changed?",
@@ -959,31 +1229,27 @@ def render_refinement(document: batch.Document, state: dict) -> None:
                 with st.spinner("Revising…"):
                     chunks = carenotes.refine_document(
                         document.redacted_text,
-                        state["deidentified"],
+                        draft_state["deidentified"],
                         instruction,
-                        carenotes.OllamaBackend(
-                            st.session_state.get(
-                                f"model_{document.name}", status["default_model"]
-                            )
-                        ),
+                        backends.select_backend()[1],
                         stream=True,
-                        history=state["history"],
+                        history=draft_state["history"],
                         phi_values=list(document.phi_map.values()),
                     )
                     revised = _stream_into(placeholder, chunks, started)
-            except carenotes.CareNoteError as exc:
+            except (carenotes.CareNoteError, backends.BackendError) as exc:
                 placeholder.empty()
                 st.error(str(exc))
                 return
             placeholder.empty()
-            state["history"].append((instruction, ""))
-            state["deidentified"] = carenotes.with_banner(revised)
-            state["reidentified"] = ""
-            state["unresolved"] = []
+            draft_state["history"].append((instruction, ""))
+            draft_state["deidentified"] = carenotes.with_banner(revised)
+            draft_state["reidentified"] = ""
+            draft_state["unresolved"] = []
             st.rerun()
 
 
-def render_reidentification(document: batch.Document, state: dict) -> None:
+def render_reidentification(document: batch.Document, draft_state: dict) -> None:
     """Opt-in, local-only substitution of placeholders back to real values."""
     st.markdown("#### Re-identify for the patient record (local only)")
     st.warning(
@@ -994,7 +1260,7 @@ def render_reidentification(document: batch.Document, state: dict) -> None:
     )
 
     issues = mapping.check_placeholder_integrity(
-        state["deidentified"], list(document.phi_map)
+        draft_state["deidentified"], list(document.phi_map)
     )
     mangled = [i for i in issues if i.kind == mapping.ISSUE_MANGLED]
     if mangled:
@@ -1007,39 +1273,216 @@ def render_reidentification(document: batch.Document, state: dict) -> None:
         "🔓 Re-identify locally", key=f"reid_{document.name}",
         disabled=not document.phi_map,
     ):
-        text, unresolved = carenotes.finalise(state["deidentified"], document.phi_map)
-        state["reidentified"] = text
-        state["unresolved"] = unresolved
+        text, unresolved = carenotes.finalise(draft_state["deidentified"], document.phi_map)
+        draft_state["reidentified"] = text
+        draft_state["unresolved"] = unresolved
         st.rerun()
 
-    if state["unresolved"]:
+    if draft_state["unresolved"]:
         st.error(
             "**Blocked — these placeholders could not be resolved:** "
-            + ", ".join(f"`{token}`" for token in state["unresolved"])
+            + ", ".join(f"`{token}`" for token in draft_state["unresolved"])
             + "\n\nA report filed with a placeholder still in it is worse than "
             "no report. Refine the draft or correct the identifier table, then "
             "re-identify again."
         )
         return
 
-    if state["reidentified"]:
+    if draft_state["reidentified"]:
         st.success("Re-identified. Every placeholder resolved.")
-        st.markdown(state["reidentified"])
+        st.markdown(draft_state["reidentified"])
         stem = batch.safe_stem(document.name)
         col_md, col_docx = st.columns(2)
         with col_md:
             st.download_button(
-                "⬇ .md (contains PHI)", state["reidentified"],
+                "⬇ .md (contains PHI)", draft_state["reidentified"],
                 file_name=f"{stem}.record.md", mime="text/markdown",
                 key=f"dlr_md_{document.name}",
             )
         with col_docx:
             st.download_button(
-                "⬇ .docx (contains PHI)", _as_docx(state["reidentified"]),
+                "⬇ .docx (contains PHI)", _as_docx(draft_state["reidentified"]),
                 file_name=f"{stem}.record.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 key=f"dlr_docx_{document.name}",
             )
+
+
+def render_clinical_form_panel(docs: dict) -> None:
+    from carescribe.core import clinical_forms
+
+    approved = [doc for doc in docs.values() if doc.approved]
+    if not approved:
+        st.info("Approve at least one document in step 3 to generate a clinical form.")
+        return
+
+    form_options = clinical_forms.available_forms()
+    form_id = st.selectbox(
+        "Form", [fid for fid, _ in form_options],
+        format_func=lambda fid: dict(form_options)[fid], key="form_type",
+    )
+    spec = clinical_forms.get_form_spec(form_id)
+
+    selected_names = st.multiselect(
+        "Source document(s)", [doc.name for doc in approved],
+        default=[approved[0].name], key="form_sources",
+    )
+    if not selected_names:
+        st.info("Select at least one approved document.")
+        return
+
+    draft_key = _form_draft_key(selected_names, form_id)
+    draft = _form_draft_state(draft_key)
+
+    st.markdown("##### Form header")
+    header_values = draft.setdefault("header_values", {})
+    for header in spec.header_fields:
+        widget = st.text_area if header.key == "reason_for_referral" else st.text_input
+        header_values[header.key] = widget(
+            header.label, value=header_values.get(header.key, ""),
+            key=f"hdr_{draft_key}_{header.key}",
+        )
+
+    if not generation_status.generation_status().ready:
+        render_setup_card()
+        return
+
+    backends_available = render_generation_status()
+    ready = (
+        any(backends_available[kind]["available"] for kind in ("ollama", "local", "cloud"))
+        and _header_values_complete(spec, header_values)
+    )
+    if not _header_values_complete(spec, header_values):
+        st.caption("Fill in every header field except Reason for referral to enable generation.")
+
+    if st.button("✨ Generate form", type="primary", disabled=not ready, key=f"gen_form_{draft_key}"):
+        _run_form_generation(docs, selected_names, spec, draft)
+
+    if draft.get("deidentified"):
+        render_form_draft(docs, selected_names, spec, draft)
+
+
+def _run_form_generation(docs: dict, selected_names: list[str], spec, draft: dict) -> None:
+    from carescribe.core import clinical_forms
+
+    sources = [(name, docs[name].redacted_text, docs[name].phi_map) for name in selected_names]
+    phi_values = [v for name in selected_names for v in docs[name].phi_map.values()]
+    combined_text, merged_map = clinical_forms.combine_sources(sources)
+    draft["combined_text"] = combined_text
+    draft["merged_phi_map"] = merged_map
+
+    placeholder = st.empty()
+    started = time.monotonic()
+    try:
+        with st.spinner("Generating on this computer — this can take a minute. Nothing leaves your device."):
+            _, backend, _label = backends.select_backend()
+            chunks = clinical_forms.generate_form_document(
+                combined_text, spec, backend, stream=True, phi_values=phi_values,
+            )
+            raw = _stream_into(placeholder, chunks, started)
+    except (carenotes.CareNoteError, backends.BackendError) as exc:
+        placeholder.empty()
+        st.error(str(exc))
+        return
+
+    placeholder.empty()
+    draft["deidentified"] = raw
+    draft["field_values"] = clinical_forms.parse_fields(spec, raw)
+    draft["reidentified"] = ""
+    draft["unresolved"] = []
+    draft["history"] = []
+    st.rerun()
+
+
+def render_form_draft(docs: dict, selected_names: list[str], spec, draft: dict) -> None:
+    from carescribe.core import clinical_forms
+
+    st.markdown("#### Draft (de-identified)")
+    st.caption("Still contains placeholders — safe to display, share, and save.")
+    st.markdown(clinical_forms.render_preview(spec, draft["field_values"]))
+
+    render_form_refinement(docs, selected_names, spec, draft)
+    render_form_reidentification(spec, draft)
+
+
+def render_form_refinement(docs: dict, selected_names: list[str], spec, draft: dict) -> None:
+    from carescribe.core import clinical_forms
+
+    with st.expander("Refine this draft", expanded=False):
+        st.caption("Refinement runs on the same de-identified source and the current draft.")
+        for instruction, _ in draft["history"]:
+            st.markdown(f"- _{instruction}_")
+        instruction = st.text_input(
+            "What would you like changed?", key=f"form_refine_{id(draft)}",
+            placeholder="e.g. expand the risk assessment section",
+        )
+        phi_values = [v for name in selected_names for v in docs[name].phi_map.values()]
+        status = ollama_client.status()
+        if st.button(
+            "Apply", key=f"form_refine_go_{id(draft)}",
+            disabled=not instruction or not status["models"],
+        ):
+            placeholder = st.empty()
+            started = time.monotonic()
+            try:
+                with st.spinner("Revising…"):
+                    chunks = clinical_forms.refine_form_document(
+                        draft["combined_text"], draft["deidentified"], instruction, spec,
+                        backends.select_backend()[1], stream=True,
+                        history=draft["history"], phi_values=phi_values,
+                    )
+                    revised = _stream_into(placeholder, chunks, started)
+            except (carenotes.CareNoteError, backends.BackendError) as exc:
+                placeholder.empty()
+                st.error(str(exc))
+                return
+            placeholder.empty()
+            draft["history"].append((instruction, ""))
+            draft["deidentified"] = revised
+            draft["field_values"] = clinical_forms.parse_fields(spec, revised)
+            draft["reidentified"] = ""
+            draft["unresolved"] = []
+            st.rerun()
+
+
+def render_form_reidentification(spec, draft: dict) -> None:
+    from carescribe.core import clinical_forms
+
+    st.markdown("#### Re-identify and export (local only)")
+    st.warning(
+        "**This produces a document containing real patient identifiers.** "
+        "It happens entirely in Python on this machine."
+    )
+
+    merged_map = draft.get("merged_phi_map", {})
+    if st.button("🔓 Re-identify and fill the form", key=f"form_reid_{id(draft)}", disabled=not merged_map):
+        resolved_fields = {}
+        unresolved: list[str] = []
+        for key, text in draft["field_values"].items():
+            resolved_text, field_unresolved = carenotes.finalise(text, merged_map)
+            resolved_fields[key] = resolved_text
+            unresolved.extend(field_unresolved)
+        draft["resolved_field_values"] = resolved_fields
+        draft["unresolved"] = sorted(set(unresolved))
+        st.rerun()
+
+    if draft["unresolved"]:
+        st.error(
+            "**Blocked — these placeholders could not be resolved:** "
+            + ", ".join(f"`{token}`" for token in draft["unresolved"])
+        )
+        return
+
+    if draft.get("resolved_field_values"):
+        st.success("Re-identified. Every placeholder resolved.")
+        header_values = draft.get("header_values", {})
+        output = clinical_forms.fill_template(spec, draft["resolved_field_values"], header_values)
+        st.download_button(
+            "⬇ .docx (contains PHI)", output,
+            file_name=f"{batch.safe_stem(spec.title)}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            key=f"form_dl_{id(draft)}",
+        )
 
 
 def _as_docx(text: str) -> bytes:
@@ -1067,6 +1510,15 @@ def section_handoff() -> None:
     st.divider()
     st.subheader("5. Generate report")
 
+    mode = st.radio(
+        "What do you want to generate?",
+        ["Free-form note", "Clinical form"],
+        horizontal=True, key="generation_mode",
+    )
+    if mode == "Clinical form":
+        render_clinical_form_panel(docs)
+        return
+
     approved = [doc for doc in docs.values() if doc.approved]
     if not approved:
         st.button(
@@ -1079,6 +1531,9 @@ def section_handoff() -> None:
             "de-identified document and nothing else — the identity mapping "
             "has no path out of this process."
         )
+        if not generation_status.generation_status().ready:
+            st.divider()
+            render_setup_card()
         return
 
     st.caption(
@@ -1107,11 +1562,54 @@ def main() -> None:
         "correct what was found, then approve. Nothing leaves this machine."
     )
 
+    # Load the model before anything can ask for it, so the first click is
+    # never the thing that triggers a silent multi-second load.
+    engine_state = ensure_engine_ready()
+    if engine_state["error"]:
+        render_engine_failure(engine_state)
+        return
+
     section_load()
     section_process()
     section_review()
     section_batch_status()
     section_handoff()
 
+    st.divider()
+    st.caption(
+        f"Model: `{engine_state['model']}` (loaded in "
+        f"{engine_state['elapsed']:.1f}s) · Log file: `{applog.log_path()}`"
+    )
 
-main()
+
+def render_unexpected_error(exc: BaseException) -> None:
+    """The last line of defence: a calm message instead of a stack trace.
+
+    A clinician who sees a Python traceback in a medical tool has no idea
+    whether their patient data is safe, and reasonably stops trusting the app.
+    The traceback still goes to the log — where it is useful — and the screen
+    gets a sentence and a next step.
+    """
+    applog.exception("unhandled exception in the UI")
+    st.error(
+        "**Something went wrong.**\n\n"
+        "Your documents have not been sent anywhere and nothing has been "
+        "changed on disk. You can usually carry on by going back a step, or "
+        "restart CareScribe."
+    )
+    st.caption(
+        "If it keeps happening, send this log file — it contains timings and "
+        "file sizes, no patient information:"
+    )
+    st.code(str(applog.log_path()), language="text")
+    with st.expander("Technical detail (for whoever supports this app)"):
+        st.code(f"{type(exc).__name__}: {exc}", language="text")
+
+
+
+applog.log("app start frozen=%s", desktop.is_frozen())
+
+try:
+    main()
+except Exception as _exc:  # noqa: BLE001 — the boundary catches everything
+    render_unexpected_error(_exc)
