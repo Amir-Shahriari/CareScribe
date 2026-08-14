@@ -317,3 +317,48 @@ def fill_template(
     buffer = io.BytesIO()
     doc.save(buffer)
     return buffer.getvalue()
+
+
+_SYSTEM_PREAMBLE = """\
+You are a clinical documentation assistant filling out a structured clinical \
+form from de-identified source material. You produce a DRAFT that a \
+clinician will review, correct, and sign.
+
+The source text has already been de-identified. Names, numbers, dates and \
+places have been replaced with bracketed placeholders such as [PATIENT], \
+[CLINICIAN_1], [MRN] and [DATE_2].
+
+Rules you must follow:
+
+1. Use ONLY information present in the provided source text.
+2. Do NOT invent facts, names, dates, dosages, values, or events.
+3. Preserve every bracketed placeholder EXACTLY as written, character for \
+character. Do not translate, expand, renumber, or replace them.
+4. Write in plain clinical register, past tense, concisely.
+5. For each field listed below, write the field's marker on its own line, \
+then the field's content, then move to the next field. If the source has \
+no information for a field, write exactly "Not documented" for that field \
+rather than guessing or leaving it blank.
+6. Do not add commentary, a greeting, or a sign-off. Output only the fields.
+
+FIELDS TO COMPLETE, IN THIS EXACT ORDER — reproduce each marker exactly:
+
+{field_list}
+"""
+
+_USER_TEMPLATE = """\
+SOURCE TEXT (de-identified):
+---
+{document}
+---
+
+Write the content for every field listed in the system instructions, each \
+under its own <<FIELD:key>> marker, in the exact order given.
+"""
+
+
+def build_prompt(form_spec: FormSpec, deidentified_text: str) -> tuple[str, str]:
+    field_list = "\n".join(f"<<FIELD:{f.key}>> — {f.label}" for f in form_spec.fields)
+    system = _SYSTEM_PREAMBLE.format(field_list=field_list)
+    user = _USER_TEMPLATE.format(document=deidentified_text)
+    return system, user
