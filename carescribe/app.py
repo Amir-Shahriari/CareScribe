@@ -63,6 +63,10 @@ PHI_KEYS: dict = {
     # Generated drafts. The de-identified draft is safe; the re-identified one
     # holds real identifiers, so it lives here and is wiped with everything else.
     "drafts": {},
+    # Clinical-form drafts (multi-document, keyed by selection+form). Holds the
+    # merged identity map, re-identified field values, and typed header values
+    # (client name, DOB, session number) — all real PHI.
+    "form_drafts": {},
 }
 
 DEFAULTS = {**PHI_KEYS, "uploader_nonce": 0, "folder_path": ""}
@@ -78,6 +82,15 @@ def wipe_phi() -> None:
     """Drop every document, identifier table, and identity map from memory."""
     for key, value in PHI_KEYS.items():
         st.session_state[key] = value.copy() if isinstance(value, (dict, list)) else value
+    # Clinical-form header inputs are dynamically keyed per draft/header
+    # (f"hdr_{draft_key}_{header.key}"), so they can't be listed statically
+    # in PHI_KEYS — each one holds real, typed PHI (client name, DOB, ...).
+    for key in list(st.session_state.keys()):
+        if key.startswith("hdr_"):
+            del st.session_state[key]
+    # Not PHI themselves, but stale UI state after a wipe.
+    st.session_state.pop("form_type", None)
+    st.session_state.pop("form_sources", None)
     # Force the uploader to forget its files by rotating its widget key.
     st.session_state.uploader_nonce = st.session_state.get("uploader_nonce", 0) + 1
 
@@ -866,12 +879,20 @@ def _form_draft_state(key: str) -> dict:
         key,
         {
             "deidentified": "",       # marker text — refine/reidentify/export source of truth
-            "reidentified": "",
             "unresolved": [],
             "history": [],
             "field_values": {},       # parsed {field_key: text}, deidentified
         },
     )
+
+
+def _invalidate_form_export(draft: dict) -> None:
+    """Drop any previously re-identified/exportable content — called
+    whenever the underlying draft text changes (fresh generation or a
+    refinement), so a stale export can never be served after the content
+    it was built from is gone."""
+    draft.pop("resolved_field_values", None)
+    draft["unresolved"] = []
 
 
 def _header_values_complete(form_spec, header_values: dict) -> bool:
@@ -1388,8 +1409,7 @@ def _run_form_generation(docs: dict, selected_names: list[str], spec, draft: dic
     placeholder.empty()
     draft["deidentified"] = raw
     draft["field_values"] = clinical_forms.parse_fields(spec, raw)
-    draft["reidentified"] = ""
-    draft["unresolved"] = []
+    _invalidate_form_export(draft)
     draft["history"] = []
     st.rerun()
 
@@ -1440,8 +1460,7 @@ def render_form_refinement(docs: dict, selected_names: list[str], spec, draft: d
             draft["history"].append((instruction, ""))
             draft["deidentified"] = revised
             draft["field_values"] = clinical_forms.parse_fields(spec, revised)
-            draft["reidentified"] = ""
-            draft["unresolved"] = []
+            _invalidate_form_export(draft)
             st.rerun()
 
 

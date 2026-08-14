@@ -19,6 +19,24 @@ def test_form_draft_key_differs_by_form_or_selection():
     assert base != app._form_draft_key(["a.txt"], "client_treatment_review")
 
 
+def test_invalidate_form_export_drops_stale_resolved_values():
+    # A refine or regenerate must never leave a previously re-identified
+    # export sitting around next to freshly-generated draft text — the UI
+    # decides whether to show "Re-identified" and render the download
+    # button purely off resolved_field_values, so a stale one there means
+    # the practitioner reviews revision N but downloads revision N-1.
+    draft = {
+        "resolved_field_values": {"x": "y"},
+        "unresolved": ["stale"],
+        "deidentified": "some draft text",
+    }
+    app._invalidate_form_export(draft)
+    assert "resolved_field_values" not in draft
+    assert draft["unresolved"] == []
+    # Unrelated draft state is left alone.
+    assert draft["deidentified"] == "some draft text"
+
+
 def test_header_values_complete_requires_every_non_reason_field():
     from carescribe.core import clinical_forms
     spec = clinical_forms.get_form_spec("client_session_notes")

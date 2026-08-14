@@ -51,3 +51,14 @@ def test_parse_fields_handles_empty_output():
     parsed = clinical_forms.parse_fields(spec, "")
     assert all(value == "Not documented" for value in parsed.values())
     assert set(parsed) == {f.key for f in spec.fields}
+
+
+def test_parse_fields_treats_whitespace_only_content_as_not_documented():
+    # A field body of only \r/\t/\n (no spaces, no dash) must still resolve
+    # to "Not documented" rather than surviving as a blank string — the old
+    # strip(" \n—-") charset didn't cover \r or \t.
+    spec = _spec()
+    key0 = spec.fields[0].key
+    raw = f"<<FIELD:{key0}>>\r\n\r\t\n"
+    parsed = clinical_forms.parse_fields(spec, raw)
+    assert parsed[key0] == "Not documented"

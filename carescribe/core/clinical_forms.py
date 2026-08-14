@@ -263,7 +263,8 @@ def _clear_cell(cell) -> None:
 def _fill_cell(cell, text: str) -> None:
     """Overwrite a dedicated value cell (label lives in a different cell)."""
     _clear_cell(cell)
-    lines = (text or "Not documented").splitlines() or ["Not documented"]
+    text = (text or "").strip() or "Not documented"
+    lines = text.splitlines() or ["Not documented"]
     cell.paragraphs[0].add_run(lines[0])
     for line in lines[1:]:
         cell.add_paragraph(line)
@@ -276,7 +277,8 @@ def _fill_cell_after_label(cell, text: str) -> None:
     paragraphs = cell.paragraphs
     for extra in paragraphs[1:]:
         extra._element.getparent().remove(extra._element)
-    for line in (text or "Not documented").splitlines() or ["Not documented"]:
+    text = (text or "").strip() or "Not documented"
+    for line in text.splitlines() or ["Not documented"]:
         cell.add_paragraph(line)
 
 
@@ -300,17 +302,35 @@ def fill_template(
         value = (header_values.get(header.key) or "").strip()
         if not value:
             continue
-        cell = _dedupe_row(doc.tables[header.table_index].rows[header.row_index])[header.col_index]
+        try:
+            cell = _dedupe_row(
+                doc.tables[header.table_index].rows[header.row_index]
+            )[header.col_index]
+        except IndexError:
+            raise ClinicalFormError(
+                f"Template shape mismatch for form '{form_spec.form_id}': header "
+                f"'{header.key}' expects table {header.table_index}, row "
+                f"{header.row_index}, column {header.col_index}, which does not "
+                "exist in this template."
+            ) from None
         if header.style == "inline":
             _fill_header_cell(cell, value)
         else:
             _fill_cell_after_label(cell, value)
 
     for field in form_spec.fields:
-        cell = _dedupe_row(
-            doc.tables[field.table_index].rows[field.value_row_index]
-        )[field.value_col_index]
-        text = field_values.get(field.key) or "Not documented"
+        try:
+            cell = _dedupe_row(
+                doc.tables[field.table_index].rows[field.value_row_index]
+            )[field.value_col_index]
+        except IndexError:
+            raise ClinicalFormError(
+                f"Template shape mismatch for form '{form_spec.form_id}': field "
+                f"'{field.key}' expects table {field.table_index}, row "
+                f"{field.value_row_index}, column {field.value_col_index}, which "
+                "does not exist in this template."
+            ) from None
+        text = (field_values.get(field.key) or "").strip() or "Not documented"
         if field.append_after_label:
             _fill_cell_after_label(cell, text)
         else:
@@ -384,7 +404,7 @@ def parse_fields(form_spec: FormSpec, raw_output: str) -> dict[str, str]:
         start = match.end()
         end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
         if key not in found:
-            found[key] = text[start:end].strip(" \n—-")
+            found[key] = text[start:end].strip().strip("—-").strip()
 
     return {
         field.key: found.get(field.key) or "Not documented"

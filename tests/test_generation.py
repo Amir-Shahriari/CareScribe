@@ -365,6 +365,15 @@ def test_drafts_are_wiped_with_the_rest_of_the_session():
     assert "drafts" in carescribe_app.PHI_KEYS
 
 
+def test_form_drafts_are_wiped_with_the_rest_of_the_session():
+    from carescribe import app as carescribe_app
+
+    # form_drafts holds the clinical-form equivalent of "drafts" — merged
+    # identity maps, re-identified field values, and typed header values.
+    # It must be wiped by the same "Wipe PHI" action, or it leaks past it.
+    assert "form_drafts" in carescribe_app.PHI_KEYS
+
+
 # ==========================================================================
 # Task 8 — generate/refine overrides for the clinical-form pipeline
 # ==========================================================================
