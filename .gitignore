@@ -49,3 +49,29 @@ graphify-out/.graphify_python
 graphify-out/.graphify_root
 graphify-out/cache/
 graphify-out/20*/
+
+# ---------------------------------------------------------------------------
+# Desktop packaging. The build artefacts and the generation model are large and
+# reproducible from source — the build scripts fetch the model on demand.
+# ---------------------------------------------------------------------------
+build/
+dist/
+models/
+*.gguf
+
+# Generated icons and installer output — reproducible from make_icon.py and the
+# build scripts, so they do not belong in git.
+packaging/carescribe.png
+packaging/carescribe.ico
+packaging/carescribe.icns
+packaging/Output/
+CareScribeSetup.exe
+*.dmg
+
+# Local launch shortcut and its icon (point at this machine's dist\ folder).
+CareScribe.lnk
+CareScribe.ico
+
+# Subagent-driven-development scratch workspace (ledgers, briefs, review
+# packages) — the git history is the durable record, not this directory.
+.superpowers/
