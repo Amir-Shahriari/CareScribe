@@ -362,3 +362,29 @@ def build_prompt(form_spec: FormSpec, deidentified_text: str) -> tuple[str, str]
     system = _SYSTEM_PREAMBLE.format(field_list=field_list)
     user = _USER_TEMPLATE.format(document=deidentified_text)
     return system, user
+
+
+_FIELD_MARKER_RE = re.compile(r"<<FIELD:([a-z0-9_.]+)>>")
+
+
+def parse_fields(form_spec: FormSpec, raw_output: str) -> dict[str, str]:
+    """Turn the model's marker-delimited output into ``{field_key: text}``.
+
+    Any field the model skipped defaults to "Not documented" — enforced
+    here rather than trusted to the model. Unknown markers are ignored; on
+    a duplicate marker for the same key, the first occurrence wins.
+    """
+    text = raw_output or ""
+    matches = list(_FIELD_MARKER_RE.finditer(text))
+    found: dict[str, str] = {}
+    for index, match in enumerate(matches):
+        key = match.group(1)
+        start = match.end()
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        if key not in found:
+            found[key] = text[start:end].strip(" \n—-")
+
+    return {
+        field.key: found.get(field.key) or "Not documented"
+        for field in form_spec.fields
+    }
