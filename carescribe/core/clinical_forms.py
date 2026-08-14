@@ -399,22 +399,34 @@ def combine_sources(
 
     ``sources`` is ``(name, redacted_text, phi_map)`` per contributing
     document. Every placeholder is prefixed with that document's position
-    (``[PATIENT]`` -> ``[DOC1_PATIENT]``) so two documents that each define
+    (``[PATIENT]`` -> ``[DOCA_PATIENT]``) so two documents that each define
     their own ``[PATIENT]`` never collide once merged — each keeps
     resolving to its own real value at re-identification time.
+
+    Raises ``ClinicalFormError`` if sources is empty or exceeds 26 documents.
     """
     if not sources:
         raise ClinicalFormError("No source documents were selected.")
+    if len(sources) > 26:
+        raise ClinicalFormError("Maximum 26 source documents permitted.")
 
     parts = []
     merged: dict[str, str] = {}
     for index, (name, text, phi_map) in enumerate(sources, start=1):
-        prefix = f"DOC{index}_"
-        rewritten = _mapping.PLACEHOLDER_RE.sub(
-            lambda m, p=prefix: f"[{p}{m.group(0)[1:]}", text or ""
-        )
-        parts.append(f"--- Source: {name} ---\n{rewritten}")
+        # Use letter-based tag (DOCA_, DOCB_, ...) to preserve trailing digit
+        # run position expected by mapping.PLACEHOLDER_RE regex pattern.
+        prefix = f"DOC{chr(ord('A') + index - 1)}_"
+        rewritten = text or ""
+        # Drive both text and map rewrite from phi_map.keys() to ensure
+        # consistency: every placeholder in map gets rewritten in text,
+        # and vice versa, regardless of whether it matches PLACEHOLDER_RE.
         for placeholder, value in (phi_map or {}).items():
-            merged[f"[{prefix}{placeholder[1:]}"] = value
+            new_key = f"[{prefix}{placeholder[1:]}"
+            rewritten = rewritten.replace(placeholder, new_key)
+            merged[new_key] = value
+
+        # Use plain positional separator; do not interpolate filename
+        # which may contain PII from the original upload.
+        parts.append(f"--- Source {index} ---\n{rewritten}")
 
     return "\n\n".join(parts), merged
