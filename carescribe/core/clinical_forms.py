@@ -12,6 +12,7 @@ generation time — that was fixed when the spec was built from the asset.
 
 from __future__ import annotations
 
+import io
 import re
 from dataclasses import dataclass
 from functools import lru_cache
@@ -245,3 +246,74 @@ def get_form_spec(form_id: str) -> FormSpec:
 def available_forms() -> list[tuple[str, str]]:
     """(form_id, title) pairs, in registration order — for the UI's selector."""
     return [(form_id, builder().title) for form_id, builder in _FORM_SPEC_BUILDERS.items()]
+
+
+def _clear_cell(cell) -> None:
+    """Remove every paragraph after the first, and every run in the first,
+    leaving one empty paragraph ready to receive fresh text."""
+    paragraphs = cell.paragraphs
+    for extra in paragraphs[1:]:
+        extra._element.getparent().remove(extra._element)
+    for run in list(paragraphs[0].runs):
+        run._element.getparent().remove(run._element)
+
+
+def _fill_cell(cell, text: str) -> None:
+    """Overwrite a dedicated value cell (label lives in a different cell)."""
+    _clear_cell(cell)
+    lines = (text or "Not documented").splitlines() or ["Not documented"]
+    cell.paragraphs[0].add_run(lines[0])
+    for line in lines[1:]:
+        cell.add_paragraph(line)
+
+
+def _fill_cell_after_label(cell, text: str) -> None:
+    """Append text as new paragraphs after an existing label paragraph,
+    which must survive untouched (used for own-cell fields and the
+    'Reason for referral' header field)."""
+    paragraphs = cell.paragraphs
+    for extra in paragraphs[1:]:
+        extra._element.getparent().remove(extra._element)
+    for line in (text or "Not documented").splitlines() or ["Not documented"]:
+        cell.add_paragraph(line)
+
+
+def _fill_header_cell(cell, value: str) -> None:
+    """Append a typed value inline, on the label's own paragraph and run —
+    'Date: ' becomes 'Date: 12/08/2026'."""
+    paragraph = cell.paragraphs[0]
+    if paragraph.runs:
+        paragraph.runs[-1].text = paragraph.runs[-1].text + value
+    else:
+        paragraph.add_run(value)
+
+
+def fill_template(
+    form_spec: FormSpec, field_values: dict[str, str], header_values: dict[str, str]
+) -> bytes:
+    """Fill a fresh in-memory copy of the template. Nothing touches disk."""
+    doc = docx.Document(form_spec.asset_path)
+
+    for header in form_spec.header_fields:
+        value = (header_values.get(header.key) or "").strip()
+        if not value:
+            continue
+        cell = _dedupe_row(doc.tables[header.table_index].rows[header.row_index])[header.col_index]
+        if header.style == "inline":
+            _fill_header_cell(cell, value)
+        else:
+            _fill_cell_after_label(cell, value)
+
+    for field in form_spec.fields:
+        cell = _dedupe_row(
+            doc.tables[field.table_index].rows[field.value_row_index]
+        )[field.value_col_index]
+        text = field_values.get(field.key) or "Not documented"
+        if field.append_after_label:
+            _fill_cell_after_label(cell, text)
+        else:
+            _fill_cell(cell, text)
+
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    return buffer.getvalue()
