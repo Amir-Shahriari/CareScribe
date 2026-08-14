@@ -42,3 +42,33 @@ def test_session_notes_signature_row_is_excluded():
     doc = _load("client_session_notes.docx")
     fields = clinical_forms._walk_table(doc.tables[0], table_index=0, start_row=6)
     assert all("signature" not in f.key for f in fields)
+
+
+def test_treatment_review_spec_has_fourteen_fields():
+    spec = clinical_forms.get_form_spec("client_treatment_review")
+    assert spec.title == "Client Treatment Review"
+    assert len(spec.fields) == 14
+    keys = [f.key for f in spec.fields]
+    assert "clinical_formulation.current_diagnoses_prognoses" in keys
+    # "Review dates:" is a bare label whose own paragraph count is 1 and
+    # whose answer lives in the following blank row (row 25).
+    review = next(f for f in spec.fields if f.key.endswith("review_dates"))
+    assert review.value_row_index == 25
+
+
+def test_treatment_review_header_fields():
+    spec = clinical_forms.get_form_spec("client_treatment_review")
+    header_keys = [h.key for h in spec.header_fields]
+    assert header_keys == [
+        "date", "practitioner", "client_name", "client_dob",
+        "session_number", "item_code", "reason_for_referral",
+    ]
+    reason = next(h for h in spec.header_fields if h.key == "reason_for_referral")
+    assert reason.style == "append"
+    date = next(h for h in spec.header_fields if h.key == "date")
+    assert date.style == "inline"
+
+
+def test_unknown_form_id_raises():
+    with pytest.raises(clinical_forms.ClinicalFormError):
+        clinical_forms.get_form_spec("not_a_real_form")

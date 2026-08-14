@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 import docx
@@ -139,3 +140,42 @@ def _walk_table(table, table_index: int, start_row: int, header_seed: str = "") 
         ))
 
     return fields
+
+
+def _treatment_review_spec() -> FormSpec:
+    asset = TEMPLATES_DIR / "client_treatment_review.docx"
+    doc = docx.Document(asset)
+    (table,) = doc.tables
+    fields = _walk_table(table, table_index=0, start_row=6)
+    header_fields = [
+        HeaderField("date", "Date", 0, 0, 0, "inline"),
+        HeaderField("practitioner", "Practitioner", 0, 0, 1, "inline"),
+        HeaderField("client_name", "Client name", 0, 1, 0, "inline"),
+        HeaderField("client_dob", "Client DOB", 0, 1, 1, "inline"),
+        HeaderField("session_number", "Session number", 0, 2, 0, "inline"),
+        HeaderField("item_code", "Item code (if relevant)", 0, 2, 1, "inline"),
+        HeaderField("reason_for_referral", "Reason for referral", 0, 4, 0, "append"),
+    ]
+    return FormSpec(
+        form_id="client_treatment_review", title="Client Treatment Review",
+        asset_path=asset, header_fields=header_fields, fields=fields,
+    )
+
+
+_FORM_SPEC_BUILDERS = {
+    "client_treatment_review": _treatment_review_spec,
+}
+
+
+@lru_cache(maxsize=None)
+def get_form_spec(form_id: str) -> FormSpec:
+    try:
+        builder = _FORM_SPEC_BUILDERS[form_id]
+    except KeyError:
+        raise ClinicalFormError(f"Unknown clinical form '{form_id}'.") from None
+    return builder()
+
+
+def available_forms() -> list[tuple[str, str]]:
+    """(form_id, title) pairs, in registration order — for the UI's selector."""
+    return [(form_id, builder().title) for form_id, builder in _FORM_SPEC_BUILDERS.items()]
