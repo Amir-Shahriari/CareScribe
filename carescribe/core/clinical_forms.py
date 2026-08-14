@@ -1,0 +1,141 @@
+"""
+Fill the three bundled APS clinical form templates from approved,
+de-identified source documents.
+
+Each template's fillable cells are discovered by walking its real table
+structure (see docs/superpowers/specs/2026-08-13-clinical-forms-design.md),
+not hand-transcribed, because merged cells make column indices unreliable
+by eye. Generation asks the model for one delimited block of text per
+discovered field; nothing here decides what counts as a field at
+generation time — that was fixed when the spec was built from the asset.
+"""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from pathlib import Path
+
+import docx
+
+TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
+
+
+class ClinicalFormError(RuntimeError):
+    """Raised when a clinical form can't be built or filled."""
+
+
+def slugify(text: str) -> str:
+    text = (text or "").lower().strip()
+    text = re.sub(r"[^a-z0-9]+", "_", text)
+    return text.strip("_")
+
+
+@dataclass(frozen=True)
+class FormField:
+    key: str
+    label: str
+    table_index: int
+    value_row_index: int
+    value_col_index: int
+    append_after_label: bool
+
+
+@dataclass(frozen=True)
+class HeaderField:
+    key: str
+    label: str
+    table_index: int
+    row_index: int
+    col_index: int
+    style: str  # "inline" (append to the label's own paragraph) or "append"
+                # (new paragraph(s) after the label, same cell)
+
+
+@dataclass(frozen=True)
+class FormSpec:
+    form_id: str
+    title: str
+    asset_path: Path
+    header_fields: list[HeaderField]
+    fields: list[FormField]
+
+
+def _dedupe_row(row):
+    """Deduplicate a row's cells by underlying XML element identity.
+
+    python-docx reports a merged cell once per grid column it spans, so a
+    naive ``row.cells`` walk sees the same cell 2-3 times. Comparing
+    ``id(cell._tc)`` collapses those back into one logical cell per visual
+    box, in left-to-right order.
+    """
+    seen: set[int] = set()
+    cells = []
+    for cell in row.cells:
+        key = id(cell._tc)
+        if key not in seen:
+            seen.add(key)
+            cells.append(cell)
+    return cells
+
+
+def _paragraph_texts(cell) -> list[str]:
+    return [p.text for p in cell.paragraphs]
+
+
+def _walk_table(table, table_index: int, start_row: int, header_seed: str = "") -> list[FormField]:
+    fields: list[FormField] = []
+    current_header = header_seed
+    pending: tuple[int, str] | None = None  # (row_index, label_text)
+
+    def make_key(label: str) -> str:
+        return f"{slugify(current_header)}.{slugify(label)}" if current_header else slugify(label)
+
+    for row_index in range(start_row, len(table.rows)):
+        cells = _dedupe_row(table.rows[row_index])
+        texts = [c.text.strip() for c in cells]
+        full_blank = all(t == "" for t in texts)
+
+        if pending is not None:
+            _, label_text = pending
+            pending = None
+            if full_blank and len(cells) == 1:
+                fields.append(FormField(
+                    key=make_key(label_text), label=label_text,
+                    table_index=table_index, value_row_index=row_index,
+                    value_col_index=0, append_after_label=False,
+                ))
+                continue
+            current_header = label_text
+            # fall through — this row still needs its own classification
+
+        if full_blank:
+            continue
+
+        if len(cells) == 1:
+            paragraphs = _paragraph_texts(cells[0])
+            label_text = paragraphs[0].strip()
+            trailing = paragraphs[1:]
+            trailing_blank = bool(trailing) and all(p.strip() == "" for p in trailing)
+            if trailing_blank:
+                fields.append(FormField(
+                    key=make_key(label_text), label=label_text,
+                    table_index=table_index, value_row_index=row_index,
+                    value_col_index=0, append_after_label=True,
+                ))
+            elif len(paragraphs) == 1:
+                pending = (row_index, label_text)
+            else:
+                current_header = label_text
+            continue
+
+        label_text = cells[0].text.strip()
+        if label_text.lower().startswith("signature"):
+            continue
+        fields.append(FormField(
+            key=make_key(label_text), label=label_text,
+            table_index=table_index, value_row_index=row_index,
+            value_col_index=1, append_after_label=False,
+        ))
+
+    return fields
