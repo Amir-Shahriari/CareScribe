@@ -72,3 +72,38 @@ def test_treatment_review_header_fields():
 def test_unknown_form_id_raises():
     with pytest.raises(clinical_forms.ClinicalFormError):
         clinical_forms.get_form_spec("not_a_real_form")
+
+
+def test_session_notes_spec():
+    spec = clinical_forms.get_form_spec("client_session_notes")
+    assert spec.title == "Client Session Notes"
+    assert len(spec.fields) == 9
+    header_keys = [h.key for h in spec.header_fields]
+    assert header_keys == [
+        "date", "practitioner", "client_name", "client_dob",
+        "session_number", "item_code", "reason_for_referral",
+    ]
+
+
+def test_biopsychosocial_spec_field_count_and_grid():
+    spec = clinical_forms.get_form_spec("biopsychosocial_assessment")
+    assert spec.title == "Biopsychosocial Assessment"
+    assert len(spec.fields) == 62
+    keys = {f.key for f in spec.fields}
+    assert "history.substance_use" in keys
+    assert "current_functioning.mood" in keys
+    assert "mood_and_affect.mood" in keys  # same label, different section — must not collide
+    assert "clinical_formulation.predisposing.biological" in keys
+    assert "clinical_formulation.protecting.social" in keys
+    grid_keys = [k for k in keys if k.startswith("clinical_formulation.")
+                 and k.count(".") == 2]
+    assert len(grid_keys) == 12
+    header_keys = [h.key for h in spec.header_fields]
+    assert header_keys == ["date", "practitioner", "client_name", "client_dob", "reason_for_referral"]
+
+
+def test_no_field_key_collides_within_a_spec():
+    for form_id, _ in clinical_forms.available_forms():
+        spec = clinical_forms.get_form_spec(form_id)
+        keys = [f.key for f in spec.fields]
+        assert len(keys) == len(set(keys)), f"duplicate field key in {form_id}"

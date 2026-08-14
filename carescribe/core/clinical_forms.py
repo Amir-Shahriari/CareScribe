@@ -162,9 +162,75 @@ def _treatment_review_spec() -> FormSpec:
     )
 
 
+def _grid_fields(table, table_index: int, header_row: int, first_data_row: int,
+                  last_data_row: int, section_header: str) -> list[FormField]:
+    """The Biopsychosocial 'CLINICAL FORMULATION' table: a row-label ×
+    column-label grid, not a single label/value pair per row."""
+    header_cells = _dedupe_row(table.rows[header_row])
+    column_labels = [c.text.strip() for c in header_cells[1:]]
+    fields = []
+    for row_index in range(first_data_row, last_data_row + 1):
+        cells = _dedupe_row(table.rows[row_index])
+        row_label = cells[0].text.strip()
+        for col_offset, column_label in enumerate(column_labels, start=1):
+            key = f"{slugify(section_header)}.{slugify(row_label)}.{slugify(column_label)}"
+            fields.append(FormField(
+                key=key, label=f"{row_label} – {column_label}",
+                table_index=table_index, value_row_index=row_index,
+                value_col_index=col_offset, append_after_label=False,
+            ))
+    return fields
+
+
+def _session_notes_spec() -> FormSpec:
+    asset = TEMPLATES_DIR / "client_session_notes.docx"
+    doc = docx.Document(asset)
+    (table,) = doc.tables
+    fields = _walk_table(table, table_index=0, start_row=6)
+    header_fields = [
+        HeaderField("date", "Date", 0, 0, 0, "inline"),
+        HeaderField("practitioner", "Practitioner", 0, 0, 1, "inline"),
+        HeaderField("client_name", "Client name", 0, 1, 0, "inline"),
+        HeaderField("client_dob", "Client DOB", 0, 1, 1, "inline"),
+        HeaderField("session_number", "Session Number", 0, 2, 0, "inline"),
+        HeaderField("item_code", "Item code (if relevant)", 0, 2, 1, "inline"),
+        HeaderField("reason_for_referral", "Reason for referral", 0, 4, 0, "append"),
+    ]
+    return FormSpec(
+        form_id="client_session_notes", title="Client Session Notes",
+        asset_path=asset, header_fields=header_fields, fields=fields,
+    )
+
+
+def _biopsychosocial_spec() -> FormSpec:
+    asset = TEMPLATES_DIR / "biopsychosocial_assessment.docx"
+    doc = docx.Document(asset)
+    table0, table1 = doc.tables
+    fields = _walk_table(table0, table_index=0, start_row=5)
+    fields += _grid_fields(
+        table1, table_index=1, header_row=1, first_data_row=2, last_data_row=5,
+        section_header="CLINICAL FORMULATION",
+    )
+    fields += _walk_table(table1, table_index=1, start_row=6)
+    header_fields = [
+        HeaderField("date", "Date", 0, 0, 0, "inline"),
+        HeaderField("practitioner", "Practitioner", 0, 0, 1, "inline"),
+        HeaderField("client_name", "Client Name", 0, 1, 0, "inline"),
+        HeaderField("client_dob", "Client DOB", 0, 1, 1, "inline"),
+        HeaderField("reason_for_referral", "Reason for referral", 0, 3, 0, "append"),
+    ]
+    return FormSpec(
+        form_id="biopsychosocial_assessment", title="Biopsychosocial Assessment",
+        asset_path=asset, header_fields=header_fields, fields=fields,
+    )
+
+
 _FORM_SPEC_BUILDERS = {
     "client_treatment_review": _treatment_review_spec,
 }
+
+_FORM_SPEC_BUILDERS["client_session_notes"] = _session_notes_spec
+_FORM_SPEC_BUILDERS["biopsychosocial_assessment"] = _biopsychosocial_spec
 
 
 @lru_cache(maxsize=None)
