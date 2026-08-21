@@ -98,6 +98,37 @@ def test_dedupe_carries_the_keep_action():
     assert result[0]["action"] == mapping.KEEP
 
 
+def test_dedupe_entities_keeps_confidence():
+    entities = [{"type": "PERSON", "value": "Jo Bloggs", "confidence": "auto"}]
+    result = mapping.dedupe_entities(entities)
+    assert result[0]["confidence"] == "auto"
+
+
+def test_dedupe_entities_defaults_missing_confidence_to_review():
+    entities = [{"type": "PERSON", "value": "Jo Bloggs"}]
+    result = mapping.dedupe_entities(entities)
+    assert result[0]["confidence"] == "review"
+
+
+def test_assign_placeholders_keeps_confidence():
+    """assign_placeholders is analyze()'s last step — a silent drop here is permanent."""
+    result = mapping.assign_placeholders(
+        [{"type": "PERSON", "value": "Jo Bloggs", "confidence": "auto"}]
+    )
+    assert result[0]["confidence"] == "auto"
+
+
+def test_dedupe_entities_worst_case_wins_across_duplicates():
+    """If ANY occurrence of a value was low-confidence, the whole entity is."""
+    entities = [
+        {"type": "PERSON", "value": "Jo Bloggs", "confidence": "auto"},
+        {"type": "PERSON", "value": "jo bloggs", "confidence": "review"},
+    ]
+    result = mapping.dedupe_entities(entities)
+    assert len(result) == 1
+    assert result[0]["confidence"] == "review"
+
+
 # ==========================================================================
 # Surface forms and the Keep action
 # ==========================================================================

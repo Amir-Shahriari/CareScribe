@@ -181,6 +181,14 @@ def dedupe_entities(entities: Iterable[dict]) -> list[dict]:
     encountered wins, so re-identification restores the document's own casing.
     The reviewer's Redact/Keep choice rides along — a duplicate row must not
     silently re-enable a value they turned off.
+
+    ``confidence`` (``"auto"`` or ``"review"``) rides along too, aggregated
+    worst-case: if any occurrence of a value was only ``"review"``-grade, the
+    whole deduped entity is ``"review"`` — one weak occurrence means the
+    reviewer's single decision for this value has to actually be reviewed.
+    Missing or unrecognised confidence defaults to ``"review"``, never
+    ``"auto"`` — an entity this function has never seen a confidence claim
+    for is not one it will silently wave through.
     """
     seen: dict[str, dict] = {}
     for entity in entities:
@@ -193,12 +201,18 @@ def dedupe_entities(entities: Iterable[dict]) -> list[dict]:
         if len(value) < MIN_VALUE_LENGTH:
             continue
         key = value.casefold()
+        confidence = str(entity.get("confidence") or "review")
+        if confidence != "auto":
+            confidence = "review"
         if key in seen:
+            if confidence != "auto":
+                seen[key]["confidence"] = "review"
             continue
         seen[key] = {
             "type": normalise_type(entity.get("type")),
             "value": value,
             "action": normalise_action(entity.get("action")),
+            "confidence": confidence,
         }
     return list(seen.values())
 
@@ -209,7 +223,10 @@ def assign_placeholders(entities: Iterable[dict]) -> list[dict]:
     A type with exactly one value gets a bare placeholder (``[PATIENT]``); a
     type with several gets numbered ones (``[MRN_1]``, ``[MRN_2]``). Any
     placeholder already present on an entity (e.g. the user edited it in the
-    UI) is preserved.
+    UI) is preserved. ``confidence`` (see :func:`dedupe_entities`) rides
+    along the same way placeholder does — this is the last step of
+    :func:`~carescribe.core.deidentify.analyze`, so anything dropped here is
+    dropped for good.
     """
     entities = list(entities)
 
@@ -235,12 +252,16 @@ def assign_placeholders(entities: Iterable[dict]) -> list[dict]:
             else:
                 placeholder = f"[{stem}_{counters[entity_type]}]"
 
+        confidence = str(entity.get("confidence") or "review")
+        if confidence != "auto":
+            confidence = "review"
         result.append(
             {
                 "type": entity_type,
                 "value": str(entity.get("value", "")).strip(),
                 "placeholder": placeholder,
                 "action": normalise_action(entity.get("action")),
+                "confidence": confidence,
             }
         )
     return result

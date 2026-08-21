@@ -35,12 +35,15 @@ None of this is a guarantee. The reviewer's approval step in the UI, and the
 
 from __future__ import annotations
 
+import os
 import re
+import sys
 import threading
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from . import mapping
+from . import applog, mapping
 
 # ---------------------------------------------------------------------------
 # Protected terms — the allow-list that outranks every detection layer
@@ -117,10 +120,66 @@ USE_STRUCTURED = True
 USE_NER = True
 USE_GLINER = True  # no-op unless the gliner package is importable
 
-# spaCy models tried in order. The large model has materially better NER on
-# free text; the small one is the fallback so a failed download doesn't take the
-# whole app down with it.
-SPACY_MODELS = ("en_core_web_lg", "en_core_web_sm")
+# ---------------------------------------------------------------------------
+# Offline enforcement
+#
+# De-identification must never touch the network. Left to itself, a spaCy or
+# HuggingFace component that cannot find a local resource will try to fetch it —
+# which on a clinic network behind a captive portal does not fail, it *hangs*,
+# and the clinician sees a frozen app with no explanation.
+#
+# These flags turn that hang into an immediate, legible error. Set at import,
+# before any of those libraries initialise.
+# ---------------------------------------------------------------------------
+for _var, _value in (
+    ("HF_HUB_OFFLINE", "1"),
+    ("TRANSFORMERS_OFFLINE", "1"),
+    ("HF_DATASETS_OFFLINE", "1"),
+    ("NO_PROXY", "*"),
+):
+    os.environ.setdefault(_var, _value)
+
+# Which spaCy model to use, tried in order.
+#
+# The packaged app defaults to the small model: en_core_web_lg is ~750 MB and
+# slow to load on the laptops this is aimed at, and a first-run stall reads as a
+# broken app. `md` and `lg` are better on free-text names and are preferred when
+# installed. Override with CARESCRIBE_SPACY_MODEL.
+SPACY_MODEL_PREFERENCE = ("en_core_web_lg", "en_core_web_md", "en_core_web_sm")
+PACKAGED_DEFAULT_MODEL = "en_core_web_sm"
+
+
+def _model_preference() -> tuple[str, ...]:
+    override = (os.environ.get("CARESCRIBE_SPACY_MODEL") or "").strip()
+    if override:
+        return (override,)
+    return SPACY_MODEL_PREFERENCE
+
+
+SPACY_MODELS = _model_preference()
+
+
+def resolve_model_path(name: str) -> str | None:
+    """Where a spaCy model package actually lives, or ``None`` if absent.
+
+    Resolved explicitly rather than trusting ``spacy.load`` to find it, so a
+    model missing from a frozen build is a clear message instead of a download
+    attempt.
+    """
+    try:
+        import importlib.util
+
+        spec = importlib.util.find_spec(name)
+    except Exception:  # noqa: BLE001
+        return None
+    if spec is None or not spec.submodule_search_locations:
+        return None
+    return str(list(spec.submodule_search_locations)[0])
+
+
+def available_models() -> list[str]:
+    """Every spaCy model importable in this environment."""
+    return [name for name in SPACY_MODEL_PREFERENCE if resolve_model_path(name)]
 
 # GLiNER labels, per the pipeline spec. Only used when the package is present.
 GLINER_MODEL = "urchade/gliner_small-v2.1"
@@ -202,6 +261,17 @@ def _build_analyzer() -> tuple[object | None, str | None, str | None]:
 
     errors: list[str] = []
     for model_name in SPACY_MODELS:
+        # Resolve the package before asking Presidio for it. If it is not on
+        # disk, say so — do not hand the name to a loader that would try to
+        # fetch it and hang on a captive-portal network.
+        model_path = resolve_model_path(model_name)
+        if model_path is None:
+            errors.append(f"{model_name}: not installed in this build")
+            applog.warn("NER model %s: not installed", model_name)
+            continue
+
+        applog.log("loading NER model %s from %s", model_name, model_path)
+        started = time.monotonic()
         try:
             provider = NlpEngineProvider(
                 nlp_configuration={
@@ -212,14 +282,33 @@ def _build_analyzer() -> tuple[object | None, str | None, str | None]:
             engine = AnalyzerEngine(
                 nlp_engine=provider.create_engine(), supported_languages=["en"]
             )
+            applog.log(
+                "NER model %s loaded in %.1fs", model_name, time.monotonic() - started
+            )
             return engine, model_name, None
         except Exception as exc:  # noqa: BLE001 — any failure means "try the next model"
+            applog.exception("NER model %s failed to load", model_name)
             errors.append(f"{model_name}: {exc}")
 
+    detail = "\n".join(errors)
+    applog.warn("no NER model could be loaded:\n%s", detail)
+    if is_frozen_build():
+        # In a packaged build there is no pip to run, and no network fetch is
+        # permitted, so this is a broken build rather than a setup step.
+        return None, None, (
+            "The de-identification model is not installed in this build.\n\n"
+            "This is a packaging fault, not something you can fix here — the "
+            "app needs rebuilding with the language model included.\n\n"
+            f"Details:\n{detail}"
+        )
     return None, None, (
         "No spaCy model could be loaded. Install one with:\n"
-        "    python -m spacy download en_core_web_lg\n\n" + "\n".join(errors)
+        f"    python -m spacy download {PACKAGED_DEFAULT_MODEL}\n\n" + detail
     )
+
+
+def is_frozen_build() -> bool:
+    return bool(getattr(sys, "frozen", False))
 
 
 def get_analyzer() -> object | None:
@@ -1548,8 +1637,33 @@ def merge_spans(text: str, *span_lists: list[Span], known_as: str | None = None)
 
     kept.sort(key=lambda s: s.start)
 
+    def _confidence(span: Span) -> str:
+        """"auto" if this span is safe to redact with no manual decision.
+
+        Layer 1 (regex) is pattern-certain by construction. Anything else is
+        "auto" only if a second, independent layer's candidate also covered
+        this exact region while spans were still being resolved — real
+        corroboration, not just one layer's guess. Checked against
+        ``prepared`` (every candidate, before the occupied-bytearray dedup
+        above threw the losers away), because ``kept`` only has the single
+        surviving span per region and has already lost that information.
+        """
+        if span.source == "regex":
+            return "auto"
+        sources = {
+            other.source
+            for other in prepared
+            if other.start < span.end and span.start < other.end
+        }
+        return "auto" if len(sources) >= 2 else "review"
+
     entities = mapping.dedupe_entities(
-        {"type": span.entity_type, "value": text[span.start : span.end]} for span in kept
+        {
+            "type": span.entity_type,
+            "value": text[span.start : span.end],
+            "confidence": _confidence(span),
+        }
+        for span in kept
     )
 
     # A later, more specific type upgrades a generic one for the same value:
@@ -1636,6 +1750,11 @@ def analyze(text: str) -> list[dict]:
     return mapping.assign_placeholders(entities)
 
 
+# A document this app is asked to handle should take seconds. Past this, the
+# honest thing is to stop and point at the log rather than spin forever.
+DEID_TIMEOUT_SECONDS = 180
+
+
 def deidentify(text: str) -> DeidResult:
     """Run the full local pipeline over one document.
 
@@ -1645,7 +1764,22 @@ def deidentify(text: str) -> DeidResult:
     if not text or not text.strip():
         raise DeidentificationError("There is no text to de-identify.")
 
+    started = time.monotonic()
+    applog.log("de-identify: start chars=%d", len(text))
     entities = analyze(text)
+    elapsed = time.monotonic() - started
+    if elapsed > DEID_TIMEOUT_SECONDS:
+        applog.warn("de-identify: exceeded budget %.0fs chars=%d", elapsed, len(text))
+        raise DeidentificationError(
+            f"De-identification took longer than {DEID_TIMEOUT_SECONDS // 60} "
+            f"minutes on a {len(text):,}-character document and was stopped.\n\n"
+            f"If the document really is that large, try splitting it. If not, "
+            f"the log has the detail: {applog.log_path()}"
+        )
+    applog.log(
+        "de-identify: done in %.1fs chars=%d entities=%d",
+        elapsed, len(text), len(entities),
+    )
     known_as = mapping.find_known_as(text)
 
     return DeidResult(
@@ -1710,7 +1844,12 @@ def add_manual_entity(
     if any(str(e.get("value", "")).strip().casefold() == value.casefold() for e in rows):
         raise DeidentificationError(f"'{value}' is already in the table.")
 
-    rows.append({"type": mapping.normalise_type(entity_type), "value": value, "placeholder": ""})
+    rows.append({
+        "type": mapping.normalise_type(entity_type),
+        "value": value,
+        "placeholder": "",
+        "confidence": "auto",
+    })
     return rebuild(text, rows)
 
 

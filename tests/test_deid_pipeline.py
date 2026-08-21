@@ -324,6 +324,45 @@ def test_add_manual_entity_refuses_a_duplicate(raw_text, deid):
         )
 
 
+def test_a_structured_regex_hit_is_auto_confidence():
+    """An NHS number is Layer 1 (regex) — pattern-certain, no review needed."""
+    text = "NHS number: 943 476 5919"
+    entities = deidentify.analyze(text)
+    nhs = next(e for e in entities if e["type"] == "NHS_NUMBER")
+    assert nhs["confidence"] == "auto"
+
+
+def test_a_single_layer_ner_only_hit_needs_review():
+    """A bare forename with no structural corroboration is single-layer."""
+    text = "Zephyrine mentioned she felt better today."
+    entities = deidentify.analyze(text)
+    person = next(
+        (e for e in entities if e["type"] in ("PATIENT_NAME", "PERSON")), None
+    )
+    assert person is not None
+    assert person["confidence"] == "review"
+
+
+def test_two_layers_agreeing_is_auto_confidence():
+    """GLiNER and Presidio/spaCy both firing on the same span is corroboration."""
+    try:
+        import gliner  # noqa: F401
+    except ImportError:
+        pytest.skip("requires the gliner package to be installed")
+    text = "The patient, Margaret Elizabeth Chen, was reviewed today."
+    entities = deidentify.analyze(text)
+    person = next(e for e in entities if "Chen" in e["value"])
+    assert person["confidence"] == "auto"
+
+
+def test_a_manually_added_entity_is_auto_confidence():
+    """The add action IS the human decision — no second click to confirm it."""
+    text = "Seen by the coordinator, Zaphod, today."
+    result = deidentify.add_manual_entity(text, [], "Zaphod")
+    entity = next(e for e in result.entities if e["value"] == "Zaphod")
+    assert entity["confidence"] == "auto"
+
+
 def test_rebuild_preserves_a_reviewer_edited_placeholder(raw_text, deid):
     entities = [dict(e) for e in deid.entities]
     entities[0]["placeholder"] = "[CUSTOM_1]"
