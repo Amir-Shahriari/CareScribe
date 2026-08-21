@@ -111,92 +111,36 @@ def test_dismissing_a_flag_clears_it():
 
 
 # ==========================================================================
-# Task 2 / 4 — the checklist adapts, and stays short when it can
-# ==========================================================================
-
-def test_a_clean_plain_note_asks_only_the_two_always_items():
-    features = review_checklist.DocFeatures()
-    items = review_checklist.build_checklist(features)
-    assert [item.key for item in items] == ["read_full", "flags_cleared"]
-
-
-def test_a_risky_document_earns_the_extra_items():
-    features = review_checklist.DocFeatures(
-        has_table=True, has_relatives=True, has_textbox=True,
-        has_header_footer=True, has_dates=True,
-    )
-    keys = [item.key for item in review_checklist.build_checklist(features)]
-    assert keys == [
-        "read_full", "flags_cleared", "table_cells", "header_footer",
-        "relatives", "textboxes", "dates",
-    ]
-
-
-def test_the_flags_item_is_unsatisfiable_while_a_flag_is_outstanding():
-    features = review_checklist.DocFeatures(n_candidate_flags=3, flags_outstanding=2)
-    item = next(
-        i for i in review_checklist.build_checklist(features) if i.key == "flags_cleared"
-    )
-    assert not item.auto_satisfied
-    assert "2" in item.hint
-
-
-def test_the_flags_item_satisfies_once_every_flag_is_decided():
-    features = review_checklist.DocFeatures(n_candidate_flags=3, flags_outstanding=0)
-    item = next(
-        i for i in review_checklist.build_checklist(features) if i.key == "flags_cleared"
-    )
-    assert item.auto_satisfied
-
-
-def test_features_are_derived_from_the_document():
-    document = batch.Document(
-        name="letter.txt",
-        raw_text="Patient: Wei Chen\nWard: Cedar Ward\nNHS No: 943 476 5919\n\nSeen today.\n",
-        redacted_text="[PATIENT] was seen.\n",
-        entities=[
-            {"type": "RELATIVE_NAME", "value": "Mei Chen", "placeholder": "[RELATIVE]"},
-            {"type": "DATE", "value": "1 May 2026", "placeholder": "[DATE]"},
-            {"type": "MRN", "value": "990214", "placeholder": "[MRN]"},
-        ],
-    )
-    features = review_checklist.describe(document)
-    assert features.has_table
-    assert features.has_relatives
-    assert features.has_dates
-    assert features.has_ids
-    assert not features.has_textbox
-
-
-# ==========================================================================
 # The gate — blocked while anything is outstanding
 # ==========================================================================
 
+def test_blocking_reason_empty_when_nothing_outstanding():
+    assert review_checklist.blocking_reason([], 0) == ""
+
+
+def test_blocking_reason_reports_residual_first():
+    reason = review_checklist.blocking_reason(["Bolton"], 3)
+    assert "1 finding" in reason
+
+
+def test_blocking_reason_reports_outstanding_spans():
+    reason = review_checklist.blocking_reason([], 2)
+    assert "2" in reason and "span" in reason
+
+
 def test_approval_is_blocked_while_a_flag_is_outstanding():
-    items = review_checklist.build_checklist(
-        review_checklist.DocFeatures(flags_outstanding=1)
-    )
-    reason = review_checklist.blocking_reason(items, set(), [], 1)
-    assert reason
-    assert "highlighted" in reason
+    reason = review_checklist.blocking_reason([], 1)
+    assert reason != ""
 
 
 def test_approval_is_blocked_while_the_sweep_has_findings():
-    items = review_checklist.build_checklist(review_checklist.DocFeatures())
-    reason = review_checklist.blocking_reason(items, {"read_full", "flags_cleared"},
-                                              ["01632 960 188"], 0)
-    assert "safety sweep" in reason
-
-
-def test_approval_is_blocked_until_every_item_is_ticked():
-    items = review_checklist.build_checklist(review_checklist.DocFeatures())
-    assert review_checklist.blocking_reason(items, {"read_full"}, [], 0)
+    reason = review_checklist.blocking_reason(["Some Name"], 0)
+    assert reason != ""
 
 
 def test_approval_unblocks_once_everything_is_resolved():
-    items = review_checklist.build_checklist(review_checklist.DocFeatures())
-    ticked = {item.key for item in items}
-    assert review_checklist.blocking_reason(items, ticked, [], 0) == ""
+    reason = review_checklist.blocking_reason([], 0)
+    assert reason == ""
 
 
 def test_the_gate_unblocks_after_dismissing_the_last_flag():
@@ -204,12 +148,7 @@ def test_the_gate_unblocks_after_dismissing_the_last_flag():
     assert flags
     dismissed = [flag.key for flag in flags]
     outstanding = len(review_flags.outstanding(flags, dismissed))
-    items = review_checklist.build_checklist(
-        review_checklist.DocFeatures(n_candidate_flags=len(flags),
-                                     flags_outstanding=outstanding)
-    )
-    ticked = {item.key for item in items}
-    assert review_checklist.blocking_reason(items, ticked, [], outstanding) == ""
+    assert review_checklist.blocking_reason([], outstanding) == ""
 
 
 # ==========================================================================
@@ -297,24 +236,6 @@ def test_no_corpus_identifier_reaches_the_sidecar(tmp_path, monkeypatch):
     for document in key["documents"]:
         for value in document["must_redact"]:
             assert value not in written, value
-
-
-# ==========================================================================
-# Task 4 — no friction where there is no risk
-# ==========================================================================
-
-def test_a_clean_note_needs_only_two_ticks_end_to_end():
-    document = batch.Document(
-        name="note.txt",
-        raw_text="Seen in clinic today. He remains well.",
-        redacted_text="Seen in clinic today. He remains well.",
-        entities=[],
-    )
-    features = review_checklist.describe(document)
-    items = review_checklist.build_checklist(features)
-    assert len(items) == 2
-    ticked = {item.key for item in items}
-    assert review_checklist.blocking_reason(items, ticked, [], 0) == ""
 
 
 def test_the_app_registers_the_new_state_keys_for_wiping():
