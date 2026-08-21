@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+  #doc {
+    white-space: pre-wrap;
+    padding: 10px;
+    max-height: 360px;
+    overflow: auto;
+    border: 1px solid rgba(128, 128, 128, .35);
+    border-radius: 6px;
+  }
+  mark {
+    cursor: pointer;
+  }
+  mark:hover {
+    outline: 2px solid #495057;
+  }
+</style>
+</head>
+<body>
+<div id="doc"></div>
+<script>
+  // Streamlit's component postMessage protocol, hand-rolled -- no external
+  // library, no CDN. Three message types out (componentReady,
+  // setComponentValue, setFrameHeight), one in (render).
+  function sendValue(value) {
+    window.parent.postMessage({ type: "streamlit:setComponentValue", value: value }, "*");
+  }
+
+  function setFrameHeight() {
+    window.parent.postMessage(
+      { type: "streamlit:setFrameHeight", height: document.documentElement.scrollHeight },
+      "*"
+    );
+  }
+
+  function onRender(event) {
+    var args = (event.data && event.data.args) || {};
+    var doc = document.getElementById("doc");
+    doc.innerHTML = args.html || "";
+    var marks = doc.querySelectorAll("mark[data-span-id]");
+    for (var i = 0; i < marks.length; i++) {
+      marks[i].addEventListener("click", (function (mark) {
+        return function () {
+          sendValue(mark.getAttribute("data-span-id"));
+        };
+      })(marks[i]));
+    }
+    setFrameHeight();
+  }
+
+  window.addEventListener("message", function (event) {
+    if (event.data && event.data.type === "streamlit:render") {
+      onRender(event);
+    }
+  });
+
+  window.parent.postMessage({ type: "streamlit:componentReady", apiVersion: 1 }, "*");
+  setFrameHeight();
+</script>
+</body>
+</html>
