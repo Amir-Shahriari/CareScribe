@@ -6,6 +6,7 @@ de-identified text, and the write refuses anything the safety sweep flags.
 """
 
 import io
+import json
 
 import pytest
 
@@ -190,3 +191,19 @@ def test_a_dismissed_finding_lets_the_write_through(tmp_path, monkeypatch, raw_t
 
     path = batch.write_approved("summary.txt", leaky, acknowledged=["01632 960 188"])
     assert path.exists()
+
+
+def test_review_record_counts_auto_vs_reviewed_identifiers(tmp_path, monkeypatch):
+    monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path)
+    entities = [
+        {"type": "PROVIDER_NAME", "value": "Dr Ng", "action": "Redact", "confidence": "auto"},
+        {"type": "PATIENT_NAME", "value": "Jo Bloggs", "action": "Redact", "confidence": "review"},
+        {"type": "LOCATION", "value": "Bolton", "action": "Keep", "confidence": "review"},
+    ]
+    path = batch.write_review_record(
+        "doc.txt", entities=entities, flags_shown=0, flags_redacted=0, flags_dismissed=0,
+    )
+    record = json.loads(path.read_text(encoding="utf-8"))
+    assert record["identifiers_auto_redacted"] == 1
+    assert record["identifiers_reviewed_by_practitioner"] == 1
+    assert "checklist_confirmed" not in record

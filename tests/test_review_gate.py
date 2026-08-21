@@ -157,12 +157,13 @@ def test_the_gate_unblocks_after_dismissing_the_last_flag():
 
 ENTITIES = [
     {"type": "PATIENT_NAME", "value": "Mariam Aisha Rahman",
-     "placeholder": "[PATIENT]", "action": "Redact"},
+     "placeholder": "[PATIENT]", "action": "Redact", "confidence": "review"},
     {"type": "RELATIVE_NAME", "value": "Yusuf Rahman",
-     "placeholder": "[RELATIVE]", "action": "Redact"},
-    {"type": "MRN", "value": "990214", "placeholder": "[MRN]", "action": "Redact"},
+     "placeholder": "[RELATIVE]", "action": "Redact", "confidence": "review"},
+    {"type": "MRN", "value": "990214", "placeholder": "[MRN]", "action": "Redact",
+     "confidence": "auto"},
     {"type": "NHS_NUMBER", "value": "943 476 5919",
-     "placeholder": "[NHS_NO]", "action": "Keep"},
+     "placeholder": "[NHS_NO]", "action": "Keep", "confidence": "auto"},
 ]
 
 
@@ -171,7 +172,6 @@ def record(tmp_path, monkeypatch):
     monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path / "out")
     path = batch.write_review_record(
         "referral.docx",
-        ticked=["read_full", "flags_cleared", "table_cells"],
         entities=ENTITIES,
         flags_shown=7,
         flags_redacted=2,
@@ -184,7 +184,11 @@ def test_the_sidecar_records_the_review(record):
     path, data = record
     assert path.name == "referral" + batch.REVIEW_SUFFIX
     assert data["document"] == "referral.docx"
-    assert data["checklist_confirmed"] == ["flags_cleared", "read_full", "table_cells"]
+    # MRN is the only Redact-action row marked "auto"; the other two Redact
+    # rows are "review". The Keep row (NHS_NUMBER) contributes to neither
+    # count — it was never redacted.
+    assert data["identifiers_auto_redacted"] == 1
+    assert data["identifiers_reviewed_by_practitioner"] == 2
     assert data["candidate_flags"] == {"shown": 7, "redacted": 2, "dismissed": 5}
     assert data["reviewed_at"]
 
@@ -229,7 +233,7 @@ def test_no_corpus_identifier_reaches_the_sidecar(tmp_path, monkeypatch):
         for v in document["must_redact"]
     ]
     path = batch.write_review_record(
-        "corpus.txt", ticked=["read_full"], entities=entities,
+        "corpus.txt", entities=entities,
         flags_shown=0, flags_redacted=0, flags_dismissed=0,
     )
     written = path.read_text(encoding="utf-8")

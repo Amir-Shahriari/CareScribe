@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import re
 from datetime import datetime, timezone
 from dataclasses import dataclass, field
@@ -33,7 +34,22 @@ from . import deidentify, docx_redact, ingest, mapping
 # carescribe/core/batch.py -> carescribe/
 _PACKAGE_ROOT = Path(__file__).resolve().parent.parent
 
-OUTPUT_DIR = _PACKAGE_ROOT / "output" / "deidentified"
+def _default_output_dir() -> Path:
+    """Where approved output lands.
+
+    In a source checkout that is ``carescribe/output/deidentified``. In the
+    packaged desktop app it is a per-user app-data directory, because the
+    executable may sit somewhere unwritable (``C:\\Program Files``) or inside a
+    signed ``.app`` bundle whose contents must not change. The launcher sets the
+    environment variable; nothing else needs to know which case it is in.
+    """
+    override = (os.environ.get("CARESCRIBE_OUTPUT_DIR") or "").strip()
+    if override:
+        return Path(override)
+    return _PACKAGE_ROOT / "output" / "deidentified"
+
+
+OUTPUT_DIR = _default_output_dir()
 
 # Approved files get this suffix so a de-identified copy is never mistaken for
 # a source document sitting in the same folder.
@@ -276,7 +292,6 @@ def review_record_path(name: str) -> Path:
 def write_review_record(
     name: str,
     *,
-    ticked: list[str] | tuple[str, ...],
     entities,
     flags_shown: int,
     flags_redacted: int,
@@ -285,25 +300,33 @@ def write_review_record(
     """Write the no-PHI audit sidecar for one approved document.
 
     Evidence that a consistent review happened, and nothing more. It records
-    *counts* and *types*: which checklist items were affirmed, how many
-    highlighted spans were shown and what became of them, and how many
-    placeholders of each type the document ended up with.
+    *counts* and *types*: how many redacted identifiers were auto-resolved by
+    confidence tiering versus actually reviewed by the practitioner, how many
+    highlighted residual spans were shown and what became of them, and how
+    many placeholders of each type the document ended up with.
 
     It deliberately holds no identifier value, no placeholder-to-value mapping,
     and no document text. There is no parameter through which one could reach
     it — the entity values are counted here and discarded, never written.
     """
     tally: dict[str, int] = {}
+    auto_redacted = 0
+    reviewed_redacted = 0
     for entity in entities or []:
         entity_type = str(entity.get("type", "") or "OTHER_ID")
         if mapping.normalise_action(entity.get("action")) != mapping.REDACT:
             continue
         tally[entity_type] = tally.get(entity_type, 0) + 1
+        if str(entity.get("confidence", "review")) == "auto":
+            auto_redacted += 1
+        else:
+            reviewed_redacted += 1
 
     record = {
         "document": Path(name).name,
         "reviewed_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "checklist_confirmed": sorted(str(key) for key in ticked),
+        "identifiers_auto_redacted": auto_redacted,
+        "identifiers_reviewed_by_practitioner": reviewed_redacted,
         "candidate_flags": {
             "shown": int(flags_shown),
             "redacted": int(flags_redacted),
