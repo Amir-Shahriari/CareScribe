@@ -54,6 +54,16 @@ def _redacted(name: str) -> str:
     return _CACHE[name]
 
 
+_ENTITIES_CACHE: dict[str, list] = {}
+
+
+def _entities(name: str) -> list:
+    if name not in _ENTITIES_CACHE:
+        text = (CORPUS / name).read_text(encoding="utf-8")
+        _ENTITIES_CACHE[name] = deidentify.analyze(text)
+    return _ENTITIES_CACHE[name]
+
+
 def _redact_cases() -> list[tuple[str, str]]:
     return [(d["file"], value) for d in DOCUMENTS for value in d["must_redact"]]
 
@@ -83,6 +93,24 @@ def test_identifier_does_not_survive(document, value):
 )
 def test_clinical_content_is_preserved(document, value):
     assert _normalise(value) in _normalise(_redacted(document))
+
+
+@pytest.mark.parametrize(
+    "document, value", _preserve_cases(), ids=lambda v: str(v).replace(" ", "_")[:40]
+)
+def test_auto_confidence_never_covers_a_must_preserve_value(document, value):
+    """Confidence tiering must never make the reviewer's job LESS safe.
+
+    An "auto" entity skips the reviewer entirely, so if confidence tiering
+    ever marked something "auto" that should have stayed preserved (a place
+    name, a clinical term), that value would be silently redacted with no
+    chance to catch it — a correctness regression this test exists
+    specifically to prevent, independent of whether it was flagged at all.
+    """
+    preserved_key = _normalise(value).casefold()
+    for entity in _entities(document):
+        if _normalise(entity["value"]).casefold() == preserved_key:
+            assert entity["confidence"] == "review"
 
 
 @pytest.mark.parametrize("document", [d["file"] for d in DOCUMENTS])

@@ -142,6 +142,45 @@ def test_a_document_with_only_auto_confidence_entities_needs_one_click():
     assert reason_captions == []
 
 
+def test_a_batch_of_clean_documents_needs_roughly_one_click_each(tmp_path, monkeypatch):
+    """The actual goal of this redesign, made concrete and regression-tested."""
+    monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path / "deidentified")
+    docs = {}
+    for index in range(1, 6):
+        name = f"clean{index}.txt"
+        docs[name] = batch.Document(
+            name=name,
+            raw_text="the patient was seen today and remains well.",
+            redacted_text="[PATIENT] was seen today and remains well.",
+            entities=[{
+                "type": "PATIENT_NAME", "value": "the patient",
+                "placeholder": "[PATIENT]", "action": "Redact", "confidence": "auto",
+            }],
+            analyzed=True,
+        )
+    state = {"docs": docs, "order": list(docs), "selected": next(iter(docs))}
+    app = AppTest.from_file(APP, default_timeout=120)
+    for key, value in state.items():
+        app.session_state[key] = value
+    app.run()
+    assert not app.exception, [e.value for e in app.exception]
+
+    clicks = 0
+    for name in list(docs):
+        app.session_state["selected"] = name
+        app.run()
+        clicks += 1  # selecting the document
+        app.button(key=f"approve_{name}").click()
+        app.run()
+        clicks += 1  # the one Approve click
+        assert docs[name].approved
+
+    # 5 documents, 2 interactions each (select + approve) — no per-document
+    # checkbox ticks, no per-span decisions, since every entity is "auto"
+    # and the text is clean of anything the residual scanner would flag.
+    assert clicks == 10
+
+
 def test_human_review_warning_is_shown():
     app = run_app(**analysed_batch(1))
     assert "Human review required" in text_of(app.warning)
