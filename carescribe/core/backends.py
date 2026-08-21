@@ -1,0 +1,294 @@
+"""
+Generation backends, layered so the app works with nothing installed.
+
+Selection order, decided at runtime:
+
+1. :class:`~carescribe.core.carenotes.OllamaBackend` — only if a local Ollama
+   daemon is already answering. Someone who installed it did so to run a bigger
+   model, so it wins when present.
+2. :class:`LocalGGUFBackend` — the default. ``llama-cpp-python`` on the CPU with
+   a small bundled Q4 model. This is what makes the app generate with no
+   external install at all.
+3. :class:`CloudBackend` — **off unless explicitly configured**, and even then
+   only if a key is present in the environment. Never bundled, never a default,
+   never reached by accident.
+
+All three see the same thing: approved de-identified text with placeholders.
+Re-identification stays in Python, after generation. That is what makes the
+cloud option defensible at all — the provider receives a document that has
+already passed the residual sweep, and never the mapping.
+"""
+
+from __future__ import annotations
+
+import os
+from typing import Iterator
+
+from . import desktop, ollama_client
+
+# The deployer opts in by setting this to a provider name. Absent or empty means
+# cloud generation does not exist as far as this app is concerned.
+CLOUD_PROVIDER_ENV = "CARESCRIBE_CLOUD_PROVIDER"
+CLOUD_API_KEY_ENV = "CARESCRIBE_CLOUD_API_KEY"
+
+BACKEND_OLLAMA = "ollama"
+BACKEND_LOCAL_GGUF = "local"
+BACKEND_CLOUD = "cloud"
+
+
+class BackendError(RuntimeError):
+    """Raised when a backend cannot be used, with the fix in the message."""
+
+
+# --------------------------------------------------------------------------
+# 2. The default — a small quantised model on the CPU
+# --------------------------------------------------------------------------
+
+class LocalGGUFBackend:
+    """CPU-only generation from a bundled GGUF via ``llama-cpp-python``.
+
+    The model is loaded once per process and cached: a 3B Q4 takes a few
+    seconds to map into memory, and paying that on every draft would make the
+    app feel broken on the laptops it is aimed at.
+    """
+
+    _cache: dict = {}
+
+    def __init__(
+        self,
+        model_path=None,
+        *,
+        context_tokens: int = 8192,
+        max_tokens: int = 1600,
+        # Zero, not the 0.2 the Ollama backend uses. Measured on the bundled 3B:
+        # at 0.2 it invented "anxiety and occasional insomnia" and "a history of
+        # depression" for a source that contained neither; at 0.0 the same
+        # prompt produced [not documented] in every unsupported section. A small
+        # model has less headroom to be creative with, and in clinical
+        # documentation creativity is the failure mode.
+        temperature: float = 0.0,
+        threads: int | None = None,
+    ) -> None:
+        self.model_path = str(model_path or "") or None
+        self.context_tokens = context_tokens
+        self.max_tokens = max_tokens
+        self.temperature = temperature
+        self.threads = threads
+
+    @staticmethod
+    def available() -> bool:
+        """True if the runtime and a model file are both present."""
+        try:
+            import llama_cpp  # noqa: F401
+        except Exception:  # noqa: BLE001
+            return False
+        return desktop.find_local_model() is not None
+
+    def _resolve_path(self) -> str:
+        if self.model_path:
+            return self.model_path
+        found = desktop.find_local_model()
+        if found is None:
+            raise BackendError(
+                "The built-in model file is missing. Reinstall CareScribe, or "
+                "install Ollama and pull a model to use that instead."
+            )
+        return str(found)
+
+    def _llama(self):
+        path = self._resolve_path()
+        cached = LocalGGUFBackend._cache.get(path)
+        if cached is not None:
+            return cached
+        try:
+            from llama_cpp import Llama
+        except Exception as exc:  # noqa: BLE001
+            raise BackendError(
+                "The local generation runtime (llama-cpp-python) is not "
+                f"available: {exc}"
+            ) from exc
+
+        try:
+            model = Llama(
+                model_path=path,
+                n_ctx=self.context_tokens,
+                n_threads=self.threads or max(1, (os.cpu_count() or 4) // 2),
+                verbose=False,
+            )
+        except Exception as exc:  # noqa: BLE001
+            raise BackendError(f"The local model could not be loaded: {exc}") from exc
+        LocalGGUFBackend._cache[path] = model
+        return model
+
+    def generate(self, system: str, prompt: str, stream: bool = True) -> Iterator[str]:
+        model = self._llama()
+        messages = [
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt},
+        ]
+        try:
+            completion = model.create_chat_completion(
+                messages=messages,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                stream=bool(stream),
+            )
+        except Exception as exc:  # noqa: BLE001
+            raise BackendError(f"Local generation failed: {exc}") from exc
+
+        if not stream:
+            yield completion["choices"][0]["message"]["content"]
+            return
+
+        for chunk in completion:
+            delta = chunk.get("choices", [{}])[0].get("delta", {})
+            piece = delta.get("content")
+            if piece:
+                yield piece
+
+
+# --------------------------------------------------------------------------
+# 3. The optional one — off unless a deployer turns it on
+# --------------------------------------------------------------------------
+
+def cloud_provider() -> str:
+    """The configured provider name, or "" when cloud generation is off."""
+    return (os.environ.get(CLOUD_PROVIDER_ENV) or "").strip()
+
+
+def cloud_key_present() -> bool:
+    return bool((os.environ.get(CLOUD_API_KEY_ENV) or "").strip())
+
+
+def cloud_enabled() -> bool:
+    """Cloud generation exists only with BOTH an explicit provider and a key.
+
+    Two separate switches on purpose. A key left in the environment by another
+    tool must not silently enable off-device generation, and naming a provider
+    without a key must fail loudly rather than fall back to it.
+    """
+    return bool(cloud_provider()) and cloud_key_present()
+
+
+class CloudBackend:
+    """A remote provider, reachable only when explicitly configured.
+
+    Receives approved de-identified text and nothing else — the same input the
+    local backends get. The key is read from the environment at call time and
+    is never written, logged, or bundled.
+
+    Deliberately not implemented against a specific provider here: wiring one in
+    is a deployment decision that needs an information-governance sign-off and a
+    paid no-training tier, not a default someone can trip over. The class exists
+    so the selection logic and its tests are real.
+    """
+
+    def __init__(self, provider: str | None = None) -> None:
+        self.provider = provider or cloud_provider()
+        if not self.provider:
+            raise BackendError(
+                "Cloud generation is not configured. It is off by default and "
+                f"requires {CLOUD_PROVIDER_ENV} to be set."
+            )
+        if not cloud_key_present():
+            raise BackendError(
+                f"Cloud generation is configured for '{self.provider}' but no "
+                f"API key is present. Set {CLOUD_API_KEY_ENV} in the "
+                "environment. CareScribe never bundles or stores a key."
+            )
+
+    def generate(self, system: str, prompt: str, stream: bool = True) -> Iterator[str]:
+        raise BackendError(
+            f"No transport is wired up for provider '{self.provider}'. Cloud "
+            "generation requires a paid no-training tier and an "
+            "information-governance sign-off before it is enabled — see "
+            "docs/deployer-cloud-note.md."
+        )
+        yield ""  # pragma: no cover — unreachable, keeps this a generator
+
+
+# --------------------------------------------------------------------------
+# Selection
+# --------------------------------------------------------------------------
+
+def describe_backends() -> dict:
+    """What is available right now, for the UI's status line."""
+    ollama_up = ollama_client.is_up()
+    ollama_models = ollama_client.list_models() if ollama_up else []
+    return {
+        "ollama": {
+            "available": bool(ollama_up and ollama_models),
+            "models": ollama_models,
+            "default_model": ollama_client.default_model(ollama_models)
+            if ollama_models
+            else None,
+        },
+        "local": {
+            "available": LocalGGUFBackend.available(),
+            "model_path": str(desktop.find_local_model() or ""),
+        },
+        "cloud": {
+            "available": cloud_enabled(),
+            "provider": cloud_provider(),
+            "key_present": cloud_key_present(),
+        },
+    }
+
+
+def select_backend(prefer: str | None = None):
+    """Pick a backend. Returns ``(kind, backend, label)``.
+
+    ``prefer`` lets the UI honour an explicit choice; without it the ladder is
+    Ollama → bundled GGUF → cloud-only-if-configured.
+    """
+    state = describe_backends()
+
+    def build(kind: str):
+        if kind == BACKEND_OLLAMA and state["ollama"]["available"]:
+            from .carenotes import OllamaBackend
+
+            model = state["ollama"]["default_model"]
+            return kind, OllamaBackend(model), f"Ollama · {model}"
+        if kind == BACKEND_LOCAL_GGUF and state["local"]["available"]:
+            from pathlib import Path
+
+            name = Path(state["local"]["model_path"]).name
+            return kind, LocalGGUFBackend(), f"Built-in model · {name}"
+        if kind == BACKEND_CLOUD and state["cloud"]["available"]:
+            provider = state["cloud"]["provider"]
+            return kind, CloudBackend(provider), f"Cloud · {provider}"
+        return None
+
+    if prefer:
+        chosen = build(prefer)
+        if chosen:
+            return chosen
+
+    for kind in (BACKEND_OLLAMA, BACKEND_LOCAL_GGUF, BACKEND_CLOUD):
+        chosen = build(kind)
+        if chosen:
+            return chosen
+
+    raise BackendError(
+        "No generation backend is available.\n\n"
+        "De-identification and review work without one. For generation, either "
+        "reinstall CareScribe so the built-in model is present, or install "
+        "Ollama and run: ollama pull qwen2.5:3b"
+    )
+
+
+__all__ = [
+    "BACKEND_CLOUD",
+    "BACKEND_LOCAL_GGUF",
+    "BACKEND_OLLAMA",
+    "CLOUD_API_KEY_ENV",
+    "CLOUD_PROVIDER_ENV",
+    "BackendError",
+    "CloudBackend",
+    "LocalGGUFBackend",
+    "cloud_enabled",
+    "cloud_key_present",
+    "cloud_provider",
+    "describe_backends",
+    "select_backend",
+]

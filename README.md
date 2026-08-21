@@ -84,8 +84,20 @@ Deterministic and highest precision. The formats a regex nails and a model drops
 
 ### Layer 2 — Presidio + spaCy NER (`ner_spans`)
 
-`AnalyzerEngine` over a spaCy NLP engine (`en_core_web_lg`, falling back to
-`en_core_web_sm`). Captures `PERSON`, `LOCATION`, `ORGANIZATION`, `DATE_TIME`, plus
+`AnalyzerEngine` over a spaCy NLP engine. The model is chosen from
+`en_core_web_lg` -> `md` -> `sm`, overridable with `CARESCRIBE_SPACY_MODEL`.
+`lg` is ~750 MB and materially better on free-text names; `sm` loads far faster
+and suits a modest laptop, at some cost to recall on names no label vouches for.
+
+**The model loads once at startup, behind a spinner, cached with
+`@st.cache_resource`.** Streamlit re-runs the whole script on every interaction,
+so an uncached engine is rebuilt on every click — the classic "the app froze"
+report on weak hardware. De-identification is also offline by force:
+`HF_HUB_OFFLINE` and friends are set at import, so a missing resource fails fast
+with a legible message rather than hanging on a socket behind a captive portal.
+A model that cannot be found is reported and the app stops; it never falls back
+to fetching one. Every load and every de-identify call is timed into
+`%LOCALAPPDATA%/CareScribe/logs/carescribe.log` (timings and sizes, no PHI). Captures `PERSON`, `LOCATION`, `ORGANIZATION`, `DATE_TIME`, plus
 Presidio's own pattern recognisers. **This is the layer that catches a name sitting in the
 middle of a paragraph**, where no label or title vouches for it.
 
@@ -198,6 +210,95 @@ prose. A date span is also clipped to its own line — an NER span running from 
 date into the next line's `Date typed:` label used to carry the newline into the entity
 value, which both mangled the following line on replacement and stopped the value matching
 the same date written in prose.
+
+---
+
+## The desktop app
+
+For a clinician, CareScribe is a file you double-click. No terminal, no Python,
+no setup. The packaging is the privacy model made concrete — the app runs on the
+laptop rather than asking anyone to trust a server.
+
+```bash
+# Windows: icon -> PyInstaller -> Inno Setup installer
+powershell -ExecutionPolicy Bypass -File packaginguild_windows.ps1
+# -> dist\CareScribe\CareScribe.exe
+# -> packaging\Output\CareScribeSetup.exe   (desktop + Start-menu shortcuts)
+
+# macOS: icon -> PyInstaller -> .dmg   (must run ON macOS — no cross-compile)
+bash packaging/build_macos.sh
+# -> dist/CareScribe.app  and  dist/CareScribe.dmg
+```
+
+`packaging/make_icon.py` generates the placeholder icon (a teal rounded square
+with "CS") with Pillow, so the build never depends on a checked-in binary asset.
+It degrades to a plain square if no TrueType font is available rather than
+failing the build. Compiling the installer needs Inno Setup 6 once:
+`winget install -e --id JRSoftware.InnoSetup`.
+
+The Windows build carries a PyInstaller splash, drawn by the bootloader before
+Python starts — a frozen Streamlit app takes several seconds to unpack, and
+without feedback a user double-clicks again and ends up with two servers. The
+launcher closes it once the health check passes.
+
+`run_app.py` is the entry point: it picks a free loopback port, starts Streamlit
+headless on `127.0.0.1`, waits for it, and shows it in a native `pywebview`
+window — no browser tab, no console. Closing the window stops the server.
+
+**Signing is not optional in practice, and it applies to the installer too.**
+The installer is the *first* thing a clinician runs, so an unsigned
+`CareScribeSetup.exe` means the very first interaction is a SmartScreen wall.
+An unsigned `.app`/`.dmg` is blocked outright by Gatekeeper. Sign the inner
+binary *and* the installer/dmg — the build scripts carry the `signtool` and
+`codesign`/`notarytool` commands for both. Shipping unsigned means teaching a
+clinician to click through a security warning, which is a bad thing to teach.
+
+### Generation backends
+
+Chosen at runtime, in this order:
+
+| | Backend | When |
+|---|---|---|
+| 1 | Ollama | Only if a local daemon is already answering — someone who installed it wanted a bigger model |
+| 2 | **Built-in GGUF** | The default. `llama-cpp-python` on the CPU with a bundled 3B Q4 model, so the app generates with nothing installed |
+| 3 | Cloud | **Off.** Requires both `CARESCRIBE_CLOUD_PROVIDER` and `CARESCRIBE_CLOUD_API_KEY`; see `docs/deployer-cloud-note.md` |
+
+All three receive the same thing: approved de-identified text. Re-identification
+stays local in Python.
+
+**First run on a fresh machine shows a setup card, never an empty panel.**
+`generation_status()` reports which backends are usable; when none are, the
+panel offers a one-click download of the built-in model or a one-click Ollama
+pull, then a **Test generation** action that proves it works before the
+clinician relies on it. De-identification and review never block on any of this.
+
+> **Downloading a model and running one are different things, and the code keeps
+> them apart.** Fetching weights is the single outbound request this app makes,
+> it lives alone in `core/model_setup.py`, and it only runs on a click — no
+> module in the document pipeline imports it, which is asserted by a test.
+> Running the model opens no socket, which is asserted by another. The
+> "no egress during de-id → approve → generate" invariant is unchanged.
+
+> **The built-in 3B model runs at temperature 0.0, deliberately.** At 0.2 it
+> invented "anxiety and occasional insomnia" and "a history of depression" for a
+> source containing neither. At 0.0 the same prompt produced `[not documented]`
+> in every unsupported section. A small model has less headroom to be creative
+> with, and creativity is the failure mode here. An 8B via Ollama is materially
+> better and is worth the install for real clinical use.
+
+### Where things go
+
+Outputs are written under the user profile —
+`%LOCALAPPDATA%\CareScribe` or `~/Library/Application Support/CareScribe` —
+never beside the executable, which may sit in `C:\Program Files` or inside a
+signed `.app`. The identity mapping is written to neither.
+
+On first launch the app checks available RAM. Below what the bundled model
+needs, it warns plainly and points at a smaller Ollama model rather than
+crashing; de-identification and review are unaffected.
+
+Practitioner guide: `docs/practitioner-guide.md`.
+Deployer note on the optional cloud path: `docs/deployer-cloud-note.md`.
 
 ---
 
