@@ -5,8 +5,8 @@
     "semantic_hash": "533e72a4166008742fe4d6516435cf00"
   },
   "carescribe/app.py": {
-    "mtime": 1785988988.8990934,
-    "ast_hash": "c9c0c988408a885fbe68b8a54c408c86",
+    "mtime": 1787317613.3264596,
+    "ast_hash": "80c5ade328ac4e73f965da0075687aec",
     "semantic_hash": ""
   },
   "carescribe/core/__init__.py": {
@@ -15,34 +15,34 @@
     "semantic_hash": "636336c3fa332fba5764f7906032f96b"
   },
   "carescribe/core/batch.py": {
-    "mtime": 1785989765.6310627,
-    "ast_hash": "69cfc26349430a0090e364459ad72fe9",
+    "mtime": 1787317258.825239,
+    "ast_hash": "c0070711de6cd1941edebe6e9a321d85",
     "semantic_hash": ""
   },
   "carescribe/core/carenotes.py": {
-    "mtime": 1785988879.0674913,
-    "ast_hash": "d59981b2a450cd4be1bf707979d8ec65",
-    "semantic_hash": ""
+    "mtime": 1786703746.4139693,
+    "ast_hash": "9096d2d3256d0483c6eb0279ecc6ca1a",
+    "semantic_hash": "9096d2d3256d0483c6eb0279ecc6ca1a"
   },
   "carescribe/core/deidentify.py": {
-    "mtime": 1785987008.8551333,
-    "ast_hash": "22678095143b735dafd81228aed000bb",
+    "mtime": 1787316848.989034,
+    "ast_hash": "2eb8f9cad99e0fb90a7caad10ece2f3f",
     "semantic_hash": ""
   },
   "carescribe/core/ingest.py": {
     "mtime": 1785987292.5894313,
     "ast_hash": "51ecfd4a36956a45ea39f3ebedcdc5fc",
-    "semantic_hash": ""
+    "semantic_hash": "51ecfd4a36956a45ea39f3ebedcdc5fc"
   },
   "carescribe/core/mapping.py": {
-    "mtime": 1785988717.0628028,
-    "ast_hash": "9ef3cf97d0c52b362e462441e7336cb4",
+    "mtime": 1787316871.9227788,
+    "ast_hash": "895fe04aeab85103450ac834ac5a44a2",
     "semantic_hash": ""
   },
   "carescribe/core/ollama_client.py": {
     "mtime": 1785988775.9739954,
     "ast_hash": "14eab138ae41eff2095ff262b08581c8",
-    "semantic_hash": ""
+    "semantic_hash": "14eab138ae41eff2095ff262b08581c8"
   },
   "carescribe/prompts/__init__.py": {
     "mtime": 1785732012.16356,
@@ -77,22 +77,22 @@
   "tests/run_all.py": {
     "mtime": 1785929096.871353,
     "ast_hash": "b17fc9d83133ecd962fc1ae3d53c0115",
-    "semantic_hash": ""
+    "semantic_hash": "b17fc9d83133ecd962fc1ae3d53c0115"
   },
   "tests/test_app.py": {
-    "mtime": 1785989003.3597858,
-    "ast_hash": "192b9020ccf2ec9d9565b20a0ec4f2e0",
+    "mtime": 1787317834.7592764,
+    "ast_hash": "5eb91efed36e4eff1da3f7ef1b44d5db",
     "semantic_hash": ""
   },
   "tests/test_batch.py": {
-    "mtime": 1785844342.0148313,
-    "ast_hash": "3e8a2e4bd011e50421cda5cecb1dff81",
-    "semantic_hash": "3e8a2e4bd011e50421cda5cecb1dff81"
+    "mtime": 1787317241.2100215,
+    "ast_hash": "8bba84244fb1332b824d607d84ae01b8",
+    "semantic_hash": ""
   },
   "tests/test_deid_pipeline.py": {
-    "mtime": 1785844090.1357656,
-    "ast_hash": "667f3dad8da897e9b40a932c0759d443",
-    "semantic_hash": "667f3dad8da897e9b40a932c0759d443"
+    "mtime": 1787316793.6292367,
+    "ast_hash": "f5117daf92442d403b0e070617dddba9",
+    "semantic_hash": ""
   },
   "tests/test_ingest.py": {
     "mtime": 1785843730.1474605,
@@ -100,14 +100,14 @@
     "semantic_hash": "7578b898c8f7017b4987a06f1a8a2caa"
   },
   "tests/test_mapping.py": {
-    "mtime": 1785928665.3109097,
-    "ast_hash": "e4e2c0fe767b43a5f83c55491824ad40",
+    "mtime": 1787316875.8034835,
+    "ast_hash": "4b354da3fb9c12c17dba57adc863c0ee",
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1785989756.7133002,
-    "ast_hash": "dbd469637ada8a65c979a156247b22f0",
-    "semantic_hash": ""
+    "mtime": 1785998072.936054,
+    "ast_hash": "e084f5a2718428b8860fe5470ccd65ca",
+    "semantic_hash": "e084f5a2718428b8860fe5470ccd65ca"
   },
   "requirements.txt": {
     "mtime": 1785843557.3575404,
@@ -122,146 +122,346 @@
   "carescribe/core/docx_redact.py": {
     "mtime": 1785930480.4037027,
     "ast_hash": "cbe4044e7fb2cdf1bb37d18c03638de2",
-    "semantic_hash": ""
+    "semantic_hash": "cbe4044e7fb2cdf1bb37d18c03638de2"
   },
   "carescribe/core/review_checklist.py": {
-    "mtime": 1785988075.279332,
-    "ast_hash": "08a9f8001b0d2123e904c44a718181c1",
+    "mtime": 1787317177.4443684,
+    "ast_hash": "1c223e4c0f7614c5f3a507facdf22f1e",
     "semantic_hash": ""
   },
   "carescribe/core/review_flags.py": {
     "mtime": 1785988181.5336175,
     "ast_hash": "86dea7acc9859f805171b10038c618f8",
-    "semantic_hash": ""
+    "semantic_hash": "86dea7acc9859f805171b10038c618f8"
   },
   "stress_corpus/answer_key.json": {
     "mtime": 1785931424.0126896,
     "ast_hash": "dfcb4af52fe17105e5bf461c85af9e65",
-    "semantic_hash": ""
+    "semantic_hash": "dfcb4af52fe17105e5bf461c85af9e65"
   },
   "tests/stress_report.py": {
     "mtime": 1785929077.7381942,
     "ast_hash": "bceed314733920405efc469670a957c4",
-    "semantic_hash": ""
+    "semantic_hash": "bceed314733920405efc469670a957c4"
   },
   "tests/test_deid_regressions.py": {
     "mtime": 1785928422.8801227,
     "ast_hash": "4ad29551d3b25db517e6c2408b8a3856",
-    "semantic_hash": ""
+    "semantic_hash": "4ad29551d3b25db517e6c2408b8a3856"
   },
   "tests/test_docx_roundtrip.py": {
     "mtime": 1785989745.6114957,
     "ast_hash": "4ece855ae6c197cce743c63b056c4a74",
-    "semantic_hash": ""
+    "semantic_hash": "4ece855ae6c197cce743c63b056c4a74"
   },
   "tests/test_generation.py": {
-    "mtime": 1785989062.1349006,
-    "ast_hash": "98c27cf0a23ead8909a7817ea5b9ddfd",
-    "semantic_hash": ""
+    "mtime": 1786708117.7569141,
+    "ast_hash": "2fd045eb29231850aa3a622a9ab5d857",
+    "semantic_hash": "2fd045eb29231850aa3a622a9ab5d857"
   },
   "tests/test_review_gate.py": {
-    "mtime": 1785988056.9988182,
-    "ast_hash": "8bc2c717c4eb96cb9c015b3272f0b031",
+    "mtime": 1787317647.0937316,
+    "ast_hash": "177473c5604d3b79eb7db19a591a6e90",
     "semantic_hash": ""
   },
   "tests/test_round2_regressions.py": {
     "mtime": 1785986971.1693559,
     "ast_hash": "1170048a21903b319b435ce48db3c791",
-    "semantic_hash": ""
+    "semantic_hash": "1170048a21903b319b435ce48db3c791"
   },
   "tests/test_stress_corpus.py": {
-    "mtime": 1785929031.6440935,
-    "ast_hash": "b6489749eee6fc360ed2e78e981b2312",
+    "mtime": 1787317806.9469044,
+    "ast_hash": "390f235baa0033296e632bf99ee983d5",
     "semantic_hash": ""
   },
   "carescribe/core/protected_terms.txt": {
     "mtime": 1785930543.567379,
     "ast_hash": "7ec4c22ffd00886fd26dee39677af0f5",
-    "semantic_hash": ""
+    "semantic_hash": "7ec4c22ffd00886fd26dee39677af0f5"
   },
   "carescribe/prompts/care_notes_soap.txt": {
     "mtime": 1785988801.7151167,
     "ast_hash": "cb20874361972732b4b606bd17de46ab",
-    "semantic_hash": ""
+    "semantic_hash": "cb20874361972732b4b606bd17de46ab"
   },
   "carescribe/prompts/clinic_letter.txt": {
     "mtime": 1785988801.7378712,
     "ast_hash": "995407916704b613ed896f9cd661561e",
-    "semantic_hash": ""
+    "semantic_hash": "995407916704b613ed896f9cd661561e"
   },
   "carescribe/prompts/custom.txt": {
     "mtime": 1785988801.7761133,
     "ast_hash": "83633deca0309fd9d15380375c47e6f5",
-    "semantic_hash": ""
+    "semantic_hash": "83633deca0309fd9d15380375c47e6f5"
   },
   "carescribe/prompts/discharge_summary.txt": {
     "mtime": 1785988801.7566345,
     "ast_hash": "4799e70180327eb261894a2faab7d2c5",
-    "semantic_hash": ""
+    "semantic_hash": "4799e70180327eb261894a2faab7d2c5"
   },
   "carescribe/prompts/refine.txt": {
     "mtime": 1785988801.7949114,
     "ast_hash": "c8b6537810c4ede86fe4e3cd919da8d2",
-    "semantic_hash": ""
+    "semantic_hash": "c8b6537810c4ede86fe4e3cd919da8d2"
   },
   "carescribe/prompts/system.txt": {
     "mtime": 1785988801.6834924,
     "ast_hash": "367c4218bd54d3878c59fb06713d53b1",
-    "semantic_hash": ""
+    "semantic_hash": "367c4218bd54d3878c59fb06713d53b1"
   },
   "stress_corpus/README.md": {
     "mtime": 1785929109.4314127,
     "ast_hash": "bbe4d23689b97d6b7ad44f3ef23f70a1",
-    "semantic_hash": ""
+    "semantic_hash": "bbe4d23689b97d6b7ad44f3ef23f70a1"
   },
   "stress_corpus/doc01_community_mh_letter.txt": {
     "mtime": 1785928702.5635529,
     "ast_hash": "8a1600bfa2278dd25177d06f45ce3fab",
-    "semantic_hash": ""
+    "semantic_hash": "8a1600bfa2278dd25177d06f45ce3fab"
   },
   "stress_corpus/doc02_cardiology_discharge.txt": {
     "mtime": 1785928711.9348035,
     "ast_hash": "9939f3de69c404e6431558738fdc36d5",
-    "semantic_hash": ""
+    "semantic_hash": "9939f3de69c404e6431558738fdc36d5"
   },
   "stress_corpus/doc03_outpatient_clinic_letter.txt": {
     "mtime": 1785928722.776246,
     "ast_hash": "82ee0f85242a6dc13cf03cb296310fda",
-    "semantic_hash": ""
+    "semantic_hash": "82ee0f85242a6dc13cf03cb296310fda"
   },
   "stress_corpus/doc04_ward_handover.txt": {
     "mtime": 1785928952.3000858,
     "ast_hash": "2c8afac4232187a652f7b246654a3fe4",
-    "semantic_hash": ""
+    "semantic_hash": "2c8afac4232187a652f7b246654a3fe4"
   },
   "stress_corpus/doc05_gp_referral.txt": {
     "mtime": 1785928742.296052,
     "ast_hash": "f1c0a16cb1c60217ead46f1248e39100",
-    "semantic_hash": ""
+    "semantic_hash": "f1c0a16cb1c60217ead46f1248e39100"
   },
   "stress_corpus/doc06_psych_clinic_letter.txt": {
     "mtime": 1785930941.0887227,
     "ast_hash": "12047c64953fe932322b1867c9c60c4a",
-    "semantic_hash": ""
+    "semantic_hash": "12047c64953fe932322b1867c9c60c4a"
   },
   "stress_corpus/doc07_cmht_family_review.txt": {
     "mtime": 1785930948.5487127,
     "ast_hash": "ac8d8ef1f2df114a74f9dd26e83be7e2",
-    "semantic_hash": ""
+    "semantic_hash": "ac8d8ef1f2df114a74f9dd26e83be7e2"
   },
   "stress_corpus/doc08_wrapped_referral.txt": {
     "mtime": 1785930956.4937828,
     "ast_hash": "2b858626f25284819eca72e733555ac2",
-    "semantic_hash": ""
+    "semantic_hash": "2b858626f25284819eca72e733555ac2"
   },
   "stress_corpus/doc09_crisis_contact_log.txt": {
     "mtime": 1785930966.693223,
     "ast_hash": "69d8956b8b996a2c978b914d82dfb8a7",
-    "semantic_hash": ""
+    "semantic_hash": "69d8956b8b996a2c978b914d82dfb8a7"
   },
   "stress_corpus/doc10_mha_assessment.txt": {
     "mtime": 1785930974.6922941,
     "ast_hash": "b50b1ec10cafed5ade37554e6009a5aa",
+    "semantic_hash": "b50b1ec10cafed5ade37554e6009a5aa"
+  },
+  "carescribe/core/applog.py": {
+    "mtime": 1785997745.2053628,
+    "ast_hash": "3a9e5548d6bea338fa51daa7955ec8e6",
+    "semantic_hash": "3a9e5548d6bea338fa51daa7955ec8e6"
+  },
+  "carescribe/core/backends.py": {
+    "mtime": 1785991136.2877612,
+    "ast_hash": "46026a72f69871d949138bef1d531b39",
+    "semantic_hash": "46026a72f69871d949138bef1d531b39"
+  },
+  "carescribe/core/desktop.py": {
+    "mtime": 1785990969.4339802,
+    "ast_hash": "08b5bc2cc970921a2f385c4f8516873c",
+    "semantic_hash": "08b5bc2cc970921a2f385c4f8516873c"
+  },
+  "carescribe/core/generation_status.py": {
+    "mtime": 1787317384.9056935,
+    "ast_hash": "3d418de6bce2c8c7c7a04e511315e1e8",
+    "semantic_hash": ""
+  },
+  "carescribe/core/model_setup.py": {
+    "mtime": 1785995888.6988251,
+    "ast_hash": "49ebaa13be1e0d225e7911273d231102",
+    "semantic_hash": "49ebaa13be1e0d225e7911273d231102"
+  },
+  "packaging/build_dmg.sh": {
+    "mtime": 1785992280.9267495,
+    "ast_hash": "e5e9983ebca4d8e5499071f670e3ba49",
+    "semantic_hash": "e5e9983ebca4d8e5499071f670e3ba49"
+  },
+  "packaging/build_macos.sh": {
+    "mtime": 1785992280.9657018,
+    "ast_hash": "72bb4449476873e2f4154fbfd1b66b91",
+    "semantic_hash": "72bb4449476873e2f4154fbfd1b66b91"
+  },
+  "packaging/build_windows.ps1": {
+    "mtime": 1785992280.9657018,
+    "ast_hash": "3fcdb890673a4225028db10a06145b87",
+    "semantic_hash": "3fcdb890673a4225028db10a06145b87"
+  },
+  "packaging/hooks/rthook_carescribe.py": {
+    "mtime": 1785991247.5727258,
+    "ast_hash": "12f0e579124f8a21ff91fa4c10c293d5",
+    "semantic_hash": "12f0e579124f8a21ff91fa4c10c293d5"
+  },
+  "packaging/make_icon.py": {
+    "mtime": 1785992181.57401,
+    "ast_hash": "43c8683c90e520dc477882cb57fb4665",
+    "semantic_hash": "43c8683c90e520dc477882cb57fb4665"
+  },
+  "packaging/smoke_test.py": {
+    "mtime": 1785991359.389933,
+    "ast_hash": "3546f712b49ef3500e516a4891c5f6e6",
+    "semantic_hash": "3546f712b49ef3500e516a4891c5f6e6"
+  },
+  "run_app.py": {
+    "mtime": 1785992248.9123418,
+    "ast_hash": "37644cf98ed2c2cb8e4868fe66a2ff36",
+    "semantic_hash": "37644cf98ed2c2cb8e4868fe66a2ff36"
+  },
+  "tests/test_desktop_packaging.py": {
+    "mtime": 1787317441.6947677,
+    "ast_hash": "0f72c3d6b7a0d19cfd4c8303688cf641",
+    "semantic_hash": ""
+  },
+  "tests/test_generation_setup.py": {
+    "mtime": 1787317362.9364316,
+    "ast_hash": "f7976bb90c8eaab92551a59a17c9a5fe",
+    "semantic_hash": ""
+  },
+  "SETUP_ON_A_NEW_PC.md": {
+    "mtime": 1785998072.9305396,
+    "ast_hash": "7721c3711cc477d83dde854ce287a461",
+    "semantic_hash": "7721c3711cc477d83dde854ce287a461"
+  },
+  "docs/deployer-cloud-note.md": {
+    "mtime": 1785991402.956019,
+    "ast_hash": "23d13d6605193907ea7c7150614d050b",
+    "semantic_hash": "23d13d6605193907ea7c7150614d050b"
+  },
+  "docs/practitioner-guide.md": {
+    "mtime": 1785992375.5693464,
+    "ast_hash": "8f1aed6ecbf278a90bf9f5a7d321ddd3",
+    "semantic_hash": "8f1aed6ecbf278a90bf9f5a7d321ddd3"
+  },
+  "docs/superpowers/specs/2026-08-13-clinical-forms-design.md": {
+    "mtime": 1786619415.4916701,
+    "ast_hash": "8af47b3f0bb4a88cdb3b49a8bc933276",
+    "semantic_hash": "8af47b3f0bb4a88cdb3b49a8bc933276"
+  },
+  "docs/superpowers/plans/2026-08-13-clinical-forms.md": {
+    "mtime": 1786708696.4273522,
+    "ast_hash": "4f102babef2bff403b2ef4a33b36f898",
+    "semantic_hash": "4f102babef2bff403b2ef4a33b36f898"
+  },
+  "carescribe/templates/__init__.py": {
+    "mtime": 1786701472.2727687,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "tests/test_clinical_form_templates.py": {
+    "mtime": 1786701456.9744267,
+    "ast_hash": "8305e46ab47717d0f23c5968cf553a47",
+    "semantic_hash": "8305e46ab47717d0f23c5968cf553a47"
+  },
+  "carescribe/core/clinical_forms.py": {
+    "mtime": 1786708113.0867302,
+    "ast_hash": "4865a0dba3c95350ff86debc8b3a0274",
+    "semantic_hash": "4865a0dba3c95350ff86debc8b3a0274"
+  },
+  "tests/test_clinical_forms.py": {
+    "mtime": 1786702517.4512918,
+    "ast_hash": "5815fd9d0e1983af212719017e76b532",
+    "semantic_hash": "5815fd9d0e1983af212719017e76b532"
+  },
+  "tests/test_clinical_forms_fill.py": {
+    "mtime": 1786708229.30284,
+    "ast_hash": "bd5723bf358d4cbf11558d29a98195cb",
+    "semantic_hash": "bd5723bf358d4cbf11558d29a98195cb"
+  },
+  "tests/test_clinical_forms_prompt.py": {
+    "mtime": 1786703211.842162,
+    "ast_hash": "016bcd2e666f238989378ab93f5763e8",
+    "semantic_hash": "016bcd2e666f238989378ab93f5763e8"
+  },
+  "tests/test_clinical_forms_parse.py": {
+    "mtime": 1786708143.2767923,
+    "ast_hash": "3a49ec344c42a1e01d46364fa95d6970",
+    "semantic_hash": "3a49ec344c42a1e01d46364fa95d6970"
+  },
+  "carescribe/prompts/refine_form.txt": {
+    "mtime": 1786703753.2296855,
+    "ast_hash": "4eb20824371c0c51d2756cc57c09f8f5",
+    "semantic_hash": "4eb20824371c0c51d2756cc57c09f8f5"
+  },
+  "tests/test_clinical_forms_combine.py": {
+    "mtime": 1786705441.823204,
+    "ast_hash": "5a040bd542c6183d0f9bc1aa50c60e1d",
+    "semantic_hash": "5a040bd542c6183d0f9bc1aa50c60e1d"
+  },
+  "tests/test_clinical_forms_generate.py": {
+    "mtime": 1786705705.3614872,
+    "ast_hash": "d8467a17057166bf47d2febf20f8a999",
+    "semantic_hash": "d8467a17057166bf47d2febf20f8a999"
+  },
+  "tests/test_app_clinical_forms.py": {
+    "mtime": 1786708136.948344,
+    "ast_hash": "638ab9e93b5f8d9da380f8a92896fa15",
+    "semantic_hash": "638ab9e93b5f8d9da380f8a92896fa15"
+  },
+  "sample_documents/make_sample_docs.py": {
+    "mtime": 1787307329.7664483,
+    "ast_hash": "487a9ed4b11cbc72f865e143eed5e8c7",
+    "semantic_hash": "487a9ed4b11cbc72f865e143eed5e8c7"
+  },
+  "sample_documents/README.md": {
+    "mtime": 1787307333.2541335,
+    "ast_hash": "e2686818bc6403ed62cfd7631813a524",
+    "semantic_hash": "e2686818bc6403ed62cfd7631813a524"
+  },
+  "docs/superpowers/specs/2026-08-21-review-ux-redesign-design.md": {
+    "mtime": 1787312777.447983,
+    "ast_hash": "ccbad0ba6d9dd11bef57eb2cb621c00b",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-08-21-review-ux-redesign.md": {
+    "mtime": 1787314238.0162325,
+    "ast_hash": "31c35156a4f20589379f0aaded402695",
+    "semantic_hash": ""
+  },
+  "carescribe/core/review_spans.py": {
+    "mtime": 1787316921.025514,
+    "ast_hash": "fcf3ea1de8dafba073b815c642b55298",
+    "semantic_hash": ""
+  },
+  "tests/test_review_spans.py": {
+    "mtime": 1787316968.0668662,
+    "ast_hash": "3a15c9418eae34abea129470e7972f1b",
+    "semantic_hash": ""
+  },
+  "carescribe/components/__init__.py": {
+    "mtime": 1787316994.772088,
+    "ast_hash": "edb0fe86b3b099dd74a4677cf23aa733",
+    "semantic_hash": ""
+  },
+  "carescribe/components/highlight_review/__init__.py": {
+    "mtime": 1787317007.3205776,
+    "ast_hash": "d0c0212c0f9405ee165f3906145b6359",
+    "semantic_hash": ""
+  },
+  "tests/test_highlight_review_component.py": {
+    "mtime": 1787316987.551492,
+    "ast_hash": "738da6d4ea0520b02c05b58fb00aaaaf",
+    "semantic_hash": ""
+  },
+  "carescribe/components/highlight_review/frontend/index.html": {
+    "mtime": 1787317002.5114622,
+    "ast_hash": "c5a8d363135a1cf95cb9a56705237910",
     "semantic_hash": ""
   }
 }
