@@ -35,7 +35,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from carescribe.core import (  # noqa: E402
     applog, backends, batch, carenotes, deidentify, desktop, generation_status,
     ingest, mapping, model_setup, ollama_client, review_checklist, review_flags,
+    review_spans,
 )
+from carescribe.components.highlight_review import highlight_review  # noqa: E402
 
 st.set_page_config(page_title="CareScribe", page_icon="🩺", layout="wide")
 
@@ -57,7 +59,7 @@ PHI_KEYS: dict = {
     # Reviewer decisions, keyed by filename. A dismissal key carries the text of
     # the span that was dismissed — which is precisely a string someone decided
     # was not an identifier, and could be wrong. It belongs on this list.
-    "checklist": {},        # filename -> set of ticked checklist keys
+    "entity_confirmed": {}, # filename -> set of confirmed low-confidence entity value-keys
     "flag_dismissed": {},   # filename -> list of dismissed flag keys
     "flag_redacted": {},    # filename -> count redacted from highlights
     # Generated drafts. The de-identified draft is safe; the re-identified one
@@ -540,86 +542,124 @@ def document_flags(document: batch.Document) -> list:
     return review_flags.candidate_residuals(document.redacted_text)
 
 
-def outstanding_flags(document: batch.Document) -> list:
-    return review_flags.outstanding(document_flags(document), flag_dismissals(document))
-
-
 def flag_dismissals(document: batch.Document) -> list[str]:
     return st.session_state.flag_dismissed.setdefault(document.name, [])
 
 
-def render_highlighted_preview(document: batch.Document) -> None:
-    """The redacted text with candidate residuals tinted in place.
+def entity_confirmed(document: batch.Document) -> set[str]:
+    return st.session_state.entity_confirmed.setdefault(document.name, set())
 
-    Tints, not alarm colours: everything highlighted here is a *maybe*, and
-    colouring the whole preview red would train the reviewer to ignore it.
-    """
+
+def _review_span_style(span: review_spans.ReviewSpan) -> str:
+    if span.kind == review_spans.KIND_ENTITY:
+        # Already redacted, already safe — a dotted underline says "worth a
+        # second look", not "this is exposed text", which the solid tints
+        # below correctly reserve for residual (never-redacted) candidates.
+        return "border-bottom:2px dotted #868e96;padding:0 1px"
+    tint = _FLAG_TINTS.get(span.flag_kind, "#f1f3f5")
+    return f"background:{tint};padding:0 2px;border-radius:2px"
+
+
+def _render_review_html(document: batch.Document, spans: list) -> str:
     text = document.redacted_text
-    remaining = outstanding_flags(document)
-    if not remaining:
-        st.text_area(
-            "Redacted", text, height=420,
-            label_visibility="collapsed", disabled=True,
-            key=f"preview_clean_{document.name}",
-        )
-        st.caption("No candidate residuals highlighted in this document.")
-        return
-
-    spans = sorted(remaining, key=lambda f: f.char_start)
     parts: list[str] = []
     cursor = 0
-    for flag in spans:
-        parts.append(html.escape(text[cursor : flag.char_start]))
-        tint = _FLAG_TINTS.get(flag.kind, "#f1f3f5")
+    for span in spans:
+        parts.append(html.escape(text[cursor : span.char_start]))
         parts.append(
-            f'<mark style="background:{tint};padding:0 2px;border-radius:2px" '
-            f'title="{html.escape(flag.why)}">{html.escape(flag.text)}</mark>'
+            f'<mark data-span-id="{html.escape(span.id)}" '
+            f'style="{_review_span_style(span)}" '
+            f'title="{html.escape(span.why)}">'
+            f'{html.escape(text[span.char_start : span.char_end])}</mark>'
         )
-        cursor = flag.char_end
+        cursor = span.char_end
     parts.append(html.escape(text[cursor:]))
+    return "".join(parts)
 
-    st.markdown(
-        '<div style="white-space:pre-wrap;font-family:ui-monospace,monospace;'
-        'font-size:0.82rem;line-height:1.5;max-height:360px;overflow:auto;'
-        'border:1px solid rgba(128,128,128,.35);border-radius:6px;padding:10px">'
-        + "".join(parts)
-        + "</div>",
-        unsafe_allow_html=True,
+
+def render_review(document: batch.Document) -> int:
+    """The single primary review surface: highlighted text, click to decide.
+
+    Returns how many spans are still outstanding, so the caller can drive
+    the Approve gate without recomputing this list a second time.
+    """
+    spans = review_spans.review_spans(
+        document.redacted_text, document.entities,
+        entity_confirmed(document), flag_dismissals(document),
     )
-    st.caption(
-        f"{len(remaining)} highlighted span(s) need a decision below. "
-        "Highlighting is deliberately over-inclusive — most will be nothing."
+
+    st.markdown("#### Redacted preview")
+    st.caption("This exact text is what approval writes to disk.")
+    if spans:
+        st.caption(
+            f"{len(spans)} span(s) need a decision — click a highlighted word below."
+        )
+    else:
+        st.caption("Nothing needs a second look in this document.")
+
+    clicked = highlight_review(
+        _render_review_html(document, spans), key=f"hl_{document.name}"
     )
-    # The highlighted view is an aid; this is the authoritative text, and it is
-    # byte-for-byte what approval writes.
+    _render_span_action(document, spans, clicked)
+
+    # The interactive view above is the working copy; this is the plain,
+    # authoritative, copy-pasteable text — the same role the old
+    # render_highlighted_preview's second st.text_area played, kept
+    # unstyled and disabled on purpose so it's never mistaken for editable.
     st.text_area(
-        "Redacted", text, height=200,
+        "Redacted", document.redacted_text, height=200,
         label_visibility="collapsed", disabled=True,
         key=f"preview_exact_{document.name}",
     )
 
+    with st.expander("Show full detected-identifier table"):
+        render_entity_table(document)
 
-def render_flag_decisions(document: batch.Document) -> None:
-    """Redact-or-dismiss, one decision per distinct highlighted value."""
-    remaining = outstanding_flags(document)
-    if not remaining:
+    return len(spans)
+
+
+def _render_span_action(document: batch.Document, spans: list, clicked_id: str | None) -> None:
+    if not clicked_id:
         return
+    match = next((s for s in spans if s.id == clicked_id), None)
+    if match is None:
+        return  # already resolved by an earlier click this session
 
-    st.markdown("#### Highlighted spans to check")
-    st.caption(
-        "Each of these could be an identifier the layers missed. Redact it, or "
-        "dismiss it if it is genuinely not identifying. Dismissals apply to "
-        "this document only and are never saved."
-    )
-    for flag in remaining:
-        left, middle, right = st.columns([5, 1.4, 1.4])
-        with left:
-            st.markdown(f"`{flag.text}` — {flag.why}")
-        with middle:
-            if st.button("Redact this", key=f"flagred_{document.name}_{flag.key}"):
+    st.markdown(f"**`{match.text}`** — {match.why}")
+
+    if match.kind == review_spans.KIND_ENTITY:
+        value_key = clicked_id.split(":", 1)[1]
+        confirm_col, undo_col, retype_col = st.columns([1, 1, 2])
+        with confirm_col:
+            if st.button("✅ Confirm", key=f"conf_{document.name}_{value_key}"):
+                entity_confirmed(document).add(value_key)
+                st.rerun()
+        with undo_col:
+            if st.button("↩ Undo (restore text)", key=f"undo_{document.name}_{value_key}"):
+                for entity in document.entities:
+                    if entity["value"].strip().casefold() == value_key:
+                        entity["action"] = mapping.KEEP
+                refresh(document, document.entities)
+                st.rerun()
+        with retype_col:
+            new_type = st.selectbox(
+                "Change type", list(mapping.ENTITY_TYPES),
+                key=f"retype_{document.name}_{value_key}", label_visibility="collapsed",
+            )
+            if st.button("Apply type", key=f"retype_go_{document.name}_{value_key}"):
+                for entity in document.entities:
+                    if entity["value"].strip().casefold() == value_key:
+                        entity["type"] = new_type
+                refresh(document, document.entities)
+                st.rerun()
+    else:
+        flag_key = clicked_id.split(":", 1)[1]
+        redact_col, dismiss_col = st.columns(2)
+        with redact_col:
+            if st.button("Redact this", key=f"resred_{document.name}_{flag_key}"):
                 try:
                     result = deidentify.add_manual_entity(
-                        document.raw_text, document.entities, flag.text
+                        document.raw_text, document.entities, match.text
                     )
                 except deidentify.DeidentificationError as exc:
                     st.error(str(exc))
@@ -632,43 +672,13 @@ def render_flag_decisions(document: batch.Document) -> None:
                         st.session_state.flag_redacted.get(document.name, 0) + 1
                     )
                     st.rerun()
-        with right:
-            if st.button("Not an identifier", key=f"flagdis_{document.name}_{flag.key}"):
-                flag_dismissals(document).append(flag.key)
+        with dismiss_col:
+            if st.button("Not an identifier", key=f"resdis_{document.name}_{flag_key}"):
+                flag_dismissals(document).append(flag_key)
                 st.rerun()
 
 
-def render_checklist(document: batch.Document) -> list:
-    """The adaptive checklist. Returns the items so the gate can read them."""
-    flags = document_flags(document)
-    features = review_checklist.describe(document, flags, flag_dismissals(document))
-    items = review_checklist.build_checklist(features)
-
-    ticked = st.session_state.checklist.setdefault(document.name, set())
-    st.markdown("#### Reviewer checklist")
-    for item in items:
-        disabled = not item.auto_satisfied
-        checked = st.checkbox(
-            item.label,
-            value=item.key in ticked and not disabled,
-            disabled=disabled,
-            key=f"chk_{document.name}_{item.key}",
-        )
-        if checked and not disabled:
-            ticked.add(item.key)
-        else:
-            ticked.discard(item.key)
-        if item.hint:
-            st.caption(item.hint)
-
-    # The text-box affirmation and the Word path's B6 acknowledgement are the
-    # same statement; ticking one is ticking the other.
-    if any(item.key == "textboxes" for item in items):
-        document.text_boxes_acknowledged = "textboxes" in ticked
-    return items
-
-
-def render_approval(document: batch.Document) -> None:
+def render_approval(document: batch.Document, outstanding: int) -> None:
     st.divider()
     st.warning(
         "**Human review required.** Automated de-identification is not a "
@@ -704,20 +714,26 @@ def render_approval(document: batch.Document) -> None:
         render_docx_download(document)
 
     # A .docx whose text boxes this pass cannot reach must not slip through on
-    # the reviewer's assumption that the preview covered everything. The
-    # checklist item below carries the acknowledgement.
+    # the reviewer's assumption that the preview covered everything. This is
+    # the one acknowledgement this redesign keeps as an explicit checkbox
+    # rather than folding into the click-to-redact model — text-box content
+    # isn't a text span at all, so nothing in review_spans can ever point at
+    # it. It gates Approve directly, below.
     if document.has_text_boxes:
         st.error(
             "**This document contains text boxes, shapes, or embedded objects.** "
             "Their contents are **not** redacted automatically and do not appear "
             "in the preview above. Open the original and check them by hand."
         )
+        document.text_boxes_acknowledged = st.checkbox(
+            "I have opened the original and checked any text boxes / shapes by hand.",
+            value=document.text_boxes_acknowledged,
+            key=f"textbox_ack_{document.name}",
+        )
 
-    items = render_checklist(document)
-    ticked = st.session_state.checklist.get(document.name, set())
-    reason = review_checklist.blocking_reason(
-        items, ticked, document.residual, len(outstanding_flags(document))
-    )
+    reason = review_checklist.blocking_reason(document.residual, outstanding)
+    if not reason and document.has_text_boxes and not document.text_boxes_acknowledged:
+        reason = "Confirm the text-box check above first."
 
     if st.button(
         "✅ Run safety sweep and approve",
@@ -741,7 +757,6 @@ def render_approval(document: batch.Document) -> None:
                 write_approved_word(document)
                 batch.write_review_record(
                     document.name,
-                    ticked=sorted(ticked),
                     entities=document.entities,
                     flags_shown=len(document_flags(document)),
                     flags_redacted=st.session_state.flag_redacted.get(document.name, 0),
@@ -796,15 +811,7 @@ def section_review() -> None:
         f"{len(document.raw_text):,} characters, {len(document.entities)} identifiers detected."
     )
 
-    left, right = st.columns(2)
-    with left:
-        render_entity_table(document)
-    with right:
-        st.markdown("#### Redacted preview")
-        st.caption("This exact text is what approval writes to disk.")
-        render_highlighted_preview(document)
-
-    render_flag_decisions(document)
+    outstanding = render_review(document)
     render_add_missed(document)
     render_coverage(document)
 
@@ -815,7 +822,7 @@ def section_review() -> None:
             key=f"raw_{document.name}",
         )
 
-    render_approval(document)
+    render_approval(document, outstanding)
 
 
 # --------------------------------------------------------------------------

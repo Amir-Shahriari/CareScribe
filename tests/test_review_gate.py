@@ -244,5 +244,5 @@ def test_no_corpus_identifier_reaches_the_sidecar(tmp_path, monkeypatch):
 
 def test_the_app_registers_the_new_state_keys_for_wiping():
     """A dismissal key holds the span text, so it must be wiped with the rest."""
-    for key in ("checklist", "flag_dismissed", "flag_redacted"):
+    for key in ("entity_confirmed", "flag_dismissed", "flag_redacted"):
         assert key in carescribe_app.PHI_KEYS

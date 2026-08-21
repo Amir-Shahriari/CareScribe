@@ -117,6 +117,31 @@ def test_document_counter_is_shown():
     assert "of 4" in text_of(app.caption)
 
 
+def test_a_document_with_only_auto_confidence_entities_needs_one_click():
+    """The core promise of this redesign: nothing outstanding, no ticks.
+
+    Deliberately plain, lowercase prose — the real fixture text used
+    elsewhere in this file trips the (entity-independent, by design)
+    residual safety-net scanner on ordinary capitalised clinical terms
+    ("Cardiology", "Leeds"), which would make this test about the residual
+    mechanism instead of the one it's meant to isolate: entity confidence.
+    """
+    document = batch.Document(
+        name="clean.txt",
+        raw_text="the patient was seen today and remains well.",
+        redacted_text="[PATIENT] was seen today and remains well.",
+        entities=[{
+            "type": "PATIENT_NAME", "value": "the patient",
+            "placeholder": "[PATIENT]", "action": "Redact", "confidence": "auto",
+        }],
+        analyzed=True,
+    )
+    state = {"docs": {document.name: document}, "order": [document.name], "selected": document.name}
+    app = run_app(**state)
+    reason_captions = [c.value for c in app.caption if "Approve is disabled" in c.value]
+    assert reason_captions == []
+
+
 def test_human_review_warning_is_shown():
     app = run_app(**analysed_batch(1))
     assert "Human review required" in text_of(app.warning)
