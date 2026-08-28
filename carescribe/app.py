@@ -1336,6 +1336,110 @@ def render_reidentification(document: batch.Document, draft_state: dict) -> None
             )
 
 
+def _render_template_uploader() -> None:
+    """Let a clinic add its own table-based .docx form to the selector.
+
+    Parsing and storage are local (`template_ingest`); nothing is sent
+    anywhere. A blank template carries no PHI, so it is safe to persist.
+    """
+    from carescribe.core import clinical_forms, template_ingest
+
+    with st.expander("➕ Add your clinic's own template (.docx)"):
+        st.caption(
+            "A table-based Word form — label cells with blank cells beside them. "
+            "CareScribe reads its structure on this computer; nothing leaves the device."
+        )
+        upload = st.file_uploader("Template file", type=["docx"], key="clinical_form_template_upload")
+        if upload is None:
+            return
+        try:
+            preview = template_ingest.parse_template_bytes(upload.getvalue(), form_id="__preview__")
+        except clinical_forms.ClinicalFormError as exc:
+            st.error(str(exc))
+            return
+        sections = len({f.key.split(".")[0] for f in preview.fields})
+        st.success(
+            f"Detected **{len(preview.fields)}** fields across **{sections}** section(s), "
+            f"plus {len(preview.header_fields)} header field(s)."
+        )
+        st.write([f.label for f in preview.fields])
+        if st.button("Save this template", key="clinical_form_template_save"):
+            template_ingest.save_template(upload.getvalue(), upload.name)
+            st.success(f"Saved “{preview.title}”. Choose it from the Form list below.")
+            st.rerun()
+
+
+def _render_reference_uploader() -> None:
+    """Add clinic reference files (formulary, pathways, protocols) to a local
+    library. They are shown to the clinician during review — never sent to the
+    model — so a dose or a referral criterion is never paraphrased."""
+    from carescribe.core import reference_library
+
+    loaded = reference_library.sources()
+    label = "📚 Reference material" + (f" ({len(loaded)} file(s))" if loaded else "")
+    with st.expander(label):
+        st.caption(
+            "Formularies, care pathways, local protocols (.txt or .md, no patient "
+            "data). Retrieved verbatim into the review view as an aid — not fed to "
+            "the model."
+        )
+        for name, chunk_count in loaded:
+            cols = st.columns([4, 1])
+            cols[0].markdown(f"- **{name}** · {chunk_count} passage(s)")
+            if cols[1].button("Remove", key=f"ref_rm_{name}"):
+                reference_library.remove_file(name)
+                st.rerun()
+        upload = st.file_uploader(
+            "Add a reference file", type=["txt", "md"], key="reference_upload"
+        )
+        if upload is not None and st.button("Add to library", key="reference_add"):
+            try:
+                reference_library.add_file(upload.name, upload.getvalue())
+                st.success("Added.")
+            except reference_library.ReferenceError as exc:
+                st.error(str(exc))
+            st.rerun()
+
+
+def _render_reference_panel(spec, query: str) -> None:
+    """Verbatim reference passages, retrieved per field at the granularity the
+    planner chose for it. Read-only — never sent to the model."""
+    from carescribe.core import reference_library, retrieval_planner
+
+    if reference_library.is_empty() or not (query or "").strip():
+        return
+
+    plans = retrieval_planner.plan(spec, query)
+    groups: list[tuple[str, list]] = []
+    seen: set[tuple[str, str]] = set()
+    for field_plan in plans.values():
+        if not field_plan.want_reference:
+            continue
+        hits = reference_library.search(
+            field_plan.query, k=3, granularity=field_plan.granularity
+        )
+        fresh = [h for h in hits if (h.source, h.text) not in seen]
+        for h in fresh:
+            seen.add((h.source, h.text))
+        if fresh:
+            groups.append((field_plan.field_label, fresh))
+    if not groups:
+        return
+
+    total = sum(len(hits) for _label, hits in groups)
+    with st.expander(f"📚 Relevant reference material ({total})"):
+        st.caption(
+            "Verbatim passages matched per field. Not sent to the model — for "
+            "your judgement while reviewing."
+        )
+        for label, hits in groups:
+            st.markdown(f"##### {label}")
+            for hit in hits:
+                source = f"**{hit.source}**" + (f" — {hit.heading}" if hit.heading else "")
+                st.markdown(source)
+                st.markdown(f"> {hit.text}")
+
+
 def render_clinical_form_panel(docs: dict) -> None:
     from carescribe.core import clinical_forms
 
@@ -1343,6 +1447,9 @@ def render_clinical_form_panel(docs: dict) -> None:
     if not approved:
         st.info("Approve at least one document in step 3 to generate a clinical form.")
         return
+
+    _render_template_uploader()
+    _render_reference_uploader()
 
     form_options = clinical_forms.available_forms()
     form_id = st.selectbox(
@@ -1391,13 +1498,22 @@ def render_clinical_form_panel(docs: dict) -> None:
 
 
 def _run_form_generation(docs: dict, selected_names: list[str], spec, draft: dict) -> None:
-    from carescribe.core import clinical_forms
+    from carescribe.core import clinical_forms, exemplars, retrieval_planner
 
     sources = [(name, docs[name].redacted_text, docs[name].phi_map) for name in selected_names]
     phi_values = [v for name in selected_names for v in docs[name].phi_map.values()]
     combined_text, merged_map = clinical_forms.combine_sources(sources)
     draft["combined_text"] = combined_text
     draft["merged_phi_map"] = merged_map
+
+    plans = retrieval_planner.plan(spec, combined_text)
+    house_style: dict[str, list[str]] = {}
+    for key, field_plan in plans.items():
+        if not field_plan.want_exemplars:
+            continue
+        hits = exemplars.retrieve(spec.form_id, key, field_plan.query)
+        if hits:
+            house_style[key] = hits
 
     placeholder = st.empty()
     started = time.monotonic()
@@ -1406,6 +1522,7 @@ def _run_form_generation(docs: dict, selected_names: list[str], spec, draft: dic
             _, backend, _label = backends.select_backend()
             chunks = clinical_forms.generate_form_document(
                 combined_text, spec, backend, stream=True, phi_values=phi_values,
+                exemplars=house_style,
             )
             raw = _stream_into(placeholder, chunks, started)
     except (carenotes.CareNoteError, backends.BackendError) as exc:
@@ -1422,11 +1539,28 @@ def _run_form_generation(docs: dict, selected_names: list[str], spec, draft: dic
 
 
 def render_form_draft(docs: dict, selected_names: list[str], spec, draft: dict) -> None:
-    from carescribe.core import clinical_forms
+    from carescribe.core import clinical_forms, exemplars
 
     st.markdown("#### Draft (de-identified)")
     st.caption("Still contains placeholders — safe to display, share, and save.")
     st.markdown(clinical_forms.render_preview(spec, draft["field_values"]))
+
+    saved = exemplars.count(spec.form_id)
+    cols = st.columns([3, 2])
+    with cols[0]:
+        if st.button("★ Save as house-style example", key=f"form_exemplar_{id(draft)}"):
+            try:
+                exemplars.add_exemplar(spec.form_id, draft["field_values"])
+                st.success("Saved. Future drafts of this form will match its style.")
+            except exemplars.ExemplarError as exc:
+                st.warning(str(exc))
+            st.rerun()
+    with cols[1]:
+        if saved:
+            st.caption(f"{saved} house-style example{'s' if saved != 1 else ''} on file — "
+                       "used to steer generation.")
+
+    _render_reference_panel(spec, draft.get("combined_text", ""))
 
     render_form_refinement(docs, selected_names, spec, draft)
     render_form_reidentification(spec, draft)
