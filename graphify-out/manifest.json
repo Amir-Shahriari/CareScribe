@@ -5,8 +5,8 @@
     "semantic_hash": "533e72a4166008742fe4d6516435cf00"
   },
   "carescribe/app.py": {
-    "mtime": 1787317613.3264596,
-    "ast_hash": "80c5ade328ac4e73f965da0075687aec",
+    "mtime": 1787945562.485023,
+    "ast_hash": "35e3d72d959456ac1435b9b2e6d7a993",
     "semantic_hash": ""
   },
   "carescribe/core/__init__.py": {
@@ -105,9 +105,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1785998072.936054,
-    "ast_hash": "e084f5a2718428b8860fe5470ccd65ca",
-    "semantic_hash": "e084f5a2718428b8860fe5470ccd65ca"
+    "mtime": 1787945616.2825036,
+    "ast_hash": "c7d483765b11f5ea0b8b628a31a8ed36",
+    "semantic_hash": ""
   },
   "requirements.txt": {
     "mtime": 1785843557.3575404,
@@ -270,9 +270,9 @@
     "semantic_hash": "3a9e5548d6bea338fa51daa7955ec8e6"
   },
   "carescribe/core/backends.py": {
-    "mtime": 1785991136.2877612,
-    "ast_hash": "46026a72f69871d949138bef1d531b39",
-    "semantic_hash": "46026a72f69871d949138bef1d531b39"
+    "mtime": 1787938716.3000143,
+    "ast_hash": "3b53775106f7ace8cf20dcadeb887242",
+    "semantic_hash": ""
   },
   "carescribe/core/desktop.py": {
     "mtime": 1785990969.4339802,
@@ -340,9 +340,9 @@
     "semantic_hash": "7721c3711cc477d83dde854ce287a461"
   },
   "docs/deployer-cloud-note.md": {
-    "mtime": 1785991402.956019,
-    "ast_hash": "23d13d6605193907ea7c7150614d050b",
-    "semantic_hash": "23d13d6605193907ea7c7150614d050b"
+    "mtime": 1787938794.7829528,
+    "ast_hash": "2ed902d4d0e4c6c87720624998749f72",
+    "semantic_hash": ""
   },
   "docs/practitioner-guide.md": {
     "mtime": 1785992375.5693464,
@@ -370,9 +370,9 @@
     "semantic_hash": "8305e46ab47717d0f23c5968cf553a47"
   },
   "carescribe/core/clinical_forms.py": {
-    "mtime": 1786708113.0867302,
-    "ast_hash": "4865a0dba3c95350ff86debc8b3a0274",
-    "semantic_hash": "4865a0dba3c95350ff86debc8b3a0274"
+    "mtime": 1787939564.853079,
+    "ast_hash": "1d59bf640c03194db5de46bb46233dd9",
+    "semantic_hash": ""
   },
   "tests/test_clinical_forms.py": {
     "mtime": 1786702517.4512918,
@@ -460,8 +460,98 @@
     "semantic_hash": ""
   },
   "carescribe/components/highlight_review/frontend/index.html": {
-    "mtime": 1787317002.5114622,
-    "ast_hash": "c5a8d363135a1cf95cb9a56705237910",
+    "mtime": 1787333745.5314498,
+    "ast_hash": "e77beeeee3e8be5a2a0c2aef328937f7",
+    "semantic_hash": ""
+  },
+  "err.txt": {
+    "mtime": 1787330467.0594895,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": ""
+  },
+  "out.txt": {
+    "mtime": 1787330467.7958093,
+    "ast_hash": "803a7b514f395fac140b2025f8a1abe3",
+    "semantic_hash": ""
+  },
+  "carescribe/core/template_ingest.py": {
+    "mtime": 1787938034.6599948,
+    "ast_hash": "90d82fb0e1689567196c5b4690ecde7c",
+    "semantic_hash": ""
+  },
+  "tests/test_template_ingest.py": {
+    "mtime": 1787938127.383745,
+    "ast_hash": "123ba88784cf55d3a7e06721ed45c941",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-08-29-clinic-uploaded-templates-design.md": {
+    "mtime": 1787938220.906801,
+    "ast_hash": "0a21fa9538c520d81c495c0d8708bb54",
+    "semantic_hash": ""
+  },
+  "carescribe/core/cloud_client.py": {
+    "mtime": 1787938699.9757736,
+    "ast_hash": "8162595e4ddb537adae0e6bf38436928",
+    "semantic_hash": ""
+  },
+  "tests/test_cloud_client.py": {
+    "mtime": 1787938741.9842951,
+    "ast_hash": "73051bc76861d8ddd9fd499ade0f14d1",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-08-29-cloud-generation-transport-design.md": {
+    "mtime": 1787938831.911807,
+    "ast_hash": "6e914245b048a6b61766f754e9dfde47",
+    "semantic_hash": ""
+  },
+  "carescribe/core/exemplars.py": {
+    "mtime": 1787944552.7694607,
+    "ast_hash": "95f49ffcf35d245ea8c69642cc5d559a",
+    "semantic_hash": ""
+  },
+  "tests/test_exemplars.py": {
+    "mtime": 1787939612.405207,
+    "ast_hash": "63c085453cc5847bada50bdcfb4b77d7",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-08-29-house-style-exemplar-retrieval-design.md": {
+    "mtime": 1787939689.467118,
+    "ast_hash": "8c66e5c3b678ed0c58d4ef75247d7819",
+    "semantic_hash": ""
+  },
+  "carescribe/core/reference_library.py": {
+    "mtime": 1787945454.0944035,
+    "ast_hash": "c82f54cf89407c8d1f10a21cb2c05227",
+    "semantic_hash": ""
+  },
+  "carescribe/core/text_search.py": {
+    "mtime": 1787944541.0404692,
+    "ast_hash": "82e46895ddd0835f1e840b52df46cf10",
+    "semantic_hash": ""
+  },
+  "tests/test_reference_library.py": {
+    "mtime": 1787945535.9739933,
+    "ast_hash": "4c0ae211a294024edae8a76bd9ee73ed",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-08-29-reference-library-design.md": {
+    "mtime": 1787944630.812663,
+    "ast_hash": "d4f3c4e39ad85651f0c0c9282af9ac6f",
+    "semantic_hash": ""
+  },
+  "carescribe/core/retrieval_planner.py": {
+    "mtime": 1787945471.9630637,
+    "ast_hash": "dfd15c2f6db6d698962ae3f4e3ce42a9",
+    "semantic_hash": ""
+  },
+  "tests/test_retrieval_planner.py": {
+    "mtime": 1787945525.1823444,
+    "ast_hash": "13ed668f1c0123938e1a6ce906ea53b9",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-08-29-retrieval-planner-design.md": {
+    "mtime": 1787945609.5096476,
+    "ast_hash": "47f822101d690edf42892d65c4f8ae9b",
     "semantic_hash": ""
   }
 }
