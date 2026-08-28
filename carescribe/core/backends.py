@@ -11,7 +11,9 @@ Selection order, decided at runtime:
    external install at all.
 3. :class:`CloudBackend` — **off unless explicitly configured**, and even then
    only if a key is present in the environment. Never bundled, never a default,
-   never reached by accident.
+   never reached by accident. Transport lives in :mod:`carescribe.core.cloud_client`
+   (Anthropic Messages API, or the OpenAI-compatible shape for Azure / private /
+   self-hosted endpoints).
 
 All three see the same thing: approved de-identified text with placeholders.
 Re-identification stays in Python, after generation. That is what makes the
@@ -174,13 +176,14 @@ class CloudBackend:
     """A remote provider, reachable only when explicitly configured.
 
     Receives approved de-identified text and nothing else — the same input the
-    local backends get. The key is read from the environment at call time and
-    is never written, logged, or bundled.
+    local backends get. The key is read from the environment at call time (in
+    :mod:`carescribe.core.cloud_client`) and is never written, logged, or
+    bundled.
 
-    Deliberately not implemented against a specific provider here: wiring one in
-    is a deployment decision that needs an information-governance sign-off and a
-    paid no-training tier, not a default someone can trip over. The class exists
-    so the selection logic and its tests are real.
+    Enabling this is still a deployment decision that needs an
+    information-governance sign-off and a paid no-training tier — see
+    ``docs/deployer-cloud-note.md``. The two-switch gate and the last-place
+    position in the selection ladder are what stop it being tripped into.
     """
 
     def __init__(self, provider: str | None = None) -> None:
@@ -198,13 +201,14 @@ class CloudBackend:
             )
 
     def generate(self, system: str, prompt: str, stream: bool = True) -> Iterator[str]:
-        raise BackendError(
-            f"No transport is wired up for provider '{self.provider}'. Cloud "
-            "generation requires a paid no-training tier and an "
-            "information-governance sign-off before it is enabled — see "
-            "docs/deployer-cloud-note.md."
-        )
-        yield ""  # pragma: no cover — unreachable, keeps this a generator
+        from . import cloud_client
+
+        try:
+            yield from cloud_client.stream_generation(
+                self.provider, system, prompt, stream=stream
+            )
+        except cloud_client.CloudError as exc:
+            raise BackendError(str(exc)) from exc
 
 
 # --------------------------------------------------------------------------

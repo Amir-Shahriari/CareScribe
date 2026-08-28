@@ -24,20 +24,40 @@ process, not an application default.
 
 ## Enabling it
 
-Two separate environment variables, both required:
+Two separate environment variables are required:
 
 ```
-CARESCRIBE_CLOUD_PROVIDER=<provider-name>
+CARESCRIBE_CLOUD_PROVIDER=anthropic | openai
 CARESCRIBE_CLOUD_API_KEY=<key>
 ```
 
-Two switches on purpose. A key left in the environment by an unrelated tool must
-not silently enable off-device generation, and naming a provider without a key
-fails loudly rather than quietly falling back to something local.
+Two more are optional:
 
-No key is ever bundled, defaulted, written to disk, or logged. It is read from
-the environment at call time. There is a test asserting the source contains no
-key-shaped literal and never stores one on the instance.
+```
+CARESCRIBE_CLOUD_BASE_URL=<https://your-endpoint>   # override the API root
+CARESCRIBE_CLOUD_MODEL=<model-name>                 # required for openai
+```
+
+Two required switches on purpose. A key left in the environment by an unrelated
+tool must not silently enable off-device generation, and naming a provider
+without a key fails loudly rather than quietly falling back to something local.
+
+`CARESCRIBE_CLOUD_PROVIDER` selects the wire format:
+
+- **`anthropic`** — the Messages API. Defaults to `https://api.anthropic.com`
+  and model `claude-opus-5`; override either with the optional variables.
+- **`openai`** — the OpenAI Chat Completions shape, which **Azure OpenAI, a
+  private gateway, vLLM, and most self-hosted servers also speak**. This is the
+  path for "our own API endpoint". Set `CARESCRIBE_CLOUD_BASE_URL` to your
+  endpoint and `CARESCRIBE_CLOUD_MODEL` to the model name it expects (there is
+  no sensible default for a private endpoint, so the model is mandatory here).
+
+The transport is standard-library HTTP only — no provider SDK is a dependency,
+so "this app ships no third-party network client" stays checkable. No key is
+ever bundled, defaulted, written to disk, or logged. It is read from the
+environment at call time. Tests assert `core/backends.py` and
+`core/cloud_client.py` contain no key-shaped literal and never store one on an
+instance.
 
 Even fully configured, cloud is **last** in the selection order: a local Ollama
 daemon wins, then the built-in model, then cloud. It is a fallback, not a
@@ -56,10 +76,15 @@ preference.
   cloud is configured: it stops saying "running fully offline" and names the
   provider. Do not remove or reword that.
 
-## No transport is wired up
+## The transport
 
-`CloudBackend` validates configuration and then raises. Wiring an actual
-provider is deliberately left undone: it is a deployment decision that should be
-made once, deliberately, by someone accountable — not shipped as something a
-user could enable by accident. The class exists so the selection logic and its
-tests are real.
+`core/cloud_client.py` implements streaming against both wire formats above.
+`CloudBackend` still validates configuration at construction and is still last
+in the selection ladder and off unless both required variables are set — wiring
+the transport does not change any of that. It changes one thing: a fully
+configured, IG-signed-off deployment now generates instead of raising.
+
+What the model receives is unchanged from every other backend: approved
+de-identified text with placeholders, after `carenotes.assert_deidentified()`
+has run. The identity mapping is not a parameter to `CloudBackend` and there is
+no code path from it to the transport.
