@@ -1,9 +1,11 @@
 # CareScribe site
 
+**Live:** https://amir-shahriari.github.io/CareScribe/
+
 Landing page for CareScribe. Single-page React + Vite + Tailwind v4, static, no backend.
 
-Deployed to GitHub Pages at `https://amir-shahriari.github.io/CareScribe/` by
-`.github/workflows/deploy.yml` on every push to `main` that touches `site/`.
+Deployed to GitHub Pages by `.github/workflows/deploy.yml` on every push to
+`main` that touches `site/`.
 
 ## Local
 
