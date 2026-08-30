@@ -26,7 +26,10 @@ body {
   overflow-x: clip;
 }
 
-/* Soft background wash. A fixed, viewport-sized paint layer: nothing to overflow. */
+/* Background wash. Two fixed, pointer-events-none paint layers behind all
+   content: a static base tint (::before) and a slow-drifting accent (::after).
+   Both are fixed and the drift layer is oversized, so nothing can extend the
+   document or reveal an empty edge. */
 body::before {
   content: "";
   position: fixed;
@@ -37,6 +40,33 @@ body::before {
     radial-gradient(58vw 58vw at 6% -6%, rgba(199, 210, 254, 0.5), transparent 62%),
     radial-gradient(52vw 52vw at 102% 22%, rgba(221, 214, 254, 0.42), transparent 60%),
     radial-gradient(46vw 46vw at 72% 110%, rgba(187, 247, 208, 0.3), transparent 60%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: -25%;
+  z-index: -1;
+  pointer-events: none;
+  will-change: transform;
+  background:
+    radial-gradient(38vw 38vw at 18% 12%, rgba(129, 140, 248, 0.28), transparent 66%),
+    radial-gradient(34vw 34vw at 88% 78%, rgba(196, 181, 253, 0.24), transparent 66%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body::after {
+    animation: drift 36s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(3%, -2%, 0) scale(1.09);
+  }
 }
 
 body {
