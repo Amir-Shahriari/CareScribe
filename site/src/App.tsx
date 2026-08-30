@@ -99,8 +99,8 @@ function Hero() {
             Without the privacy trade-off.
           </h1>
           <p className="rise rise-3 mt-5 max-w-xl text-[15px] leading-relaxed text-muted sm:text-base">
-            CareScribe runs a capable model on-device. Patient data never leaves the machine, and
-            only de-identified text is used for notes.
+            De-identification runs entirely on your machine. Only de-identified text is ever used to
+            draft notes, so nothing identifying leaves the device.
           </p>
           <div className="rise rise-4 mt-8 flex flex-wrap items-center gap-3">
             <a
@@ -138,7 +138,7 @@ const STEPS = [
   },
   {
     title: "Generate on safe text only",
-    body: "The local model drafts notes from de-identified text. The map back to real identities stays in memory and is never written to disk.",
+    body: "Notes are drafted from de-identified text, by a local model or an API if you prefer. The map back to real identities stays in memory and is never written to disk.",
   },
 ];
 
@@ -238,7 +238,7 @@ function Footer() {
         <div>
           <Wordmark className="text-[15px] text-ink" />
           <p className="mt-2 text-[13.5px] text-muted">Building in the open. Thoughts welcome.</p>
-          <p className="mt-1 text-[12.5px] text-muted/80">Offline. On-device. Reviewed by a human.</p>
+          <p className="mt-1 text-[12.5px] text-muted/80">De-identified on-device. Reviewed by a human.</p>
         </div>
         <a
           href={REPO}
