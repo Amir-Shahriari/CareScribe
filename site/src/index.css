@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #fbfbfd;
+  --color-surface: #ffffff;
+  --color-border: #e7e9ee;
+  --color-line: #eef0f4;
+  --color-ink: #101828;
+  --color-muted: #5b6472;
+  --color-faint: #7d8794;
+  --color-accent: #4f46e5;
+  --color-accent-hover: #4338ca;
+  --color-accent-soft: #eef2ff;
+
+  --shadow-cs: 0 1px 2px rgba(16, 24, 40, 0.04), 0 12px 32px rgba(16, 24, 40, 0.06);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+/* Soft background wash. A fixed, viewport-sized paint layer: nothing to overflow. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(58vw 58vw at 6% -6%, rgba(199, 210, 254, 0.5), transparent 62%),
+    radial-gradient(52vw 52vw at 102% 22%, rgba(221, 214, 254, 0.42), transparent 60%),
+    radial-gradient(46vw 46vw at 72% 110%, rgba(187, 247, 208, 0.3), transparent 60%);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+code,
+kbd,
+.mono {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", "IBM Plex Mono", Menlo,
+    Consolas, monospace;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Resting state is visible. Entrance only runs when motion is welcome, so a
+   stuck or skipped animation fails visible, never blank. */
+.rise {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    animation: rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .rise-1 {
+    animation-delay: 0.05s;
+  }
+  .rise-2 {
+    animation-delay: 0.12s;
+  }
+  .rise-3 {
+    animation-delay: 0.19s;
+  }
+  .rise-4 {
+    animation-delay: 0.26s;
+  }
+}
+
+
+::selection {
+  background: rgba(79, 70, 229, 0.18);
+}
