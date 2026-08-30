@@ -499,12 +499,14 @@ def generate_form_document(
     stream: bool = True,
     *,
     phi_values: Iterable[str] | None = None,
+    acknowledged: Iterable[str] = (),
     exemplars: dict[str, list[str]] | None = None,
 ) -> Iterator[str]:
     system, user = build_prompt(form_spec, combined_text, exemplars)
     return carenotes.generate_document(
         combined_text, form_spec.form_id, backend, stream,
-        phi_values=phi_values, system=system, user_prompt=user,
+        phi_values=phi_values, acknowledged=acknowledged,
+        system=system, user_prompt=user,
     )
 
 
@@ -518,12 +520,13 @@ def refine_form_document(
     *,
     history: list[tuple[str, str]] | None = None,
     phi_values: Iterable[str] | None = None,
+    acknowledged: Iterable[str] = (),
     exemplars: dict[str, list[str]] | None = None,
 ) -> Iterator[str]:
     system, _ = build_prompt(form_spec, combined_text, exemplars)
     return carenotes.refine_document(
         combined_text, draft_marker_text, instruction, backend, stream,
-        history=history, phi_values=phi_values,
+        history=history, phi_values=phi_values, acknowledged=acknowledged,
         system=system, refine_prompt_name="refine_form.txt",
     )
 

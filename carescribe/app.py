@@ -41,7 +41,7 @@ from carescribe.components.highlight_review import highlight_review  # noqa: E40
 
 st.set_page_config(page_title="CareScribe", page_icon="🩺", layout="wide")
 
-TABLE_COLUMNS = ["value", "type", "placeholder", "action"]
+TABLE_COLUMNS = ["value", "type", "placeholder", "action", "confidence"]
 
 
 # --------------------------------------------------------------------------
@@ -88,11 +88,12 @@ def wipe_phi() -> None:
     # (f"hdr_{draft_key}_{header.key}"), so they can't be listed statically
     # in PHI_KEYS — each one holds real, typed PHI (client name, DOB, ...).
     for key in list(st.session_state.keys()):
-        if key.startswith("hdr_"):
+        if key.startswith(("hdr_", "attest_", "textbox_ack_")):
             del st.session_state[key]
     # Not PHI themselves, but stale UI state after a wipe.
     st.session_state.pop("form_type", None)
     st.session_state.pop("form_sources", None)
+    st.session_state.pop("_batch_approve_summary", None)
     # Force the uploader to forget its files by rotating its widget key.
     st.session_state.uploader_nonce = st.session_state.get("uploader_nonce", 0) + 1
 
@@ -222,7 +223,10 @@ def render_sidebar() -> None:
         f"{approved} approved."
     )
 
-    if st.sidebar.button("🧹 Clear session / wipe PHI", type="primary", use_container_width=True):
+    if st.sidebar.button(
+        "🧹 Clear session / wipe PHI", type="primary",
+        use_container_width=True, key="wipe_phi_btn",
+    ):
         wipe_phi()
         st.rerun()
 
@@ -312,7 +316,6 @@ def section_process() -> None:
     if not docs:
         return
 
-    st.divider()
     st.subheader("2. De-identify")
 
     pending = [name for name in order if not docs[name].analyzed]
@@ -355,10 +358,18 @@ def entity_frame(document: batch.Document) -> pd.DataFrame:
             "type": entity.get("type", "OTHER_ID"),
             "placeholder": entity.get("placeholder", ""),
             "action": mapping.normalise_action(entity.get("action")),
+            "confidence": str(entity.get("confidence") or "review"),
         }
         for entity in document.entities
     ]
-    return pd.DataFrame(rows, columns=TABLE_COLUMNS)
+    frame = pd.DataFrame(rows, columns=TABLE_COLUMNS)
+    # Single-detector ("review") rows first: those are the ones most worth a
+    # human's eye, in either direction. Stable, so order is otherwise unchanged.
+    if not frame.empty:
+        frame = frame.sort_values(
+            by="confidence", key=lambda col: col.ne("review"), kind="stable"
+        ).reset_index(drop=True)
+    return frame
 
 
 def render_entity_table(document: batch.Document) -> None:
@@ -367,6 +378,21 @@ def render_entity_table(document: batch.Document) -> None:
         "Fix a type, correct a value, delete a false positive, or switch an "
         "action to **Keep** to leave that string in the document."
     )
+
+    redacted = [
+        entity for entity in document.entities
+        if mapping.normalise_action(entity.get("action")) == mapping.REDACT
+    ]
+    single_layer = sum(
+        1 for entity in redacted
+        if str(entity.get("confidence") or "review") == "review"
+    )
+    if single_layer:
+        st.caption(
+            f"⚠️ {single_layer} of {len(redacted)} redaction(s) were flagged by "
+            "a single detector — the likeliest to be wrong either way. They are "
+            "listed first here and highlighted in the preview above."
+        )
 
     edited = st.data_editor(
         entity_frame(document),
@@ -392,34 +418,45 @@ def render_entity_table(document: batch.Document) -> None:
                 help="Keep leaves the text in place — use it for a false positive "
                      "you would rather not delete from the table.",
             ),
+            "confidence": st.column_config.TextColumn(
+                "Found by", disabled=True, width="small",
+                help="'auto' — corroborated by more than one layer, or a "
+                     "structured format. 'review' — a single detector, so worth "
+                     "a second look.",
+            ),
         },
     )
 
     if st.button("Apply table edits", use_container_width=True, key=f"apply_{document.name}"):
-        refresh(document, edited.fillna("").to_dict("records"))
+        # 'confidence' is display-only; drop it so rebuild re-derives tiering.
+        records = [
+            {key: value for key, value in row.items() if key != "confidence"}
+            for row in edited.fillna("").to_dict("records")
+        ]
+        refresh(document, records)
         st.rerun()
 
 
 def render_add_missed(document: batch.Document) -> None:
-    st.markdown("#### Add a missed identifier")
-    st.caption(
-        "Anything the layers missed. It is variant-expanded like a detected "
-        "value, so a full name also covers the title+surname and initials forms."
-    )
+    with st.expander("Add a missed identifier", expanded=False):
+        st.caption(
+            "Anything the layers missed. It is variant-expanded like a detected "
+            "value, so a full name also covers the title+surname and initials forms."
+        )
 
-    value_column, type_column, button_column = st.columns([3, 2, 1])
-    with value_column:
-        value = st.text_input(
-            "Value", key=f"missed_value_{document.name}", label_visibility="collapsed",
-            placeholder="Paste the exact text as it appears in the document",
-        )
-    with type_column:
-        entity_type = st.selectbox(
-            "Type", list(mapping.ENTITY_TYPES), key=f"missed_type_{document.name}",
-            label_visibility="collapsed",
-        )
-    with button_column:
-        add = st.button("Add", use_container_width=True, key=f"missed_add_{document.name}")
+        value_column, type_column, button_column = st.columns([3, 2, 1])
+        with value_column:
+            value = st.text_input(
+                "Value", key=f"missed_value_{document.name}", label_visibility="collapsed",
+                placeholder="Paste the exact text as it appears in the document",
+            )
+        with type_column:
+            entity_type = st.selectbox(
+                "Type", list(mapping.ENTITY_TYPES), key=f"missed_type_{document.name}",
+                label_visibility="collapsed",
+            )
+        with button_column:
+            add = st.button("Add", use_container_width=True, key=f"missed_add_{document.name}")
 
     if add:
         try:
@@ -577,11 +614,11 @@ def _render_review_html(document: batch.Document, spans: list) -> str:
     return "".join(parts)
 
 
-def render_review(document: batch.Document) -> int:
-    """The single primary review surface: highlighted text, click to decide.
+def render_review(document: batch.Document) -> list:
+    """The primary review surface: the redacted text, second-look items marked.
 
-    Returns how many spans are still outstanding, so the caller can drive
-    the Approve gate without recomputing this list a second time.
+    Returns the span list so the caller can drive the bulk actions and the
+    Approve gate without recomputing it.
     """
     spans = review_spans.review_spans(
         document.redacted_text, document.entities,
@@ -589,13 +626,11 @@ def render_review(document: batch.Document) -> int:
     )
 
     st.markdown("#### Redacted preview")
-    st.caption("This exact text is what approval writes to disk.")
-    if spans:
-        st.caption(
-            f"{len(spans)} span(s) need a decision — click a highlighted word below."
-        )
-    else:
-        st.caption("Nothing needs a second look in this document.")
+    st.caption(
+        "This is exactly what approval writes to disk. Highlighted words are "
+        "optional second-look items — click one to act on it on its own, or use "
+        "the bulk buttons below."
+    )
 
     clicked = highlight_review(
         _render_review_html(document, spans), key=f"hl_{document.name}"
@@ -603,19 +638,87 @@ def render_review(document: batch.Document) -> int:
     _render_span_action(document, spans, clicked)
 
     # The interactive view above is the working copy; this is the plain,
-    # authoritative, copy-pasteable text — the same role the old
-    # render_highlighted_preview's second st.text_area played, kept
-    # unstyled and disabled on purpose so it's never mistaken for editable.
-    st.text_area(
-        "Redacted", document.redacted_text, height=200,
-        label_visibility="collapsed", disabled=True,
-        key=f"preview_exact_{document.name}",
-    )
+    # authoritative, copy-pasteable text — kept unstyled and disabled on
+    # purpose so it's never mistaken for editable.
+    with st.expander("Plain text — exactly what gets written"):
+        st.text_area(
+            "Redacted", document.redacted_text, height=220,
+            label_visibility="collapsed", disabled=True,
+            key=f"preview_exact_{document.name}",
+        )
 
-    with st.expander("Show full detected-identifier table"):
+    with st.expander("Full detected-identifier table"):
         render_entity_table(document)
 
-    return len(spans)
+    return spans
+
+
+def render_bulk_actions(document: batch.Document, spans: list) -> None:
+    """Clear each class of second-look item in one click.
+
+    Low-confidence entity spans are already redacted, so "Confirm all" only
+    records that the reviewer accepts the placeholders. "Redact all flagged"
+    over-redacts every permissive residual candidate — the safe direction.
+    Either is optional: neither gates Approve.
+    """
+    entity_keys: list[str] = []
+    residual_spans: list = []
+    seen_e: set[str] = set()
+    seen_r: set[str] = set()
+    for span in spans:
+        key = span.id.split(":", 1)[1]
+        if span.kind == review_spans.KIND_ENTITY:
+            if key not in seen_e:
+                seen_e.add(key)
+                entity_keys.append(key)
+        elif key not in seen_r:
+            seen_r.add(key)
+            residual_spans.append(span)
+
+    n_e, n_r = len(entity_keys), len(residual_spans)
+    if not n_e and not n_r:
+        st.caption("Nothing needs a second look in this document.")
+        return
+
+    bits = []
+    if n_e:
+        bits.append(f"**{n_e}** low-confidence redaction(s) already in place")
+    if n_r:
+        bits.append(f"**{n_r}** item(s) flagged by the safety sweep")
+    st.markdown(" · ".join(bits))
+
+    left, right = st.columns(2)
+    with left:
+        if n_e and st.button(
+            f"Confirm all {n_e} redaction(s)",
+            key=f"confirm_all_{document.name}", use_container_width=True,
+        ):
+            entity_confirmed(document).update(entity_keys)
+            st.rerun()
+    with right:
+        if n_r and st.button(
+            f"Redact all {n_r} flagged item(s)",
+            key=f"redact_all_{document.name}", use_container_width=True,
+        ):
+            added = 0
+            for span in residual_spans:
+                try:
+                    result = deidentify.add_manual_entity(
+                        document.raw_text, document.entities, span.text
+                    )
+                except deidentify.DeidentificationError:
+                    continue
+                document.entities = result.entities
+                document.redacted_text = result.redacted_text
+                document.phi_map = result.phi_map
+                added += 1
+            if added:
+                document.approved = False
+                document.residual = []
+                st.session_state.flag_redacted[document.name] = (
+                    st.session_state.flag_redacted.get(document.name, 0) + added
+                )
+            st.rerun()
 
 
 def _render_span_action(document: batch.Document, spans: list, clicked_id: str | None) -> None:
@@ -678,12 +781,14 @@ def _render_span_action(document: batch.Document, spans: list, clicked_id: str |
                 st.rerun()
 
 
-def render_approval(document: batch.Document, outstanding: int) -> None:
+def render_approval(document: batch.Document, spans: list) -> None:
     st.divider()
     st.warning(
         "**Human review required.** Automated de-identification is not a "
-        "guarantee. Read the preview in full before approving."
+        "guarantee. Read the redacted preview above before approving."
     )
+
+    n_advisory = len({s.id for s in spans})
 
     if document.residual:
         st.error(
@@ -731,9 +836,31 @@ def render_approval(document: batch.Document, outstanding: int) -> None:
             key=f"textbox_ack_{document.name}",
         )
 
-    reason = review_checklist.blocking_reason(document.residual, outstanding)
+    # An explicit, recorded attestation that a human read the redacted text.
+    # Automated de-identification has no way to know whether the preview was
+    # actually looked at; this is the one place the reviewer says so, and it is
+    # written (as a bool) into the audit sidecar. It gates Approve, below.
+    if not document.approved:
+        document.attested = st.checkbox(
+            "I have read the redacted preview above and confirm it is safe to release.",
+            value=document.attested,
+            key=f"attest_{document.name}",
+        )
+
+    # Only the authoritative sweep blocks. Advisory spans (already-redacted
+    # low-confidence entities, permissive residual flags) never gate the write —
+    # batch.write_approved re-runs the sweep and refuses regardless.
+    reason = review_checklist.blocking_reason(document.residual)
     if not reason and document.has_text_boxes and not document.text_boxes_acknowledged:
         reason = "Confirm the text-box check above first."
+    if not reason and not document.attested:
+        reason = "Tick the read-and-confirmed box above."
+
+    if not reason and n_advisory:
+        st.caption(
+            f"{n_advisory} optional second-look item(s) not actioned — the "
+            "safety sweep runs on approve and will refuse any real identifier."
+        )
 
     if st.button(
         "✅ Run safety sweep and approve",
@@ -761,6 +888,7 @@ def render_approval(document: batch.Document, outstanding: int) -> None:
                     flags_shown=len(document_flags(document)),
                     flags_redacted=st.session_state.flag_redacted.get(document.name, 0),
                     flags_dismissed=len(flag_dismissals(document)),
+                    attested=document.attested,
                 )
         st.rerun()
 
@@ -783,7 +911,6 @@ def section_review() -> None:
     if not ready:
         return
 
-    st.divider()
     st.subheader("3. Review & approve")
 
     if st.session_state.selected not in ready:
@@ -811,7 +938,8 @@ def section_review() -> None:
         f"{len(document.raw_text):,} characters, {len(document.entities)} identifiers detected."
     )
 
-    outstanding = render_review(document)
+    spans = render_review(document)
+    render_bulk_actions(document, spans)
     render_add_missed(document)
     render_coverage(document)
 
@@ -822,7 +950,91 @@ def section_review() -> None:
             key=f"raw_{document.name}",
         )
 
-    render_approval(document, outstanding)
+    render_approval(document, spans)
+    render_batch_approve(docs, ready)
+
+
+def render_batch_approve(docs: dict, ready: list) -> None:
+    """One click to approve every document that comes back clean.
+
+    Each is re-run through the blocking safety sweep; only the clean ones are
+    written. Anything with sweep findings or an unchecked text-box warning is
+    left for the reviewer to open individually.
+    """
+    pending = [docs[name] for name in ready if not docs[name].approved]
+
+    # Show the outcome of the last batch run even if that run cleared enough
+    # documents that the button below no longer renders.
+    summary = st.session_state.pop("_batch_approve_summary", None)
+    if summary and (summary["approved"] or summary["blocked"]):
+        st.divider()
+        st.markdown("#### Batch approval")
+        if summary["approved"]:
+            st.success(
+                f"Approved {len(summary['approved'])}: "
+                + ", ".join(f"`{n}`" for n in summary["approved"])
+            )
+        if summary["blocked"]:
+            st.warning(
+                "Open these individually — the safety sweep still has findings, "
+                "the read-and-confirmed box isn't ticked, or a text-box check "
+                "is outstanding:\n"
+                + "\n".join(f"- `{n}`" for n in summary["blocked"])
+            )
+
+    if len(pending) < 2:
+        return
+
+    if not (summary and (summary["approved"] or summary["blocked"])):
+        st.divider()
+    st.markdown("#### Approve the whole batch")
+
+    st.caption(
+        f"{len(pending)} document(s) not yet approved. Each is re-checked by the "
+        "safety sweep; only the ones that come back clean, with the "
+        "read-and-confirmed box ticked, are written to disk."
+    )
+    if st.button(
+        f"✅ Approve all {len(pending)} that pass the safety sweep",
+        type="primary", key="approve_batch",
+    ):
+        approved: list[str] = []
+        blocked: list[str] = []
+        for doc in pending:
+            if not doc.attested:
+                blocked.append(doc.name)
+                continue
+            if doc.has_text_boxes and not doc.text_boxes_acknowledged:
+                blocked.append(doc.name)
+                continue
+            doc.residual = batch.sweep(doc.redacted_text, doc.dismissed)
+            if doc.residual:
+                doc.approved = False
+                blocked.append(doc.name)
+                continue
+            try:
+                path = batch.write_approved(
+                    doc.name, doc.redacted_text, acknowledged=doc.dismissed
+                )
+            except batch.BatchError:
+                blocked.append(doc.name)
+                continue
+            doc.approved = True
+            doc.approved_path = str(path)
+            write_approved_word(doc)
+            batch.write_review_record(
+                doc.name,
+                entities=doc.entities,
+                flags_shown=len(document_flags(doc)),
+                flags_redacted=st.session_state.flag_redacted.get(doc.name, 0),
+                flags_dismissed=len(flag_dismissals(doc)),
+                attested=doc.attested,
+            )
+            approved.append(doc.name)
+        st.session_state["_batch_approve_summary"] = {
+            "approved": approved, "blocked": blocked,
+        }
+        st.rerun()
 
 
 # --------------------------------------------------------------------------
@@ -835,7 +1047,6 @@ def section_batch_status() -> None:
     if not docs:
         return
 
-    st.divider()
     st.subheader("4. Batch status")
 
     rows = []
@@ -1184,6 +1395,9 @@ def _run_generation(document, template, custom, draft_state) -> None:
                 custom_instruction=custom,
                 # Passed only so generation can assert these are absent.
                 phi_values=list(document.phi_map.values()),
+                # Sweep findings the reviewer cleared at approval — so the
+                # pre-generation re-scan doesn't trip on them.
+                acknowledged=document.dismissed,
             )
             draft = _stream_into(placeholder, chunks, started)
     except (carenotes.CareNoteError, backends.BackendError) as exc:
@@ -1263,6 +1477,7 @@ def render_refinement(document: batch.Document, draft_state: dict) -> None:
                         stream=True,
                         history=draft_state["history"],
                         phi_values=list(document.phi_map.values()),
+                        acknowledged=document.dismissed,
                     )
                     revised = _stream_into(placeholder, chunks, started)
             except (carenotes.CareNoteError, backends.BackendError) as exc:
@@ -1502,6 +1717,7 @@ def _run_form_generation(docs: dict, selected_names: list[str], spec, draft: dic
 
     sources = [(name, docs[name].redacted_text, docs[name].phi_map) for name in selected_names]
     phi_values = [v for name in selected_names for v in docs[name].phi_map.values()]
+    acknowledged = [v for name in selected_names for v in docs[name].dismissed]
     combined_text, merged_map = clinical_forms.combine_sources(sources)
     draft["combined_text"] = combined_text
     draft["merged_phi_map"] = merged_map
@@ -1522,7 +1738,7 @@ def _run_form_generation(docs: dict, selected_names: list[str], spec, draft: dic
             _, backend, _label = backends.select_backend()
             chunks = clinical_forms.generate_form_document(
                 combined_text, spec, backend, stream=True, phi_values=phi_values,
-                exemplars=house_style,
+                acknowledged=acknowledged, exemplars=house_style,
             )
             raw = _stream_into(placeholder, chunks, started)
     except (carenotes.CareNoteError, backends.BackendError) as exc:
@@ -1578,6 +1794,7 @@ def render_form_refinement(docs: dict, selected_names: list[str], spec, draft: d
             placeholder="e.g. expand the risk assessment section",
         )
         phi_values = [v for name in selected_names for v in docs[name].phi_map.values()]
+        acknowledged = [v for name in selected_names for v in docs[name].dismissed]
         status = ollama_client.status()
         if st.button(
             "Apply", key=f"form_refine_go_{id(draft)}",
@@ -1591,6 +1808,7 @@ def render_form_refinement(docs: dict, selected_names: list[str], spec, draft: d
                         draft["combined_text"], draft["deidentified"], instruction, spec,
                         backends.select_backend()[1], stream=True,
                         history=draft["history"], phi_values=phi_values,
+                        acknowledged=acknowledged,
                     )
                     revised = _stream_into(placeholder, chunks, started)
             except (carenotes.CareNoteError, backends.BackendError) as exc:
@@ -1667,7 +1885,6 @@ def _as_docx(text: str) -> bytes:
 
 def section_handoff() -> None:
     docs = documents()
-    st.divider()
     st.subheader("5. Generate report")
 
     mode = st.radio(
@@ -1713,7 +1930,219 @@ def section_handoff() -> None:
 # Main
 # --------------------------------------------------------------------------
 
+_APP_CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;450;500;600;700&display=swap');
+
+:root {
+  --cs-bg:#ffffff; --cs-surface:#ffffff; --cs-panel:#f7f8fa;
+  --cs-border:#e7e9ee; --cs-line:#eef0f4;
+  --cs-ink:#101828; --cs-muted:#667085;
+  --cs-accent:#4f46e5; --cs-accent-hover:#4338ca; --cs-accent-soft:#eef2ff;
+  --cs-safe:#059669; --cs-safe-soft:#ecfdf5; --cs-safe-line:#a7f3d0;
+  --cs-warn:#b45309; --cs-warn-soft:#fff7ed; --cs-warn-line:#fed7aa;
+  --cs-danger:#b91c1c; --cs-danger-soft:#fef2f2; --cs-danger-line:#fecaca;
+  --cs-radius:16px; --cs-radius-sm:11px;
+  --cs-shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.06);
+}
+
+/* ---------- typography ---------- */
+html, body, [data-testid="stAppViewContainer"], .stApp,
+button, input, textarea, select, [data-testid="stMarkdownContainer"],
+h1, h2, h3, h4, h5, h6, [data-testid="stHeadingContainer"] {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+}
+code, kbd, pre, [data-testid="stCode"] *, .stCode *,
+[data-testid="stCodeBlock"] * {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace !important;
+}
+
+/* ---------- page canvas: calm, centred, a soft wash ---------- */
+[data-testid="stAppViewContainer"], .stApp {
+  background:
+    radial-gradient(1200px 500px at 82% -12%, rgba(79,70,229,.06), transparent 60%),
+    radial-gradient(900px 420px at -12% 8%, rgba(5,150,105,.045), transparent 55%),
+    var(--cs-bg);
+}
+[data-testid="stMain"] { background: transparent; }
+[data-testid="stMainBlockContainer"], .stMainBlockContainer, section.main .block-container {
+  max-width: 1040px !important;
+  padding-top: 2rem !important;
+  padding-bottom: 5rem !important;
+  padding-inline: clamp(1rem, 4vw, 2rem) !important;
+}
+
+/* strip Streamlit's dev chrome — this ships as a local clinical tool */
+[data-testid="stDecoration"], [data-testid="stToolbar"], [data-testid="stStatusWidget"] { display: none; }
+[data-testid="stHeader"] { background: transparent; border-bottom: 0; height: 0; }
+
+/* ---------- page title ---------- */
+[data-testid="stAppViewContainer"] h1 {
+  font-size: 1.55rem; font-weight: 700; letter-spacing: -0.02em; padding: 0; margin: 0 0 0.15rem;
+}
+[data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] * { color: var(--cs-muted); }
+
+/* ---------- cards: one per numbered step ----------
+   Only the step containers opened in main() carry a `.cs-card` marker as their
+   first child; scoping to that keeps the treatment off Streamlit's own border
+   wrappers (the sidebar shell, the file-uploader, the main block wrapper). */
+.cs-card { display: none; }
+[data-testid="stElementContainer"]:has(> div > [data-testid="stMarkdownContainer"] > .cs-card) {
+  display: none;
+}
+[data-testid="stVerticalBlockBorderWrapper"]:has(
+  > div > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:first-child .cs-card
+) {
+  background: var(--cs-surface);
+  border: 1px solid var(--cs-border) !important;
+  border-radius: var(--cs-radius) !important;
+  box-shadow: var(--cs-shadow);
+  padding: clamp(1.2rem, 2.4vw, 2rem) !important;
+  margin-top: 1.25rem;
+}
+
+/* step heading = card title */
+[data-testid="stAppViewContainer"] h3 {
+  font-size: 1.2rem; font-weight: 650; letter-spacing: -0.01em;
+  margin: 0 0 0.35rem; padding: 0; border: 0;
+}
+[data-testid="stAppViewContainer"] h2 {
+  font-size: 1rem; font-weight: 600; margin: 1.1rem 0 0.4rem; padding: 0; border: 0;
+}
+[data-testid="stAppViewContainer"] h4, [data-testid="stAppViewContainer"] h5 {
+  font-size: 0.9rem; font-weight: 600; color: var(--cs-muted); margin: 1rem 0 0.3rem;
+}
+[data-testid="stAppViewContainer"] hr { margin: 1.4rem 0; border-color: var(--cs-line); }
+
+/* keep secondary text-blocks legible (the redacted-preview tail, etc.) */
+[data-testid="stText"], .stText { color: var(--cs-ink); }
+[data-testid="stCode"], pre, [data-testid="stCodeBlock"] {
+  border: 1px solid var(--cs-border) !important;
+  border-radius: var(--cs-radius-sm) !important;
+  background: #fafbfd !important;
+}
+
+/* ---------- sidebar: quiet, out of the way ---------- */
+[data-testid="stSidebar"] { background: var(--cs-panel); border-right: 1px solid var(--cs-border); }
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h1 { font-size: 1.05rem; font-weight: 700; }
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h2,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3 {
+  font-size: 0.8rem; font-weight: 600; letter-spacing: .03em; text-transform: uppercase;
+  color: var(--cs-muted); border: 0; margin: 1.2rem 0 0.4rem;
+}
+[data-testid="stSidebar"] p, [data-testid="stSidebar"] [data-testid="stCaptionContainer"] { font-size: 0.82rem; }
+
+/* ---------- buttons: one shape, full state vocabulary ---------- */
+.stButton > button, [data-testid="stBaseButton-secondary"],
+[data-testid="stBaseButton-primary"], [data-testid="stBaseButton-secondaryFormSubmit"] {
+  border-radius: var(--cs-radius-sm);
+  font-weight: 600; font-size: 0.9rem;
+  padding: 0.6rem 1.25rem;
+  border: 1px solid var(--cs-border);
+  transition: background .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease, transform .12s ease;
+}
+[data-testid="stBaseButton-secondary"] { background: var(--cs-surface); color: var(--cs-ink); }
+[data-testid="stBaseButton-secondary"]:hover:not(:disabled) {
+  border-color: var(--cs-accent); color: var(--cs-accent); background: var(--cs-accent-soft);
+}
+[data-testid="stBaseButton-primary"] {
+  background: var(--cs-accent); border-color: var(--cs-accent); color: #fff;
+  box-shadow: 0 4px 14px rgba(79,70,229,.28);
+}
+[data-testid="stBaseButton-primary"]:hover:not(:disabled) {
+  background: var(--cs-accent-hover); border-color: var(--cs-accent-hover); transform: translateY(-1px);
+}
+.stButton > button:active:not(:disabled) { transform: translateY(0); }
+.stButton > button:disabled, [data-testid^="stBaseButton"]:disabled { opacity: 0.5; box-shadow: none; }
+.stButton > button:focus-visible, [data-testid^="stBaseButton"]:focus-visible {
+  outline: 2px solid var(--cs-accent); outline-offset: 2px;
+}
+
+/* destructive action reads as a warning, not the happy path */
+.st-key-wipe_phi_btn [data-testid="stBaseButton-primary"] {
+  background: var(--cs-danger-soft); border-color: var(--cs-danger-line); color: var(--cs-danger); box-shadow: none;
+}
+.st-key-wipe_phi_btn [data-testid="stBaseButton-primary"]:hover:not(:disabled) {
+  background: var(--cs-danger); border-color: var(--cs-danger); color: #fff; transform: none;
+}
+
+/* ---------- inputs ---------- */
+[data-testid="stTextInput"] input, [data-testid="stTextArea"] textarea,
+[data-testid="stNumberInput"] input, [data-baseweb="select"] > div {
+  border-radius: var(--cs-radius-sm) !important;
+  border-color: var(--cs-border) !important;
+  background: var(--cs-surface) !important;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+[data-testid="stTextInput"] input:focus, [data-testid="stTextArea"] textarea:focus {
+  border-color: var(--cs-accent) !important;
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12) !important;
+}
+
+/* ---------- tabs: a segmented pill ---------- */
+[data-baseweb="tab-list"] {
+  background: #f3f4f6; border-radius: 10px; padding: 4px; gap: 4px;
+  border-bottom: 0; display: inline-flex;
+}
+[data-baseweb="tab"] {
+  border-radius: 8px; padding: 0.4rem 1rem;
+  font-size: 0.88rem; font-weight: 550; color: var(--cs-muted);
+  transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+}
+[data-baseweb="tab"][aria-selected="true"] {
+  background: #fff; color: var(--cs-ink); box-shadow: 0 1px 3px rgba(0,0,0,.09);
+}
+[data-baseweb="tab-highlight"], [data-baseweb="tab-border"] { display: none; }
+
+/* ---------- expanders, alerts, dataframe, dropzone: consistent surface ---------- */
+[data-testid="stExpander"] details {
+  border: 1px solid var(--cs-border); border-radius: 12px; background: var(--cs-surface);
+}
+[data-testid="stExpander"] summary:hover { color: var(--cs-accent); }
+
+[data-testid="stAlert"] { border-radius: 12px; border: 1px solid var(--cs-border); }
+[data-testid="stAlertContentInfo"] { background: var(--cs-accent-soft); border-color: #c7d2fe; }
+[data-testid="stAlertContentSuccess"] { background: var(--cs-safe-soft); border-color: var(--cs-safe-line); }
+[data-testid="stAlertContentWarning"] { background: var(--cs-warn-soft); border-color: var(--cs-warn-line); }
+[data-testid="stAlertContentError"] { background: var(--cs-danger-soft); border-color: var(--cs-danger-line); }
+
+[data-testid="stDataFrame"], [data-testid="stTable"] {
+  border: 1px solid var(--cs-border); border-radius: 12px; overflow: hidden;
+}
+
+[data-testid="stFileUploaderDropzone"] {
+  border: 1.5px dashed #cdd2dc; border-radius: 14px; background: #fafbfd;
+  transition: border-color .16s ease, background .16s ease, color .16s ease;
+}
+[data-testid="stFileUploaderDropzone"]:hover {
+  border-color: var(--cs-accent); background: var(--cs-accent-soft); color: var(--cs-accent);
+}
+
+[data-testid="stProgress"] > div > div > div { background: var(--cs-accent); }
+
+[data-testid="stRadio"] label, [data-testid="stCheckbox"] label { transition: color .16s ease; }
+
+/* selectable text in the redacted preview / code blocks */
+::selection { background: rgba(79,70,229,.18); }
+</style>
+"""
+
+
+def _inject_app_css() -> None:
+    """CareScribe's visual identity, applied once per rerun.
+
+    Streamlit's theming only reaches five colour tokens and a font family
+    (see ``.streamlit/config.toml``); everything else — typography scale,
+    component state vocabulary, the section-header stepper, the destructive
+    button treatment — is this CSS. It touches presentation only; no widget
+    behaviour, key, or callback changes.
+    """
+    st.markdown(_APP_CSS, unsafe_allow_html=True)
+
+
 def main() -> None:
+    _inject_app_css()
     render_sidebar()
 
     st.title("CareScribe — de-identification & review")
@@ -1729,11 +2158,24 @@ def main() -> None:
         render_engine_failure(engine_state)
         return
 
-    section_load()
-    section_process()
-    section_review()
-    section_batch_status()
-    section_handoff()
+    # Each numbered step gets its own card (see _APP_CSS). Sections still guard
+    # themselves — the predicates here only decide whether to open a card, so a
+    # step that has nothing to show never leaves an empty box behind.
+    docs = documents()
+    order = st.session_state.order
+    has_review = bool(docs) and any(
+        docs[name].analyzed and not docs[name].error for name in order
+    )
+    steps = [(section_load, True), (section_process, bool(docs)),
+             (section_review, has_review), (section_batch_status, bool(docs)),
+             (section_handoff, True)]
+    for section, show in steps:
+        if not show:
+            continue
+        with st.container(border=True):
+            # Marks this border wrapper as a step card for _APP_CSS; hidden.
+            st.markdown('<span class="cs-card"></span>', unsafe_allow_html=True)
+            section()
 
     st.divider()
     st.caption(

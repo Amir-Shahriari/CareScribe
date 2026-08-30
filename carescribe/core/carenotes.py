@@ -21,7 +21,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable, Iterator, Protocol
 
-from . import mapping, ollama_client
+from . import deidentify, mapping, ollama_client
 
 PROMPT_DIR = Path(__file__).resolve().parent.parent / "prompts"
 
@@ -137,6 +137,42 @@ def assert_deidentified(text: str, phi_values: Iterable[str] | None = None) -> N
             )
 
 
+def assert_no_residual_identifiers(text: str, acknowledged: Iterable[str] = ()) -> None:
+    """Refuse to send text the residual sweep still flags.
+
+    :func:`assert_deidentified` only catches values that are in the identity
+    mapping — something a detector found. This is the complementary check: an
+    identifier *no* layer ever detected is not in the mapping and not a
+    placeholder, so only a re-scan of the outgoing text can catch it. Runs
+    :func:`carescribe.core.deidentify.residual_scan` and raises unless every
+    finding is one the reviewer explicitly cleared at approval (``acknowledged``
+    — the document's ``dismissed`` list, e.g. a town used as a place of care).
+
+    Approval already runs this sweep; reaching here with a fresh finding means
+    the approved text and the text handed to the model have diverged, or a
+    dismissal was lost. The crash is deliberate — a leak becomes a stop, not a
+    send.
+    """
+
+    def norm(value: str) -> str:
+        return " ".join(str(value or "").split()).casefold()
+
+    cleared = {norm(value) for value in acknowledged}
+    leaked = [
+        value
+        for value in deidentify.residual_scan(text or "")
+        if norm(value) not in cleared
+    ]
+    if leaked:
+        raise CareNoteError(
+            "Refusing to generate: the text handed to the model still contains "
+            "what look like identifiers the review did not clear — "
+            + ", ".join(repr(value) for value in leaked[:10])
+            + ". Generation must only ever receive approved de-identified text; "
+            "treat this as a bug in the approval path."
+        )
+
+
 def generate_document(
     deidentified_text: str,
     template: str,
@@ -145,6 +181,7 @@ def generate_document(
     *,
     custom_instruction: str = "",
     phi_values: Iterable[str] | None = None,
+    acknowledged: Iterable[str] = (),
     system: str | None = None,
     user_prompt: str | None = None,
 ) -> Iterator[str]:
@@ -152,6 +189,12 @@ def generate_document(
 
     ``phi_values`` is the mapping's real values, passed **only** so this
     function can assert they are absent. They are never forwarded to a backend.
+
+    ``acknowledged`` is the document's ``dismissed`` list — residual-sweep
+    findings the reviewer looked at and cleared. It carries no PHI (every
+    string in it is one the reviewer read in the de-identified text) and is
+    used only to keep :func:`assert_no_residual_identifiers` from tripping on
+    a finding approval already accepted.
 
     ``system``/``user_prompt`` let a caller (the clinical-form pipeline)
     supply a fully-built prompt instead of looking one up by ``template``
@@ -162,6 +205,7 @@ def generate_document(
         raise CareNoteError("There is no de-identified text to work from.")
 
     assert_deidentified(deidentified_text, phi_values)
+    assert_no_residual_identifiers(deidentified_text, acknowledged)
     prompt = user_prompt if user_prompt is not None else render_prompt(
         deidentified_text, template, custom_instruction
     )
@@ -179,6 +223,7 @@ def refine_document(
     *,
     history: list[tuple[str, str]] | None = None,
     phi_values: Iterable[str] | None = None,
+    acknowledged: Iterable[str] = (),
     system: str | None = None,
     refine_prompt_name: str = "refine.txt",
 ) -> Iterator[str]:
@@ -201,6 +246,7 @@ def refine_document(
 
     assert_deidentified(draft, phi_values)
     assert_deidentified(instruction, phi_values)
+    assert_no_residual_identifiers(deidentified_text, acknowledged)
 
     steer = instruction.strip()
     if history:
@@ -281,6 +327,7 @@ __all__ = [
     "OllamaBackend",
     "TEMPLATES",
     "assert_deidentified",
+    "assert_no_residual_identifiers",
     "finalise",
     "generate_care_note",
     "generate_document",

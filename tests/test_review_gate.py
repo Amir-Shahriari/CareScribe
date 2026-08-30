@@ -111,7 +111,7 @@ def test_dismissing_a_flag_clears_it():
 
 
 # ==========================================================================
-# The gate — blocked while anything is outstanding
+# The gate — only the authoritative safety sweep blocks
 # ==========================================================================
 
 def test_blocking_reason_empty_when_nothing_outstanding():
@@ -123,14 +123,18 @@ def test_blocking_reason_reports_residual_first():
     assert "1 finding" in reason
 
 
-def test_blocking_reason_reports_outstanding_spans():
-    reason = review_checklist.blocking_reason([], 2)
-    assert "2" in reason and "span" in reason
+def test_advisory_spans_do_not_block_approval():
+    """Low-confidence redactions are already in place; the permissive flags are
+    advisory. Neither gates the write — only the authoritative sweep does."""
+    assert review_checklist.blocking_reason([], 2) == ""
+    assert review_checklist.blocking_reason([], 99) == ""
 
 
-def test_approval_is_blocked_while_a_flag_is_outstanding():
-    reason = review_checklist.blocking_reason([], 1)
-    assert reason != ""
+def test_an_advisory_flag_alone_no_longer_blocks_approval():
+    """The streamlined gate: a permissive flag the reviewer left untouched does
+    not grey Approve. The sweep re-run inside write_approved still refuses any
+    real identifier, so the guarantee holds."""
+    assert review_checklist.blocking_reason([], 1) == ""
 
 
 def test_approval_is_blocked_while_the_sweep_has_findings():
@@ -191,6 +195,17 @@ def test_the_sidecar_records_the_review(record):
     assert data["identifiers_reviewed_by_practitioner"] == 2
     assert data["candidate_flags"] == {"shown": 7, "redacted": 2, "dismissed": 5}
     assert data["reviewed_at"]
+    # Not passed by the fixture, so it defaults to False.
+    assert data["reviewer_attested"] is False
+
+
+def test_the_sidecar_records_the_attestation(tmp_path, monkeypatch):
+    monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path / "out")
+    path = batch.write_review_record(
+        "referral.docx", entities=ENTITIES,
+        flags_shown=0, flags_redacted=0, flags_dismissed=0, attested=True,
+    )
+    assert json.loads(path.read_text(encoding="utf-8"))["reviewer_attested"] is True
 
 
 def test_the_sidecar_tallies_placeholders_by_type(record):

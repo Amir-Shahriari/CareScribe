@@ -88,6 +88,61 @@ def test_generation_refuses_text_that_still_holds_a_mapping_value():
     assert backend.calls == 0
 
 
+def test_generation_refuses_an_identifier_no_layer_ever_detected():
+    """The complement of the mapping-value check: a leaked identifier that was
+    never detected is not in `phi_values`, so only a residual re-scan catches
+    it. This is the NER-recall backstop, at the last possible moment."""
+    leaky = DEIDENTIFIED + "\nCall 07700 900461 if the picture changes.\n"
+    backend = RecordingBackend()
+    with pytest.raises(carenotes.CareNoteError) as excinfo:
+        list(
+            carenotes.generate_document(
+                leaky, "SOAP care note", backend,
+                phi_values=list(PHI_MAP.values()),
+            )
+        )
+    assert "07700 900461" in str(excinfo.value)
+    assert backend.calls == 0
+
+
+def test_a_finding_the_reviewer_cleared_does_not_block_generation():
+    """`acknowledged` carries the residual-sweep findings approval accepted
+    (a town used as a place of care, say). Generation must not re-litigate
+    them."""
+    kept = DEIDENTIFIED + "\nSeen at the community clinic in Harrogate.\n"
+    backend = RecordingBackend()
+    list(
+        carenotes.generate_document(
+            kept, "SOAP care note", backend,
+            phi_values=list(PHI_MAP.values()),
+            acknowledged=["Harrogate"],
+        )
+    )
+    assert backend.calls == 1
+
+
+def test_refine_also_rescans_the_source_for_missed_identifiers():
+    leaky = DEIDENTIFIED + "\nSigned by Adeyinka Okonkwo.\n"
+    backend = RecordingBackend()
+    with pytest.raises(carenotes.CareNoteError):
+        list(
+            carenotes.refine_document(
+                leaky, "A prior draft body.", "make the plan shorter", backend,
+                phi_values=list(PHI_MAP.values()),
+            )
+        )
+    assert backend.calls == 0
+
+
+def test_assert_no_residual_identifiers_is_a_standalone_check():
+    carenotes.assert_no_residual_identifiers("[PATIENT] was reviewed on the ward.")
+    with pytest.raises(carenotes.CareNoteError):
+        carenotes.assert_no_residual_identifiers("Ring 0161 496 0245 for the ward.")
+    carenotes.assert_no_residual_identifiers(
+        "Ring 0161 496 0245 for the ward.", acknowledged=["0161 496 0245"]
+    )
+
+
 def test_the_mapping_itself_is_never_a_parameter_to_the_backend():
     """`phi_values` exists to assert absence, never to be forwarded."""
     backend = RecordingBackend()
