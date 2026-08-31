@@ -105,8 +105,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1787945616.2825036,
-    "ast_hash": "c7d483765b11f5ea0b8b628a31a8ed36",
+    "mtime": 1788212930.6697161,
+    "ast_hash": "52627bacc29ee57b35a17ebbb4ec2cae",
     "semantic_hash": ""
   },
   "requirements.txt": {
@@ -295,14 +295,14 @@
     "semantic_hash": "e5e9983ebca4d8e5499071f670e3ba49"
   },
   "packaging/build_macos.sh": {
-    "mtime": 1785992280.9657018,
-    "ast_hash": "72bb4449476873e2f4154fbfd1b66b91",
-    "semantic_hash": "72bb4449476873e2f4154fbfd1b66b91"
+    "mtime": 1788212554.6408463,
+    "ast_hash": "801af5f5e438e7b22403ee728aebe620",
+    "semantic_hash": ""
   },
   "packaging/build_windows.ps1": {
-    "mtime": 1785992280.9657018,
-    "ast_hash": "3fcdb890673a4225028db10a06145b87",
-    "semantic_hash": "3fcdb890673a4225028db10a06145b87"
+    "mtime": 1788212554.6413574,
+    "ast_hash": "4b2cf2464c19c35c0bc62d0b407d5f45",
+    "semantic_hash": ""
   },
   "packaging/hooks/rthook_carescribe.py": {
     "mtime": 1785991247.5727258,
@@ -552,6 +552,41 @@
   "docs/superpowers/specs/2026-08-29-retrieval-planner-design.md": {
     "mtime": 1787945609.5096476,
     "ast_hash": "47f822101d690edf42892d65c4f8ae9b",
+    "semantic_hash": ""
+  },
+  ".agents/BOARD.md": {
+    "mtime": 1788212710.1674662,
+    "ast_hash": "1ec635937e58e5367f2333dfbe009b31",
+    "semantic_hash": ""
+  },
+  ".agents/tasks/TEMPLATE.md": {
+    "mtime": 1788205335.8186276,
+    "ast_hash": "d17c1bdf8b156aabcd613239cd4e6a89",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1788211001.8109932,
+    "ast_hash": "609f534ae3aaa117a09fbf88bc655976",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-09-01-local-clinical-llm-finetune-design.md": {
+    "mtime": 1788210673.429844,
+    "ast_hash": "f7d780f5e9b534fcab3f4ab5798401e3",
+    "semantic_hash": ""
+  },
+  "packaging/requirements-build.txt": {
+    "mtime": 1788212554.6632483,
+    "ast_hash": "11765844c9d42ddf32136c33100e6249",
+    "semantic_hash": ""
+  },
+  "docs/download-and-install.md": {
+    "mtime": 1788212951.0950377,
+    "ast_hash": "e322a065bf30e636e437465d83c9c348",
+    "semantic_hash": ""
+  },
+  ".github/workflows/release.yml": {
+    "mtime": 1788213011.9606054,
+    "ast_hash": "99a3c3a5ba0e2c75e77aa6f8a9071f7c",
     "semantic_hash": ""
   }
 }
