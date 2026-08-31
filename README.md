@@ -39,6 +39,10 @@ This tool is a drafting aid, not a compliance control. Specifically:
 
 ---
 
+## Download
+
+For Windows and macOS, see [Installation Guide](docs/download-and-install.md).
+
 ## Privacy invariants
 
 These are the properties the code is structured to make checkable, not just to claim:
