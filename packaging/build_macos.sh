@@ -8,7 +8,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-python3 -m pip install --quiet pyinstaller pywebview psutil llama-cpp-python
+python3 -m pip install -r packaging/requirements-build.txt
 
 python3 packaging/make_icon.py
 

@@ -1,0 +1,13 @@
+# Build-only dependencies. NOT runtime deps — see requirements.txt.
+# Nothing here is imported by the app; these exist to freeze it with "PyInstaller".
+
+pyinstaller==6.10.0
+pyinstaller-hooks-contrib==2024.8.0
+pywebview==5.0.2
+psutil==6.0.0
+llama-cpp-python==0.2.39
+
+# The CPU wheel index is required for building on Windows:
+# https://abetlen.github.io/llama-cpp-python/whl/cpu
+# This package is optional — the app degrades to Ollama / download-on-first-run if it is absent,
+# and carescribe.spec already guards its collect_all.

@@ -9,8 +9,7 @@ $ErrorActionPreference = "Stop"
 Set-Location (Split-Path $PSScriptRoot -Parent)
 
 Write-Host "Installing build dependencies..."
-python -m pip install --quiet pyinstaller pywebview psutil
-python -m pip install --quiet llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+python -m pip install -r packaging\requirements-build.txt --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
 
 Write-Host "Generating icon..."
 python packaging\make_icon.py
