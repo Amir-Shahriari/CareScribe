@@ -224,3 +224,38 @@ patched, timeout-protected workers running.
   module") — 64k helps but qwen3.8 is dense and slow (~15-20 tok/s at 64k).
 - Workers run in conda `base`, which has no `pytest`. The cockpit verifies the
   suite on the integration branch with the `medgpt` env after each merge.
+
+## UI refinement — calm-clinical, elevated (2026-09-01)
+
+Refinement (identity/copy/behaviour kept) of the incumbent CareScribe world,
+driven by the `impeccable` skill. Direction: a clinical instrument that always
+shows the reviewer where they stand in an irreversible pipeline.
+
+- `carescribe/ui/theme.py` — the stylesheet (was `_APP_CSS` in app.py), now a
+  module with the direction contract in its docstring; refined tokens, themed
+  browser surfaces (scrollbars/caret/selection/link), tabular-nums, and blocks
+  for the new components.
+- `carescribe/ui/components.py` — a drawn 1.5px-stroke SVG icon set (no emoji)
+  + HTML helpers: `hero()` (dynamic privacy pill), `step_tracker()` (Load →
+  De-identify → Review → Approve → Generate; fills as the reviewer advances —
+  the signature interaction), `chip()`/`status_chip()`, `detection_layer()`,
+  `stat_strip()`, `empty_state()`.
+- `app.py` — `main()` renders masthead + tracker (step from pipeline state);
+  `render_sidebar()` uses the icons + chip layers + stat strip;
+  `section_batch_status()` is now a `.cs-table` with status chips;
+  `privacy_indicator()` uses `:material/` icons.
+- Tests: `tests/test_ui_components.py` (7), `tests/test_app.py` title check
+  updated. Full repo **1110 passed, 1 skipped**.
+- Verified in Chrome end-to-end: tracker fills through load→de-id→review,
+  chip table renders, no console errors.
+- Commits `e5d7d27`, `8ca9360`.
+
+### Swarm tasks 015 / 016 — both failed, cockpit did them
+- **015** (batch-status chip table → coder): worker branch was on a stale
+  base (pre-UI-module) and rebuilt `ui/components.py` + `ui/theme.py` as
+  trivial stubs that would clobber the real ones; still called `st.dataframe`.
+  Rejected, not cherry-picked. Cockpit wrote it.
+- **016** (ui-component tests → quick): `opencode run` usage error, 0 edits.
+  Cockpit wrote it.
+Swarm workers remain unreliable for this repo (see earlier tally); they also
+need their base reset to the current integration branch, not a stale one.
