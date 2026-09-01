@@ -56,19 +56,33 @@ Commits after `356369a`:
 - `bc776e5` feat(finetune): assemble layer + M1 dry-run pipeline
 - `7e0ba39` feat(finetune): stdlib identifier injector (was task 014)
 
-**M1 MILESTONE MET.** `python -m finetune.assemble.build_dataset --n 200`
-produces 200/200 validated SFT pairs, 176/12/12 stratified split + manifest,
-all four validators green by construction. **65 finetune tests, full repo
-1082 passed / 1 skipped.**
+**All fine-tune code built & tested (M1–M3 + M5 wiring). Full repo 1101
+passed, 1 skipped. ~83 finetune tests.** Commits `e9bcc3b`..`51440f1`.
 
-`finetune/` now has: `datagen/` (schema, sampling, vignettes×10 across 5
-domains, sampler, render_note ×4 styles, identifiers, generator_backend),
-`assemble/` (deidentify_notes, build_target, validators, pairs, manifest,
-build_dataset), `integrate/prompt_template`.
+`finetune/` complete:
+- `datagen/` — schema, sampling, vignettes×10 / 5 domains, sampler,
+  render_note (4 styles), identifiers (stdlib, valid NHS check digit),
+  generator_backend.
+- `assemble/` — deidentify_notes (real de-id, no-socket test),
+  build_target (deterministic fact→form scaffold), validators (4 gates),
+  pairs, manifest, **build_dataset** (`python -m finetune.assemble.build_dataset`
+  → M1: 200/200 validated pairs, 176/12/12 split + manifest).
+- `eval/` — metrics (gates reused + style_match), run_eval (Completer
+  protocol, GgufCompleter, ship gate ≤1.15× latency), regression
+  (stress_corpus + sample_documents), report (EVAL_REPORT.md).
+  `python -m finetune.eval --base-gguf X --tuned-gguf Y`.
+- `train/` — sft.py (QLoRA for 16 GB: 4-bit NF4, r16/a32, batch1×accum16,
+  grad-ckpt, paged_adamw_8bit, assistant-only loss), merge_and_convert.sh,
+  modelcard.py, dpo.py (make_rejected tested; trainer a stub).
+- `integrate/` — prompt_template (shared w/ carescribe), grammar.py (GBNF:
+  pins headings, bare `[` impossible outside a known placeholder).
+- `config/` — models.yaml (bake-off candidates + licences), train.yaml
+  (5080 hyperparams), datagen.yaml (corpus mix).
+- `finetune/README.md` — M1–M5 run guide with exact M4 commands.
 
-**Next:** eval/ (metrics reuse validators; run_eval base-vs-tuned; report) →
-train/ (sft.py QLoRA config for the 5080, merge_and_convert.sh, modelcard.py)
-→ integrate/grammar.py (GBNF) → then the user runs M4 (the GPU training).
+**REMAINING = the user's:** M2 full corpus (needs local Ollama 7–8B for
+prose polish), **M4 the QLoRA run on the RTX 5080** (per README), then
+M5 wiring the winning GGUF + grammar + model card into the app.
 
 ### SWARM WORKERS: not viable for this build (2026-09-01)
 Tally on fine-tune tasks: coder no-op'd 008 & 011, produced working code on
