@@ -114,6 +114,8 @@ def build(
     pairs = []
     dropped = 0
     reasons: dict[str, int] = {}
+    stride = max(1, round(1 / template_fraction)) if template_fraction > 0 else 0
+    note_i = 0  # rotates the built-in note types independently of the template slot
 
     for i, facts in enumerate(
         sample_encounters(n, seed=seed, gap_probability=gap_probability)
@@ -130,10 +132,9 @@ def build(
             )
             continue
 
-        _stride = max(1, round(1 / template_fraction)) if template_fraction > 0 else 0
-        as_template = bool(specs) and _stride and (i % _stride == 0)
+        as_template = bool(specs) and stride and (i % stride == 0)
         if as_template:
-            spec = specs[i % len(specs)]
+            spec = specs[(i // stride) % len(specs)]
             form = FormType.UPLOADED_TEMPLATE
             target = build_target(facts, form, form_spec=spec)
             report = validate(
@@ -142,7 +143,8 @@ def build(
             )
         else:
             spec = None
-            form = forms[i % len(forms)]
+            form = forms[note_i % len(forms)]
+            note_i += 1
             target = build_target(facts, form)
             report = validate(
                 target, facts, form, known_placeholders=deid.known_placeholders
