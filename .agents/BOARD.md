@@ -16,8 +16,10 @@ Task specs: `.swarm/queue/<worker>/<id>-<slug>.task.md`
 | 008 | tiny `summary()` helper + test | coder | swarm/coder | **no-op** — worker relaunched OK and ran, but qwen3-coder emitted a malformed tool call; zero edits. Pipeline plumbing verified; nothing to merge. |
 | 009 | `docs/swarm-pipeline.md` one-liner | quick | swarm/quick | **done** — merged `978efe5`, tests green. Full self-service loop (pickup→commit→result→done) confirmed on patched worker (~5 min; qwen3.8@64k is slow). |
 | 010 | `buildinfo.user_agent()` + test | coder | swarm/coder | **done** — merged `356369a`, `1015 passed`. First task run with the codebase orientation map prepended; coder used proper tool calls, 36s. |
-| 011 | Make desktop build reproducible + self-verifying (pin bundled spaCy model, drop bogus hidden import, bump build-tool pins, add `verify_frozen.py` boot check gated into both build scripts) | cockpit | feat/retrieval-augmented-clinical-forms | **done (uncommitted)** — coder no-op'd it (qwen3-coder wandered into mapping.py, 0 edits, like 008); cockpit did it directly. `carescribe.spec` pins one model via `deidentify.PACKAGED_DEFAULT_MODEL` + `CARESCRIBE_SPACY_MODEL` override, hard-errors if absent; `sklearn.utils._typedefs` removed; `requirements-build.txt` → pyinstaller 6.21.0; new `packaging/verify_frozen.py` gated into both build scripts. Verified: clean freeze bundles `en_core_web_sm` (`dist` 866 MB→456 MB), no build ERROR, `verify_frozen.py` PASS in ~1s, absent-model path exits 1 with a clear message, `1018 passed, 1 skipped` (medgpt env). Changes left in the working tree per "commit only when asked". |
-| 012 | `finetune/` scaffold + `datagen/schema.py` (`EncounterFacts` pydantic v2 model, `FormType`/`EncounterType` enums, config YAML skeletons, `finetune/tests/test_schema.py`) | quick | swarm/quick @ `0c3f794` | **partial — TIMED OUT at 600s.** Scaffold done and clean (README, pyproject, 3 config skeletons, package inits — 8 files) but ran out before `schema.py` / `test_schema.py` (the substance). Wasted ~3 min hunting the design doc, which is untracked so absent from the worker's branch. Not yet cherry-picked. `schema.py` still needs doing. |
+| 011 | desktop build reproducible + self-verifying | cockpit | `a2d9345` | **done, committed.** coder no-op'd; cockpit wrote it. |
+| 012 | `finetune/` scaffold + schema | quick→cockpit | `0c3f794`→`ca54bd8` | quick TIMED OUT after scaffold only; cockpit wrote `schema.py` + rest, folded into `ca54bd8`. |
+| 013 | `finetune/datagen/generator_backend.py` | coder | `25884c2` | **done, cherry-picked.** coder produced working code + 7 tests, then idled into the 600s cap. |
+| 014 | `finetune/datagen/identifiers.py` | quick→cockpit | `7e0ba39` | quick TIMED OUT with ZERO edits (10 min reading). cockpit wrote it (stdlib, no Faker). |
 
 ### Worker capability ceiling on the fine-tune workstream (2026-09-01)
 coder (qwen3-coder-30b) no-op'd 008 and 011; quick (qwen3.8-27b) timed out on 012
@@ -43,31 +45,47 @@ inference variant only (stock or LoRA'd later on rented 24 GB+).
   default to Phi-3.5-mini if within noise. MedGemma-27B wired later as the
   GPU-detected inference upgrade only.
 
-### Fine-tune progress — cockpit-driven (uncommitted, on integration branch)
-- `0c3f794` (quick's scaffold) cherry-picked `--no-commit` into the working tree.
-- **schema:** `finetune/datagen/schema.py` — `EncounterFacts` + `Demographics`/
-  `Medication`/`HistoryItem`/`Finding`/`Result`/`PlanItem` (all `extra=forbid`),
-  `FormType`/`EncounterType` str-enums, identifier-shape validator on
-  Demographics, `documented_gaps` must name an empty gappable field, `FIELD_NAMES`
-  / `GAPPABLE_FIELDS` exports.
-- **shared prompt:** `finetune/integrate/prompt_template.py` — imports the
-  system/user strings verbatim from `carescribe.prompts.carenotes_prompt`,
-  maps `FormType`→(system, instruction), `build_messages()` with style-exemplar
-  support. One-way dep; carescribe never imports finetune.
-- **tests:** `finetune/tests/test_schema.py` (7) + `test_prompt_template.py` (7),
-  all green. Full repo suite **1032 passed, 1 skipped** (1018 app + 14 finetune).
-- **datagen:** `sampling.py` (Choice/Weighted/Range/Subset markers + `resolve`),
-  `vignettes/` package — 10 skeletons across 5 domains (general practice,
-  community mental health, cardiology, respiratory, elderly care) spanning
-  new/follow-up/discharge/handover/crisis; `sampler.py` — `expand()` +
-  `sample_encounters()`, seeded/deterministic, `gap_probability` blanks
-  gappable fields into `documented_gaps`.
-- **tests:** +`test_sampler.py` (6, incl. per-vignette parametrised validity).
-  Full repo suite **1047 passed, 1 skipped** (1018 app + 29 finetune).
-- `graphify update .` run.
-- **Next:** render_note.py + generator_backend.py (template mode) +
-  identifiers.py → assemble/ (de-id wrap, build_target, the 4 validators, pairs,
-  manifest) → M1 dry run (200 pairs).
+### Fine-tune progress — cockpit-driven, COMMITTED on integration branch
+
+Commits after `356369a`:
+- `e9bcc3b` fix(carenotes): token-bound the mapping-value generation guard
+  (the app bug the user hit — see "App bug" below)
+- `a2d9345` build: reproducible + self-verifying freeze (was task 011)
+- `ca54bd8` feat(finetune): scaffold + schema + sampler + vignettes + prompt_template
+- `25884c2` swarm(coder): 013-generator-backend  (cherry-picked; coder's only useful output)
+- `bc776e5` feat(finetune): assemble layer + M1 dry-run pipeline
+- `7e0ba39` feat(finetune): stdlib identifier injector (was task 014)
+
+**M1 MILESTONE MET.** `python -m finetune.assemble.build_dataset --n 200`
+produces 200/200 validated SFT pairs, 176/12/12 stratified split + manifest,
+all four validators green by construction. **65 finetune tests, full repo
+1082 passed / 1 skipped.**
+
+`finetune/` now has: `datagen/` (schema, sampling, vignettes×10 across 5
+domains, sampler, render_note ×4 styles, identifiers, generator_backend),
+`assemble/` (deidentify_notes, build_target, validators, pairs, manifest,
+build_dataset), `integrate/prompt_template`.
+
+**Next:** eval/ (metrics reuse validators; run_eval base-vs-tuned; report) →
+train/ (sft.py QLoRA config for the 5080, merge_and_convert.sh, modelcard.py)
+→ integrate/grammar.py (GBNF) → then the user runs M4 (the GPU training).
+
+### SWARM WORKERS: not viable for this build (2026-09-01)
+Tally on fine-tune tasks: coder no-op'd 008 & 011, produced working code on
+013 (then idled into the 600s cap); quick timed out on 012 (scaffold only)
+and 014 (zero edits — 10 min just reading files). qwen3-coder-30b is
+unreliable at tool-calling; qwen3.8-27b @ 64k is too slow to read context +
+write a file in 600s. Cockpit is hand-driving the rest. To revive the swarm:
+bump `.swarm/config.json` models to something stronger and relaunch.
+
+### App bug the user hit (2026-09-01) — FIXED in `e9bcc3b`
+Clinical-form generation refused with "the text handed to the model still
+contains a value from the identity mapping". Root cause: `assert_deidentified`
+did a raw casefolded **substring** test floored at `MIN_VALUE_LENGTH` (2), so a
+2-char mapping value ("mm", an honorific fragment, initials, a hand-added
+token) matched inside ordinary words ("co**mm**unity") and blocked a clean
+draft. Fixed: match on token boundaries. Regression tests added. A real
+standalone short leak still blocks.
 
 ## Local clinical LLM fine-tune (started 2026-09-01)
 
