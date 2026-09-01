@@ -89,18 +89,41 @@ def ensure_dirs() -> None:
         path.mkdir(parents=True, exist_ok=True)
 
 
+# A fine-tuned clinical model, if one has been dropped in, is preferred over the
+# stock base — it is the whole point of the finetune/ work. Matched by prefix so
+# a version bump (…-v2.Q4_K_M.gguf) needs no code change.
+CLINICAL_MODEL_PREFIX = "carescribe-clinical-"
+
+
+def _model_search_dirs() -> tuple[Path, ...]:
+    return (
+        resource_path("models"),
+        models_dir(),
+        Path(__file__).resolve().parent.parent.parent / "models",
+    )
+
+
 def find_local_model(filename: str = DEFAULT_MODEL_FILENAME) -> Path | None:
-    """Locate the GGUF: bundled first, then the per-user cache, else ``None``.
+    """Locate the GGUF: a fine-tuned clinical model first, then ``filename``,
+    then the per-user cache, else ``None``.
 
     Bundled wins so a signed build is self-contained and offline from the first
     launch. The cache is the fallback for builds shipped without the weights.
     """
-    for candidate in (
-        resource_path("models", filename),
-        models_dir() / filename,
-        Path(__file__).resolve().parent.parent.parent / "models" / filename,
-    ):
-        if candidate.is_file() and candidate.stat().st_size > 100_000_000:
+    big_enough = lambda p: p.is_file() and p.stat().st_size > 100_000_000
+
+    for directory in _model_search_dirs():
+        try:
+            clinical = sorted(directory.glob(f"{CLINICAL_MODEL_PREFIX}*.gguf"))
+        except OSError:
+            clinical = []
+        for candidate in clinical:
+            if big_enough(candidate):
+                return candidate
+
+    for directory in _model_search_dirs():
+        candidate = directory / filename
+        if big_enough(candidate):
             return candidate
     return None
 

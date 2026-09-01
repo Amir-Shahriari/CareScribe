@@ -268,6 +268,21 @@ def test_resources_resolve_in_a_checkout():
     assert desktop.streamlit_config_path().is_file()
 
 
+def test_a_fine_tuned_clinical_model_is_preferred_over_the_stock_base(tmp_path, monkeypatch):
+    models = tmp_path / "models"
+    models.mkdir()
+    stock = models / desktop.DEFAULT_MODEL_FILENAME
+    tuned = models / "carescribe-clinical-phi35-v2.Q4_K_M.gguf"
+    for p in (stock, tuned):
+        p.write_bytes(b"0" * 200_000_000)  # over the size floor
+
+    monkeypatch.setattr(desktop, "_model_search_dirs", lambda: (models,))
+    assert desktop.find_local_model() == tuned
+
+    tuned.unlink()
+    assert desktop.find_local_model() == stock
+
+
 # ==========================================================================
 # Task 1 — the launcher binds loopback and nothing else
 # ==========================================================================
