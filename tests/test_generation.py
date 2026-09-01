@@ -88,6 +88,48 @@ def test_generation_refuses_text_that_still_holds_a_mapping_value():
     assert backend.calls == 0
 
 
+@pytest.mark.parametrize(
+    "short_value, carrier_word",
+    [
+        ("mm", "in the community mental health team"),
+        ("sr", "a mood disorder was considered"),
+        ("al", "the appraisal was completed"),
+    ],
+)
+def test_a_short_mapping_value_inside_an_ordinary_word_does_not_block(
+    short_value, carrier_word
+):
+    """A 2-char mapping value must not refuse a clean draft just because those
+    characters occur inside a longer word (regression: a hand-added identifier
+    or an honorific fragment poisoned the whole form-generation gate)."""
+    backend = RecordingBackend()
+    list(
+        carenotes.generate_document(
+            f"[PATIENT] was reviewed {carrier_word}. Plan documented.",
+            "SOAP care note",
+            backend,
+            phi_values=[short_value],
+        )
+    )
+    assert backend.calls == 1
+
+
+def test_a_short_mapping_value_as_its_own_token_still_blocks():
+    """The boundary check must not weaken a real leak: a short value standing
+    alone as a token is still PHI reaching the model."""
+    backend = RecordingBackend()
+    with pytest.raises(carenotes.CareNoteError):
+        list(
+            carenotes.generate_document(
+                "[PATIENT] seen. Initials on file: MM. Plan documented.",
+                "SOAP care note",
+                backend,
+                phi_values=["MM"],
+            )
+        )
+    assert backend.calls == 0
+
+
 def test_generation_refuses_an_identifier_no_layer_ever_detected():
     """The complement of the mapping-value check: a leaked identifier that was
     never detected is not in `phi_values`, so only a residual re-scan catches

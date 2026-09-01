@@ -18,6 +18,7 @@ the seam where a provider gets swapped is one method wide.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Iterable, Iterator, Protocol
 
@@ -115,6 +116,21 @@ def render_prompt(
     )
 
 
+def _value_present(needle: str, haystack: str) -> bool:
+    """True only when ``needle`` occurs in ``haystack`` as a whole token run.
+
+    Both are already casefolded and whitespace-collapsed. The match must not be
+    flanked by another alphanumeric character, so a real leaked identifier —
+    which is always delimited by spaces or punctuation — is caught, while a
+    short mapping value that is merely a fragment of an ordinary word is not
+    (``"mm"`` inside ``"community"``, ``"sr"`` inside ``"disorder"``). Without
+    this, a 2–3 character mapping value (an honorific, a set of initials, a room
+    code, a token a reviewer added by hand) refuses generation on text that is
+    perfectly clean.
+    """
+    return re.search(rf"(?<![0-9a-z]){re.escape(needle)}(?![0-9a-z])", haystack) is not None
+
+
 def assert_deidentified(text: str, phi_values: Iterable[str] | None = None) -> None:
     """Refuse to send anything carrying a value from the identity mapping.
 
@@ -123,13 +139,20 @@ def assert_deidentified(text: str, phi_values: Iterable[str] | None = None) -> N
     of PHI — the review gate upstream is what does that — but it turns the one
     failure that would matter most, a mapping value reaching the model, into a
     crash rather than a silent send.
+
+    The comparison is token-bounded, not a raw substring test: a value counts as
+    present only when it appears delimited by non-alphanumeric characters, so a
+    genuine leak still crashes but a short value coinciding with a fragment of
+    an ordinary word does not.
     """
     if not phi_values:
         return
     haystack = " ".join((text or "").split()).casefold()
     for value in phi_values:
         needle = " ".join(str(value or "").split()).casefold()
-        if len(needle) >= mapping.MIN_VALUE_LENGTH and needle in haystack:
+        if len(needle) < mapping.MIN_VALUE_LENGTH:
+            continue
+        if _value_present(needle, haystack):
             raise CareNoteError(
                 "Refusing to generate: the text handed to the model still "
                 "contains a value from the identity mapping. This is a bug — "
