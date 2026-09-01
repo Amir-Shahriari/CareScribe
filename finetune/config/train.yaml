@@ -18,18 +18,20 @@ optim:
 
 runtime:
   devices: 1
-  batch_size: 1                       # per-device; 16 GB is tight at seq 4096
-  gradient_accumulation_steps: 16     # effective batch 16
-  max_seq_length: 4096
+  batch_size: 8                       # 5080 has headroom with packing off
+  gradient_accumulation_steps: 2      # effective batch 16
+  max_seq_length: 2048               # targets+prompts are ~700-1000 tok
   gradient_checkpointing: true
   optim: "paged_adamw_8bit"
   bf16: true
-  packing: true
+  packing: false                     # correctness: no flash-attn on Windows,
+                                     # so packing could bleed attention across
+                                     # samples. Off.
 
 epochs: 3
 
 eval:
-  steps: 100          # run the Phase-D metrics on dev, not just loss
-  save_steps: 200
+  steps: 200
+  save_steps: 400
 
 seed: 0

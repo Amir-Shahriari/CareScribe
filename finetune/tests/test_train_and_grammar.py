@@ -16,10 +16,26 @@ _REPO = Path(__file__).resolve().parents[2]
 def test_train_config_loads_from_the_committed_yaml():
     cfg = TrainConfig.from_yaml(_REPO / "finetune/config/train.yaml")
     assert cfg.lora.r == 16 and cfg.lora.alpha == 32
-    assert cfg.per_device_batch_size == 1
-    assert cfg.grad_accum_steps == 16
-    assert cfg.max_seq_length == 4096
+    # effective batch stays 16 regardless of the batch/accum split
+    assert cfg.per_device_batch_size * cfg.grad_accum_steps == 16
+    assert cfg.packing is False           # no flash-attn -> packing must be off
+    assert cfg.gradient_checkpointing is True
+    assert cfg.optim == "paged_adamw_8bit"
     assert "q_proj" in cfg.lora.target_modules
+
+
+def test_train_config_yaml_overrides_every_runtime_field(tmp_path):
+    y = tmp_path / "t.yaml"
+    y.write_text(
+        "runtime:\n  batch_size: 2\n  gradient_accumulation_steps: 8\n"
+        "  packing: true\n  gradient_checkpointing: false\n  max_seq_length: 1024\n"
+        "epochs: 1\n",
+        encoding="utf-8",
+    )
+    cfg = TrainConfig.from_yaml(y)
+    assert cfg.per_device_batch_size == 2 and cfg.grad_accum_steps == 8
+    assert cfg.packing is True and cfg.gradient_checkpointing is False
+    assert cfg.max_seq_length == 1024 and cfg.epochs == 1
 
 
 def test_load_pairs_round_trips_jsonl(tmp_path):
