@@ -1,0 +1,68 @@
+{
+  "ship": true,
+  "verdict": {
+    "deltas": {
+      "format": 0.48,
+      "faithfulness": 0.26,
+      "placeholder_integrity": 0.0,
+      "residual_clean": 0.06
+    },
+    "base": {
+      "format": 0.52,
+      "faithfulness": 0.74,
+      "placeholder_integrity": 1.0,
+      "residual_clean": 0.94,
+      "n": 50,
+      "style_match": 0.5505479999999999
+    },
+    "tuned": {
+      "format": 1.0,
+      "faithfulness": 1.0,
+      "placeholder_integrity": 1.0,
+      "residual_clean": 1.0,
+      "n": 50,
+      "style_match": 0.998072
+    },
+    "latency_ratio": 0.813,
+    "regressions": [],
+    "latency_ok": true,
+    "ship": true
+  },
+  "base": {
+    "metrics": {
+      "format": 0.52,
+      "faithfulness": 0.74,
+      "placeholder_integrity": 1.0,
+      "residual_clean": 0.94,
+      "n": 50,
+      "style_match": 0.5505479999999999
+    },
+    "median_seconds": 5.422000000020489
+  },
+  "tuned": {
+    "metrics": {
+      "format": 1.0,
+      "faithfulness": 1.0,
+      "placeholder_integrity": 1.0,
+      "residual_clean": 1.0,
+      "n": 50,
+      "style_match": 0.998072
+    },
+    "median_seconds": 4.407000000006519
+  },
+  "regression": {
+    "base": {
+      "format": 1.0,
+      "placeholder_integrity": 1.0,
+      "residual_clean": 0.7,
+      "n": 10
+    },
+    "tuned": {
+      "format": 1.0,
+      "placeholder_integrity": 1.0,
+      "residual_clean": 0.9,
+      "n": 10
+    },
+    "regressions": []
+  }
+}
