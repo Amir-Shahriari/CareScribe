@@ -6,8 +6,8 @@ THESIS: a clinical instrument that always shows the reviewer where they stand
 in an irreversible pipeline; the calm is the trust signal, not decoration.
 OWN-WORLD: near-white ground under a barely-there indigo/teal wash; ink
 #101828 and slate #667085 text; a single indigo accent (#4f46e5); 16px card
-radius; Inter for the interface, IBM Plex Mono for identifiers, paths and model
-names; drawn 1.5px-stroke icons, never emoji.
+radius; IBM Plex Sans for the interface, IBM Plex Mono for identifiers, paths
+and model names (one superfamily); drawn 1.5px-stroke icons, never emoji.
 FIRST VIEWPORT: a quiet masthead (name, one-line purpose, an "offline —
 nothing leaves this computer" lock pill), then a horizontal step tracker
 (Load / De-identify / Review / Approve / Generate) with done, active and
@@ -26,10 +26,14 @@ the browser surfaces — is this file.
 
 from __future__ import annotations
 
+# One superfamily, purpose-built for technical / enterprise products: IBM Plex
+# Sans for the interface, IBM Plex Mono for identifiers, paths and model names.
+# Not Inter — the surface is an instrument, and the type system should read as
+# one designed object rather than the AI-interface default.
 FONT_IMPORT = (
     "@import url('https://fonts.googleapis.com/css2?"
     "family=IBM+Plex+Mono:wght@400;500&"
-    "family=Inter:wght@400;450;500;600;700&display=swap');"
+    "family=IBM+Plex+Sans:wght@400;450;500;600;700&display=swap');"
 )
 
 CSS = f"""
@@ -54,7 +58,7 @@ CSS = f"""
 html, body, [data-testid="stAppViewContainer"], .stApp,
 button, input, textarea, select, [data-testid="stMarkdownContainer"],
 h1, h2, h3, h4, h5, h6, [data-testid="stHeadingContainer"] {{
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important;
+  font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important;
   -webkit-font-smoothing: antialiased;
 }}
 code, kbd, pre, [data-testid="stCode"] *, .stCode *,
@@ -116,25 +120,24 @@ code, kbd, pre, [data-testid="stCode"] *, .stCode *,
 .cs-steps {{
   display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
   margin: 0.9rem 0 0.1rem; gap: 0;
-  padding: 1.05rem 0.5rem 0.9rem;
+  padding: 0.95rem 0.5rem 0.85rem;
   border: 1px solid var(--cs-line); border-radius: var(--cs-radius);
-  background:
-    linear-gradient(#fff, #fff) padding-box,
-    var(--cs-surface);
+  background: var(--cs-surface);
   box-shadow: var(--cs-shadow-sm);
 }}
-.cs-step {{ position: relative; display:flex; flex-direction:column; align-items:center; gap:0.55rem; text-align:center; padding: 0 0.4rem; }}
+.cs-step {{ position: relative; display:flex; flex-direction:column; align-items:center; gap:0.5rem; text-align:center; padding: 0 0.4rem; }}
 .cs-step__dot {{
-  width: 36px; height: 36px; border-radius: 999px; display:grid; place-items:center;
+  width: 34px; height: 34px; border-radius: 999px; display:grid; place-items:center;
   border: 1.5px solid var(--cs-border); background: var(--cs-surface);
   color: var(--cs-faint); flex: none;
+  font-size: 0.85rem; font-weight: 650; font-variant-numeric: tabular-nums;
   transition: border-color .35s var(--cs-ease), background .35s var(--cs-ease), color .35s var(--cs-ease), box-shadow .35s var(--cs-ease);
 }}
-.cs-step__dot svg {{ width: 16px; height: 16px; }}
+.cs-step__dot svg {{ width: 15px; height: 15px; }}
 .cs-step__label {{ font-size: 0.8rem; font-weight: 550; color: var(--cs-faint); letter-spacing: -0.006em; transition: color .35s var(--cs-ease); }}
 /* connector: drawn from the previous dot to this one */
 .cs-step::before {{
-  content: ""; position: absolute; top: 18px; right: 50%; left: -50%; height: 2px;
+  content: ""; position: absolute; top: 17px; right: 50%; left: -50%; height: 2px;
   background: var(--cs-border); z-index: 0; border-radius: 999px;
   transform: scaleX(1); transform-origin: right center;
 }}
@@ -323,7 +326,8 @@ code, kbd, pre, [data-testid="stCode"] *, .stCode *,
 }}
 
 /* hand-rolled batch-status table (section_batch_status) */
-.cs-table {{ width: 100%; border-collapse: collapse; margin-top: 0.6rem; }}
+.cs-table-wrap {{ overflow-x: auto; margin-top: 0.6rem; }}
+.cs-table {{ width: 100%; min-width: 34rem; border-collapse: collapse; }}
 .cs-table th {{
   text-align: left; font-size: 0.72rem; font-weight: 650;
   letter-spacing: 0.04em; text-transform: uppercase; color: var(--cs-faint);

@@ -1110,10 +1110,10 @@ def section_batch_status() -> None:
             "</tr>"
         )
     st.markdown(
-        '<table class="cs-table"><thead><tr>'
+        '<div class="cs-table-wrap"><table class="cs-table"><thead><tr>'
         "<th>#</th><th>Document</th><th>Status</th>"
         "<th>Identifiers</th><th>Approved output</th>"
-        f'</tr></thead><tbody>{"".join(body)}</tbody></table>',
+        f'</tr></thead><tbody>{"".join(body)}</tbody></table></div>',
         unsafe_allow_html=True,
     )
 

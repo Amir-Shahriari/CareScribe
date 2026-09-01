@@ -105,22 +105,17 @@ def hero(title: str, subtitle: str, privacy_state: str = "offline") -> str:
 # Step tracker
 # --------------------------------------------------------------------------
 
-STEPS = (
-    ("Load", "upload"),
-    ("De-identify", "scan"),
-    ("Review", "eye"),
-    ("Approve", "stamp"),
-    ("Generate", "pen"),
-)
+STEPS = ("Load", "De-identify", "Review", "Approve", "Generate")
 
 
 def step_tracker(active: int) -> str:
     """A 5-step progress tracker. ``active`` is a 0-based index; steps before it
-    render done, that one active, the rest upcoming."""
+    render done (a check), that one active, the rest upcoming — each showing its
+    step number, because the sequence is the information."""
     cells = []
-    for i, (label, ic) in enumerate(STEPS):
+    for i, label in enumerate(STEPS):
         state = "done" if i < active else ("active" if i == active else "upcoming")
-        mark = ICON["check"] if state == "done" else ICON[ic]
+        mark = ICON["check"] if state == "done" else str(i + 1)
         cells.append(
             f'<div class="cs-step" data-state="{state}">'
             f'<span class="cs-step__dot">{mark}</span>'
