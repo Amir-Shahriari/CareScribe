@@ -47,14 +47,14 @@ def test_load_pairs_round_trips_jsonl(tmp_path):
 
 def test_grammar_pins_headings_and_constrains_brackets():
     g = build_grammar(FormType.SOAP, ["[PATIENT]", "[DATE_1]"])
-    assert '"**" "S \\u2014 Subjective"' in g or "S — Subjective" in g
-    assert '"[" ( "PATIENT" | "DATE_1" ) "]"' in g
-    assert "[^[]" in g  # a bare '[' is impossible outside a placeholder
+    assert "**S — Subjective**" in g
+    assert 'placeholder ::= "[" ( "PATIENT" | "DATE_1" ) "]"' in g
+    assert "[^[<]" in g  # a bare '[' is impossible outside a placeholder
 
 
 def test_grammar_with_no_placeholders_forbids_brackets_entirely():
     g = build_grammar(FormType.HANDOVER, [])
-    assert "[^[]*" in g
+    assert "[^[<]" in g
     assert "placeholder ::=" not in g
 
 

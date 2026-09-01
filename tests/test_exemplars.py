@@ -104,7 +104,7 @@ class _RecordingBackend:
     def __init__(self):
         self.system = None
 
-    def generate(self, system, prompt, stream=True):
+    def generate(self, system, prompt, stream=True, *, grammar=None):
         self.system = system
         yield "<<FIELD:x>>\nok\n"
 

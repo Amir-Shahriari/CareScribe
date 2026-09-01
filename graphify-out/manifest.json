@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "carescribe/core/carenotes.py": {
-    "mtime": 1788251266.8348978,
-    "ast_hash": "8112454f9a3911dc6f3ce68423b2f0b4",
+    "mtime": 1788274127.155266,
+    "ast_hash": "9e2c88dae78d1dccd2c79591e922ccec",
     "semantic_hash": ""
   },
   "carescribe/core/deidentify.py": {
@@ -270,8 +270,8 @@
     "semantic_hash": "3a9e5548d6bea338fa51daa7955ec8e6"
   },
   "carescribe/core/backends.py": {
-    "mtime": 1787938716.3000143,
-    "ast_hash": "3b53775106f7ace8cf20dcadeb887242",
+    "mtime": 1788273902.270537,
+    "ast_hash": "9468996f547579a89ec2555819f9a230",
     "semantic_hash": ""
   },
   "carescribe/core/desktop.py": {
@@ -370,8 +370,8 @@
     "semantic_hash": "8305e46ab47717d0f23c5968cf553a47"
   },
   "carescribe/core/clinical_forms.py": {
-    "mtime": 1788101006.9048364,
-    "ast_hash": "832c77138f357a45148274ad7c8db3d0",
+    "mtime": 1788273958.0443833,
+    "ast_hash": "9448489fc1fc3638d00b57ab8de8bb47",
     "semantic_hash": ""
   },
   "tests/test_clinical_forms.py": {
@@ -405,9 +405,9 @@
     "semantic_hash": "5a040bd542c6183d0f9bc1aa50c60e1d"
   },
   "tests/test_clinical_forms_generate.py": {
-    "mtime": 1786705705.3614872,
-    "ast_hash": "d8467a17057166bf47d2febf20f8a999",
-    "semantic_hash": "d8467a17057166bf47d2febf20f8a999"
+    "mtime": 1788274232.266935,
+    "ast_hash": "66aa598304fe7b7990c89acc9c368387",
+    "semantic_hash": ""
   },
   "tests/test_app_clinical_forms.py": {
     "mtime": 1786708136.948344,
@@ -464,16 +464,6 @@
     "ast_hash": "e77beeeee3e8be5a2a0c2aef328937f7",
     "semantic_hash": ""
   },
-  "err.txt": {
-    "mtime": 1787330467.0594895,
-    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
-    "semantic_hash": ""
-  },
-  "out.txt": {
-    "mtime": 1787330467.7958093,
-    "ast_hash": "803a7b514f395fac140b2025f8a1abe3",
-    "semantic_hash": ""
-  },
   "carescribe/core/template_ingest.py": {
     "mtime": 1787938034.6599948,
     "ast_hash": "90d82fb0e1689567196c5b4690ecde7c",
@@ -510,8 +500,8 @@
     "semantic_hash": ""
   },
   "tests/test_exemplars.py": {
-    "mtime": 1787939612.405207,
-    "ast_hash": "63c085453cc5847bada50bdcfb4b77d7",
+    "mtime": 1788274232.2751396,
+    "ast_hash": "661cbd1c5685c6187c10e9c9b450e186",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-08-29-house-style-exemplar-retrieval-design.md": {
@@ -845,13 +835,13 @@
     "semantic_hash": ""
   },
   "finetune/integrate/grammar.py": {
-    "mtime": 1788252738.6832662,
-    "ast_hash": "4b0960db134f93225e9db1543ebc58cb",
+    "mtime": 1788273999.145413,
+    "ast_hash": "9933838f2da29390f7f8d45799cbe7db",
     "semantic_hash": ""
   },
   "finetune/tests/test_train_and_grammar.py": {
-    "mtime": 1788255511.1298878,
-    "ast_hash": "ed205ad14bbc6d9c60409cb95d2ab174",
+    "mtime": 1788274104.8568301,
+    "ast_hash": "4cac5f8a63ca7ddd167bfc199e02e4d0",
     "semantic_hash": ""
   },
   "finetune/train/__init__.py": {
@@ -922,6 +912,16 @@
   "tests/test_ui_components.py": {
     "mtime": 1788267366.9595733,
     "ast_hash": "f43b5ac294b39680003bfdff463b617c",
+    "semantic_hash": ""
+  },
+  "carescribe/core/grammar.py": {
+    "mtime": 1788273866.283777,
+    "ast_hash": "e897c8fbd670d4bb0146e6f4865a3c62",
+    "semantic_hash": ""
+  },
+  "tests/test_grammar.py": {
+    "mtime": 1788274145.4388728,
+    "ast_hash": "5cc23e4745aa63ace7a6cdb7c3610e4d",
     "semantic_hash": ""
   }
 }

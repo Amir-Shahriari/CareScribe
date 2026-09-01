@@ -53,9 +53,15 @@ class CareNoteError(RuntimeError):
 
 
 class Backend(Protocol):
-    """One method wide: the seam a different provider would be swapped in at."""
+    """One method wide: the seam a different provider would be swapped in at.
 
-    def generate(self, system: str, prompt: str, stream: bool = True) -> Iterator[str]:
+    ``grammar`` is an optional GBNF string (see :mod:`carescribe.core.grammar`);
+    a backend that cannot use it ignores it.
+    """
+
+    def generate(
+        self, system: str, prompt: str, stream: bool = True, *, grammar: str | None = None
+    ) -> Iterator[str]:
         ...
 
 
@@ -66,7 +72,12 @@ class OllamaBackend:
         self.model = model
         self.temperature = temperature
 
-    def generate(self, system: str, prompt: str, stream: bool = True) -> Iterator[str]:
+    def generate(
+        self, system: str, prompt: str, stream: bool = True, *, grammar: str | None = None
+    ) -> Iterator[str]:
+        # Ollama's HTTP API has no first-class GBNF field across the versions
+        # CareScribe supports, so the grammar is accepted and ignored here; the
+        # local GGUF backend is where constrained decoding runs.
         try:
             yield from ollama_client.generate(
                 self.model, system, prompt, stream, temperature=self.temperature
@@ -207,6 +218,7 @@ def generate_document(
     acknowledged: Iterable[str] = (),
     system: str | None = None,
     user_prompt: str | None = None,
+    grammar: str | None = None,
 ) -> Iterator[str]:
     """Stream a drafted document from approved de-identified text.
 
@@ -234,7 +246,10 @@ def generate_document(
     )
     assert_deidentified(prompt, phi_values)
 
-    return backend.generate(system or system_prompt(), prompt, stream)
+    # Only pass `grammar` when there is one, so a backend (or a test stub) whose
+    # generate() predates the keyword still works for the unconstrained path.
+    extra = {"grammar": grammar} if grammar else {}
+    return backend.generate(system or system_prompt(), prompt, stream, **extra)
 
 
 def refine_document(

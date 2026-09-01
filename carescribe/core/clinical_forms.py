@@ -492,6 +492,18 @@ from typing import Iterable, Iterator
 from . import carenotes
 
 
+_PLACEHOLDER_TOKEN_RE = re.compile(r"\[[A-Z][A-Z0-9_]*\]")
+
+
+def _form_grammar(form_spec: FormSpec, combined_text: str) -> str | None:
+    """A GBNF grammar that requires every ``<<FIELD:key>>`` marker in order and
+    forbids a bracket token that is not one of this document's placeholders."""
+    from . import grammar as _grammar
+
+    placeholders = sorted(set(_PLACEHOLDER_TOKEN_RE.findall(combined_text or "")))
+    return _grammar.field_grammar([f.key for f in form_spec.fields], placeholders)
+
+
 def generate_form_document(
     combined_text: str,
     form_spec: FormSpec,
@@ -507,6 +519,7 @@ def generate_form_document(
         combined_text, form_spec.form_id, backend, stream,
         phi_values=phi_values, acknowledged=acknowledged,
         system=system, user_prompt=user,
+        grammar=_form_grammar(form_spec, combined_text),
     )
 
 

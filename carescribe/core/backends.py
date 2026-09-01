@@ -122,19 +122,31 @@ class LocalGGUFBackend:
         LocalGGUFBackend._cache[path] = model
         return model
 
-    def generate(self, system: str, prompt: str, stream: bool = True) -> Iterator[str]:
+    def generate(
+        self, system: str, prompt: str, stream: bool = True, *, grammar: str | None = None
+    ) -> Iterator[str]:
         model = self._llama()
         messages = [
             {"role": "system", "content": system},
             {"role": "user", "content": prompt},
         ]
+        kwargs: dict = dict(
+            messages=messages,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            stream=bool(stream),
+        )
+        # A GBNF grammar constrains decoding structurally (see
+        # carescribe.core.grammar). Best-effort: a compile failure or a missing
+        # runtime feature just means unconstrained generation.
+        if grammar:
+            from carescribe.core.grammar import compile_grammar
+
+            compiled = compile_grammar(grammar)
+            if compiled is not None:
+                kwargs["grammar"] = compiled
         try:
-            completion = model.create_chat_completion(
-                messages=messages,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                stream=bool(stream),
-            )
+            completion = model.create_chat_completion(**kwargs)
         except Exception as exc:  # noqa: BLE001
             raise BackendError(f"Local generation failed: {exc}") from exc
 
@@ -200,7 +212,12 @@ class CloudBackend:
                 "environment. CareScribe never bundles or stores a key."
             )
 
-    def generate(self, system: str, prompt: str, stream: bool = True) -> Iterator[str]:
+    def generate(
+        self, system: str, prompt: str, stream: bool = True, *, grammar: str | None = None
+    ) -> Iterator[str]:
+        # A remote API cannot be handed a GBNF grammar generically; the
+        # placeholder/format guarantees still hold via assert_deidentified and
+        # parse_fields' "Not documented" default.
         from . import cloud_client
 
         try:
