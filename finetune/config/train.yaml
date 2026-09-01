@@ -18,9 +18,9 @@ optim:
 
 runtime:
   devices: 1
-  batch_size: 8                       # 5080 has headroom with packing off
-  gradient_accumulation_steps: 2      # effective batch 16
-  max_seq_length: 2048               # targets+prompts are ~700-1000 tok
+  batch_size: 4                       # template targets are long; keep VRAM headroom
+  gradient_accumulation_steps: 4     # effective batch 16
+  max_seq_length: 3072               # uploaded-template targets run long
   gradient_checkpointing: true
   optim: "paged_adamw_8bit"
   bf16: true
@@ -28,7 +28,7 @@ runtime:
                                      # so packing could bleed attention across
                                      # samples. Off.
 
-epochs: 3
+epochs: 2
 
 eval:
   steps: 200
