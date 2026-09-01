@@ -286,7 +286,7 @@ def test_generate_report_is_gated_on_approval():
 
     generate = [button for button in app.button if button.label == "Generate report"]
     assert generate and generate[0].disabled
-    assert "approve the document first" in text_of(app.info)
+    assert "approve the document first" in text_of(app.markdown)
 
 
 def test_generation_refuses_empty_text():

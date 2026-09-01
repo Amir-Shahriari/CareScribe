@@ -414,9 +414,9 @@ def test_an_unapproved_document_gets_a_message_not_a_traceback():
     import inspect
 
     source = inspect.getsource(carescribe_app.render_generation_panel)
-    assert "hasn't been approved for generation yet" in source
+    assert "Approve this document in step 3" in source
     # The guard must come before anything that indexes into state.
-    guard = source.index("hasn't been approved")
+    guard = source.index("Approve this document in step 3")
     first_state_read = source.index("_draft_state(")
     assert guard < first_state_read
 

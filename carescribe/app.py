@@ -1381,9 +1381,13 @@ def render_generation_panel(document: batch.Document) -> None:
     # without approved text is a bug elsewhere, but a clinician must get a
     # sentence rather than a traceback.
     if not document.approved or not (document.redacted_text or "").strip():
-        st.info(
-            "This document hasn't been approved for generation yet — approve "
-            "it in step 3 first."
+        st.markdown(
+            ui.empty_state(
+                "stamp", "Not approved yet",
+                "Approve this document in step 3, then a draft can be generated "
+                "from its de-identified text.",
+            ),
+            unsafe_allow_html=True,
         )
         return
 
@@ -1716,7 +1720,14 @@ def render_clinical_form_panel(docs: dict) -> None:
 
     approved = [doc for doc in docs.values() if doc.approved]
     if not approved:
-        st.info("Approve at least one document in step 3 to generate a clinical form.")
+        st.markdown(
+            ui.empty_state(
+                "stamp", "Nothing approved yet",
+                "Approve a document in step 3, then pick a clinical form to "
+                "fill from its de-identified text.",
+            ),
+            unsafe_allow_html=True,
+        )
         return
 
     _render_template_uploader()
@@ -1958,7 +1969,10 @@ def section_handoff() -> None:
             "Generate report", disabled=True,
             help=carenotes.DISABLED_MESSAGE, use_container_width=False,
         )
-        st.info(carenotes.DISABLED_MESSAGE)
+        st.markdown(
+            ui.empty_state("pen", "Draft generation", carenotes.DISABLED_MESSAGE),
+            unsafe_allow_html=True,
+        )
         st.caption(
             "Generation runs only on approved text. The model receives the "
             "de-identified document and nothing else — the identity mapping "
