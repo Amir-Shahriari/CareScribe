@@ -259,3 +259,20 @@ shows the reviewer where they stand in an irreversible pipeline.
   Cockpit wrote it.
 Swarm workers remain unreliable for this repo (see earlier tally); they also
 need their base reset to the current integration branch, not a stale one.
+
+## Punch-list — "address all 10 issues" (2026-09-02)
+
+| # | Issue | Status |
+|---|---|---|
+| 1 | Tuned model weak on uploaded `.docx` templates | **in progress** — v2 corpus adds 25% `uploaded_template` pairs (`build_target.uploaded_template_target`, real FormSpec, `<<FIELD:key>>` markers); retrain running |
+| 2 | Corpus template-only / 3 epochs overfit | **in progress** — v2: 3200 encounters, `train.yaml` epochs 3→2, seq 2048→3072 for the long template targets. (M2 ollama prose backend still deferred — needs a local 7-8B) |
+| 3 | `grammar.py` not wired | **DONE** `2f...` — `carescribe/core/grammar.py`; `LocalGGUFBackend.generate(grammar=)`; `clinical_forms.generate_form_document` builds a `<<FIELD:>>` grammar. Verified: 14/14 markers, 0 invented brackets |
+| 4 | Nothing shipped (CI never ran, no signing) | **prep** — desktop build re-verified with all new code; the rest (tag `v0.1.0` → push → CI; buy an OV/EV cert for signing) is the user's — I can't push/tag |
+| 5 | Mobile viewport unverified | **partial** — `@media (max-width:640px)` rules present (tracker labels hide, padding); the Chrome extension dropped mid-session so no visual mobile confirm. Headless screen-walk passes |
+| 6 | `empty_state()` unused | **DONE** — wired into 3 "do X first" moments (unapproved generate panel, clinical-form panel, free-form panel) |
+| 7 | Screens restyled but only spot-checked | **DONE** — `tests/test_app_screens.py` walks empty→loaded→analysed→approved→generate, asserts no exception + every redesigned component renders at its state |
+| 8 | No DESIGN.md | **DONE** — `DESIGN.md` at repo root, written from the built `carescribe/ui/` |
+| 9 | Stray `err.txt` / `out.txt` | **DONE** — removed |
+| 10 | Swarm workers non-functional | **noted, not fixed** — needs the user to bump `.swarm/config.json` models + relaunch; documented above |
+
+Full repo after 3/6/7/8/9: **1118 → +7 screen tests → 1125 passed** (pre-retrain).
