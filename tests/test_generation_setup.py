@@ -283,10 +283,15 @@ def test_generated_output_keeps_the_review_banner():
 def test_the_privacy_indicator_has_a_downloading_state():
     import inspect
 
+    from carescribe.ui import components as ui
+
     source = inspect.getsource(carescribe_app.privacy_indicator)
     assert "downloading_model" in source
     assert "no patient data is going out" in source
-    assert "Running fully offline" in source
+    # the reassuring offline copy now lives in the compact sidebar helper
+    offline = ui.privacy_line()
+    assert "offline" in offline.lower()
+    assert "nothing is uploaded" in offline.lower()
 
 
 # ==========================================================================

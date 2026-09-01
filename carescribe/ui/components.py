@@ -151,15 +151,48 @@ def status_chip(kind: str) -> str:
 # Sidebar pieces
 # --------------------------------------------------------------------------
 
-def detection_layer(state: str, index: int, name: str, detail: str | None = None) -> str:
-    """One row of the 'Detection layers' list. ``state`` in on/off/wait/warn."""
+def detection_layer(state: str, name: str, detail: str | None = None) -> str:
+    """One row of the detection list. ``state`` in on/off/wait/warn.
+
+    Name on the first line, the (optional) short detail quietly under it — the
+    sidebar is narrow, so nothing shares a line that it cannot fit."""
     marks = {"on": "check", "warn": "alert"}
     ic = icon(marks.get(state, "minus"))
-    tail = f' <small>— {_esc(detail)}</small>' if detail else ""
+    tail = f'<small>{_esc(detail)}</small>' if detail else ""
     return (
         f'<div class="cs-layer" data-state="{_esc(state)}">{ic}'
-        f'<span><b>{index}. {_esc(name)}</b>{tail}</span></div>'
+        f'<span><b>{_esc(name)}</b>{tail}</span></div>'
     )
+
+
+def model_label(stem: str) -> tuple[str, str]:
+    """A readable (title, note) for a GGUF file stem, so the raw filename with
+    its quantisation suffix never lands in the UI."""
+    import re as _re
+
+    s = _re.sub(
+        r"[.\-_](gguf|q\d[_.]?k[_.]?[ms]|q\d_\d|f16|bf16|fp16)$",
+        "",
+        stem,
+        flags=_re.IGNORECASE,
+    )
+    low = s.lower()
+    if low.startswith("carescribe-clinical"):
+        rest = s.split("carescribe-clinical", 1)[1].strip("-_ .")
+        ver = ""
+        for part in rest.replace("_", "-").split("-"):
+            if part and (part[0] in "vV" and part[1:].isdigit()):
+                ver = part.lower()
+        return "CareScribe Clinical", f"fine-tuned{(' · ' + ver) if ver else ''}"
+    # a stock base model — tidy the name, mark it built-in
+    pretty = (
+        s.replace("-Instruct", "")
+        .replace("-instruct", "")
+        .replace("_K_M", "")
+        .replace("-", " ")
+        .strip()
+    )
+    return pretty or stem, "built-in"
 
 
 def stat_strip(items: list[tuple[str, object]]) -> str:
@@ -168,6 +201,17 @@ def stat_strip(items: list[tuple[str, object]]) -> str:
         for k, v in items
     )
     return f'<div class="cs-stats">{rows}</div>'
+
+
+def privacy_line() -> str:
+    """The compact 'all clear' offline statement for the sidebar. The loud
+    states (cloud enabled, model downloading) stay as full Streamlit alerts —
+    only the reassuring default is quiet."""
+    return (
+        f'<div class="cs-privacy">{ICON["lock"]}'
+        "<span><b>Fully offline.</b> Documents are read into memory, "
+        "de-identified and drafted here — nothing is uploaded.</span></div>"
+    )
 
 
 # --------------------------------------------------------------------------
@@ -189,6 +233,8 @@ __all__ = [
     "empty_state",
     "hero",
     "icon",
+    "model_label",
+    "privacy_line",
     "stat_strip",
     "status_chip",
     "step_tracker",

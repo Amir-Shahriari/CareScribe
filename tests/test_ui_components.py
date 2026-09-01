@@ -49,12 +49,27 @@ def test_chip_and_status_chip():
 
 
 def test_detection_layer():
-    on = ui.detection_layer("on", 1, "Structured regex", "always on")
-    assert 'data-state="on"' in on and "1. Structured regex" in on
-    assert "always on" in on and "<svg" in on
+    on = ui.detection_layer("on", "Structured regex", "always on")
+    assert 'data-state="on"' in on and "Structured regex" in on
+    assert "<small>always on</small>" in on and "<svg" in on
 
-    off = ui.detection_layer("off", 3, "GLiNER")
-    assert 'data-state="off"' in off and " — " not in off
+    off = ui.detection_layer("off", "GLiNER")
+    assert 'data-state="off"' in off and "<small>" not in off
+
+
+def test_model_label():
+    assert ui.model_label("carescribe-clinical-phi35-v1.Q4_K_M") == (
+        "CareScribe Clinical", "fine-tuned · v1"
+    )
+    title, note = ui.model_label("Qwen2.5-3B-Instruct-Q4_K_M")
+    assert "Qwen2.5" in title and "Q4" not in title and note == "built-in"
+
+
+def test_privacy_line_is_compact_and_reassuring():
+    out = ui.privacy_line()
+    assert 'class="cs-privacy"' in out and "Fully offline" in out
+    assert "<svg" in out  # the lock icon
+    assert "nothing is uploaded" in out
 
 
 def test_stat_strip_and_empty_state():

@@ -216,31 +216,69 @@ code, kbd, pre, [data-testid="stCode"] *, .stCode *,
 .cs-chip[data-tone="muted"]  {{ background: var(--cs-panel); border-color: var(--cs-border); color: var(--cs-muted); }}
 
 /* ---------- sidebar ---------- */
+[data-testid="stSidebar"] {{ background: var(--cs-panel); border-right: 1px solid var(--cs-border); }}
+[data-testid="stSidebar"] [data-testid="stSidebarUserContent"],
+[data-testid="stSidebar"] > div:first-child > div:first-child {{ min-width: 15.5rem; }}
+[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {{ padding-top: 1.4rem; }}
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h2,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3 {{
+  font-size: 0.72rem; font-weight: 650; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--cs-faint); border: 0; margin: 1.5rem 0 0.45rem;
+}}
+[data-testid="stSidebar"] p, [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {{ font-size: 0.78rem; line-height: 1.45; }}
+[data-testid="stSidebar"] hr {{ display: none; }}
+
+.cs-brand {{
+  display:flex; align-items:center; gap:0.5rem;
+  font-size: 1.02rem; font-weight: 700; letter-spacing: -0.01em; color: var(--cs-ink);
+  margin: 0 0 0.2rem;
+}}
+.cs-brand span {{ color: var(--cs-accent); display:inline-flex; }}
+.cs-brand svg {{ width: 18px; height: 18px; }}
+
 .cs-stat {{
-  display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
-  padding: 0.4rem 0; border-bottom: 1px solid var(--cs-line); font-size: 0.82rem;
+  display:flex; align-items:baseline; justify-content:space-between; gap:0.75rem;
+  padding: 0.38rem 0; border-bottom: 1px solid var(--cs-line); font-size: 0.8rem;
 }}
 .cs-stat:last-child {{ border-bottom: 0; }}
 .cs-stat span {{ color: var(--cs-muted); }}
-.cs-stat b {{ color: var(--cs-ink); font-weight: 650; font-size: 0.9rem; }}
-.cs-layer {{ display:flex; align-items:center; gap:0.55rem; padding: 0.28rem 0; font-size: 0.83rem; color: var(--cs-ink-soft); }}
-.cs-layer svg {{ width: 15px; height: 15px; flex: none; }}
-.cs-layer > span {{ min-width: 0; overflow-wrap: anywhere; }}
-.cs-layer .cs-mono {{ font-size: 0.76rem; color: var(--cs-ink-soft); }}
+.cs-stat b {{ color: var(--cs-ink); font-weight: 650; font-size: 0.88rem; }}
+
+/* detection rows: name on top, short detail quietly beneath — never on one
+   line the narrow sidebar cannot hold */
+.cs-layer {{ display:flex; align-items:flex-start; gap:0.5rem; padding: 0.3rem 0; }}
+.cs-layer svg {{ width: 15px; height: 15px; flex: none; margin-top: 1px; }}
+.cs-layer > span {{ min-width: 0; display:flex; flex-direction:column; line-height: 1.35; }}
+.cs-layer b {{ font-size: 0.82rem; font-weight: 600; color: var(--cs-ink); overflow-wrap: anywhere; }}
+.cs-layer small {{ font-size: 0.72rem; color: var(--cs-muted); overflow-wrap: anywhere; }}
 .cs-layer[data-state="on"]  svg {{ color: var(--cs-safe); }}
 .cs-layer[data-state="off"] svg, .cs-layer[data-state="wait"] svg {{ color: var(--cs-faint); }}
 .cs-layer[data-state="warn"] svg {{ color: var(--cs-warn); }}
-.cs-layer b {{ font-weight: 600; color: var(--cs-ink); }}
-.cs-layer small {{ color: var(--cs-muted); }}
 
-[data-testid="stSidebar"] {{ background: var(--cs-panel); border-right: 1px solid var(--cs-border); }}
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h1 {{ font-size: 1.02rem; font-weight: 700; letter-spacing: -0.01em; }}
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h2,
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3 {{
-  font-size: 0.74rem; font-weight: 650; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--cs-faint); border: 0; margin: 1.4rem 0 0.5rem;
+.cs-setup-label {{
+  font-size: 0.72rem; font-weight: 600; color: var(--cs-muted);
+  letter-spacing: 0.02em; margin: 0.2rem 0 0.15rem;
 }}
-[data-testid="stSidebar"] p, [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {{ font-size: 0.8rem; }}
+
+/* generation model — a readable label, never the raw quantised filename */
+.cs-model {{ display:flex; align-items:flex-start; gap:0.5rem; margin: 0.9rem 0 0.5rem; }}
+.cs-model svg {{ width: 15px; height: 15px; flex: none; margin-top: 2px; color: var(--cs-accent); }}
+.cs-model > span {{ display:flex; flex-direction:column; line-height: 1.3; min-width: 0; }}
+.cs-model b {{ font-size: 0.85rem; font-weight: 600; color: var(--cs-ink); }}
+.cs-model small {{ font-size: 0.72rem; color: var(--cs-muted); }}
+
+/* compact 'all clear' privacy statement (loud states stay as st.warning/info) */
+.cs-privacy {{
+  display:flex; align-items:flex-start; gap:0.55rem;
+  background: var(--cs-safe-soft); border: 1px solid var(--cs-safe-line);
+  border-radius: 12px; padding: 0.7rem 0.8rem;
+}}
+.cs-privacy svg {{ width: 15px; height: 15px; flex: none; margin-top: 2px; color: var(--cs-safe); }}
+.cs-privacy span {{ font-size: 0.78rem; line-height: 1.45; color: var(--cs-safe); }}
+.cs-privacy b {{ color: var(--cs-safe); font-weight: 650; }}
+
+[data-testid="stSidebar"] .stButton > button {{ font-size: 0.82rem; padding: 0.5rem 1rem; }}
+.st-key-open_model_card [data-testid="stBaseButton-secondary"] {{ font-weight: 550; color: var(--cs-muted); }}
 
 /* ---------- empty state ---------- */
 .cs-empty {{ text-align:center; padding: 1.6rem 1rem; color: var(--cs-muted); }}

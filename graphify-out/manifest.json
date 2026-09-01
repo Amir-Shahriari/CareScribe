@@ -5,8 +5,8 @@
     "semantic_hash": "533e72a4166008742fe4d6516435cf00"
   },
   "carescribe/app.py": {
-    "mtime": 1788262263.373315,
-    "ast_hash": "5a4bd7a4508531929a3b30cca70e24f2",
+    "mtime": 1788267327.3032615,
+    "ast_hash": "c109d7e3f87979194e4fbe389cdd25dc",
     "semantic_hash": ""
   },
   "carescribe/core/__init__.py": {
@@ -330,8 +330,8 @@
     "semantic_hash": ""
   },
   "tests/test_generation_setup.py": {
-    "mtime": 1787317362.9364316,
-    "ast_hash": "f7976bb90c8eaab92551a59a17c9a5fe",
+    "mtime": 1788267567.3267448,
+    "ast_hash": "0bc61dcbc78f6024c038b4726da656d7",
     "semantic_hash": ""
   },
   "SETUP_ON_A_NEW_PC.md": {
@@ -910,18 +910,18 @@
     "semantic_hash": ""
   },
   "carescribe/ui/components.py": {
-    "mtime": 1788262233.268032,
-    "ast_hash": "142e1c531d8cfbf55d5146f60a76f2d1",
+    "mtime": 1788267390.5034845,
+    "ast_hash": "cab31311f1bc3039c1da06e3e468eac4",
     "semantic_hash": ""
   },
   "carescribe/ui/theme.py": {
-    "mtime": 1788262257.780562,
-    "ast_hash": "bc5998c896540e7b166c634499e645e1",
+    "mtime": 1788267357.365169,
+    "ast_hash": "c09b251da12d3467c170f3e4408fd44c",
     "semantic_hash": ""
   },
   "tests/test_ui_components.py": {
-    "mtime": 1788260884.2994735,
-    "ast_hash": "f948e72e14c7b778ce54232c1b614be8",
+    "mtime": 1788267366.9595733,
+    "ast_hash": "f43b5ac294b39680003bfdff463b617c",
     "semantic_hash": ""
   }
 }

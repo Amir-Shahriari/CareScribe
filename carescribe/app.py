@@ -185,66 +185,51 @@ def refresh(document: batch.Document, entities: list[dict]) -> None:
 # Sidebar
 # --------------------------------------------------------------------------
 
-def _render_generation_model() -> None:
-    """Name the generation model, and show its model card if one ships with it."""
-    from carescribe.core import desktop
+@st.dialog("Model card", width="large")
+def _model_card_dialog(text: str) -> None:
+    st.markdown(text)
 
+
+def _model_card_path() -> Path | None:
+    model_path = desktop.find_local_model()
+    if model_path is None:
+        return None
+    stem = model_path.name.split(".", 1)[0]
+    for candidate in (
+        model_path.parent / f"{stem}.MODEL_CARD.md",
+        model_path.parent / "MODEL_CARD.md",
+    ):
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def _render_generation_model() -> None:
+    """Name the generation model with a readable label; the card opens in a
+    dialog rather than dumping a whole markdown doc into the narrow sidebar."""
     model_path = desktop.find_local_model()
     if model_path is None:
         return
-    st.sidebar.subheader("Generation model")
+    title, note = ui.model_label(model_path.stem)
     st.sidebar.markdown(
-        f'<div class="cs-layer" data-state="on">{ui.icon("cpu")}'
-        f'<span class="cs-mono" style="font-size:.8rem">{model_path.stem}</span></div>',
+        f'<div class="cs-model">{ui.icon("cpu")}'
+        f'<span><b>{title}</b><small>{note}</small></span></div>',
         unsafe_allow_html=True,
     )
-
-    stem = model_path.name.split(".", 1)[0]
-    card = model_path.parent / f"{stem}.MODEL_CARD.md"
-    if not card.is_file():
-        card = model_path.parent / "MODEL_CARD.md"
-    if card.is_file():
-        with st.sidebar.expander("Model card", expanded=False):
-            st.markdown(card.read_text(encoding="utf-8"))
+    card = _model_card_path()
+    if card is not None:
+        if st.sidebar.button("View model card", key="open_model_card",
+                             use_container_width=True):
+            _model_card_dialog(card.read_text(encoding="utf-8"))
 
 
 def render_sidebar() -> None:
     st.sidebar.markdown(
-        f'<h1 style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0 .1rem">'
-        f'<span style="color:var(--cs-accent);display:inline-flex">{ui.icon("shield")}'
-        f'</span>CareScribe</h1>',
+        f'<div class="cs-brand"><span>{ui.icon("shield")}</span>CareScribe</div>',
         unsafe_allow_html=True,
     )
-    with st.sidebar:
-        privacy_indicator()
 
-    st.sidebar.subheader("Detection layers")
-    status = deidentify.engine_status()
-
-    layers = [ui.detection_layer("on", 1, "Structured regex", "always on")]
-    if status["ner"]:
-        layers.append(ui.detection_layer("on", 2, "Presidio + spaCy", status["ner_model"]))
-    elif status["ner_error"]:
-        layers.append(ui.detection_layer("warn", 2, "Presidio + spaCy", "unavailable"))
-    else:
-        layers.append(ui.detection_layer("wait", 2, "Presidio + spaCy", "loads on first document"))
-    if status["gliner"]:
-        layers.append(ui.detection_layer("on", 3, "GLiNER", "loaded"))
-    else:
-        layers.append(ui.detection_layer("off", 3, "GLiNER", "not installed (optional)"))
-    st.sidebar.markdown("".join(layers), unsafe_allow_html=True)
-    if status["ner_error"]:
-        st.sidebar.caption(status["ner_error"])
-
-    st.sidebar.caption(
-        "In-prose dates: "
-        + ("redacted" if status["inprose_dates"] else "kept unless identity-anchored")
-    )
-
-    _render_generation_model()
-
-    st.sidebar.divider()
-
+    # 1. What am I working on — the most useful thing at a glance.
     st.sidebar.subheader("Session")
     docs = documents()
     approved = sum(1 for doc in docs.values() if doc.approved)
@@ -267,10 +252,43 @@ def render_sidebar() -> None:
         st.rerun()
 
     st.sidebar.caption(
-        "Wipe drops every document, identifier table, and identity map from "
-        "memory. None of it was ever written to disk. Approved de-identified "
-        "files already on disk are left alone."
+        "Drops every document, identifier table and identity map from memory. "
+        "None of it was ever on disk; approved files already written are left "
+        "alone."
     )
+
+    # 2. Is my data safe — critical, but the reassuring state can be quiet.
+    st.sidebar.subheader("Privacy")
+    with st.sidebar:
+        privacy_indicator()
+
+    # 3. How it is configured — reference, so it sits last and stays quiet.
+    st.sidebar.subheader("Setup")
+    status = deidentify.engine_status()
+
+    layers = [ui.detection_layer("on", "Structured regex")]
+    if status["ner"]:
+        layers.append(ui.detection_layer("on", "Presidio + spaCy", status["ner_model"]))
+    elif status["ner_error"]:
+        layers.append(ui.detection_layer("warn", "Presidio + spaCy", "unavailable"))
+    else:
+        layers.append(ui.detection_layer("wait", "Presidio + spaCy", "loads on first use"))
+    layers.append(
+        ui.detection_layer("on", "GLiNER") if status["gliner"]
+        else ui.detection_layer("off", "GLiNER", "optional, not installed")
+    )
+    st.sidebar.markdown(
+        '<div class="cs-setup-label">Detection</div>' + "".join(layers),
+        unsafe_allow_html=True,
+    )
+    if status["ner_error"]:
+        st.sidebar.caption(status["ner_error"])
+    st.sidebar.caption(
+        "In-prose dates "
+        + ("redacted" if status["inprose_dates"] else "kept unless identity-anchored")
+    )
+
+    _render_generation_model()
 
 
 # --------------------------------------------------------------------------
@@ -1186,12 +1204,7 @@ def privacy_indicator() -> None:
             icon=":material/download:",
         )
     else:
-        st.success(
-            "**Running fully offline — no data leaves this computer.** "
-            "Documents are read into memory, de-identified, reviewed and "
-            "drafted here. Nothing is uploaded.",
-            icon=":material/lock:",
-        )
+        st.markdown(ui.privacy_line(), unsafe_allow_html=True)
 
 
 def render_generation_status() -> dict:
