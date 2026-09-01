@@ -126,7 +126,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "carescribe_app",
-      "community": 57,
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "app.py"
     },
@@ -138,7 +138,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_init_state",
-      "community": 57,
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "init_state()"
     },
@@ -198,7 +198,7 @@
       "_origin": "ast",
       "id": "carescribe_app_render_engine_failure",
       "community": 27,
-      "community_name": "main",
+      "community_name": "app.py",
       "norm_label": "render_engine_failure()"
     },
     {
@@ -210,7 +210,7 @@
       "_origin": "ast",
       "id": "carescribe_app_documents",
       "community": 27,
-      "community_name": "main",
+      "community_name": "app.py",
       "norm_label": "documents()"
     },
     {
@@ -222,7 +222,7 @@
       "_origin": "ast",
       "id": "carescribe_app_current",
       "community": 27,
-      "community_name": "main",
+      "community_name": "app.py",
       "norm_label": "current()"
     },
     {
@@ -270,7 +270,7 @@
       "_origin": "ast",
       "id": "carescribe_app_ingest_sources",
       "community": 27,
-      "community_name": "main",
+      "community_name": "app.py",
       "norm_label": "ingest_sources()"
     },
     {
@@ -282,7 +282,7 @@
       "_origin": "ast",
       "id": "carescribe_app_section_load",
       "community": 27,
-      "community_name": "main",
+      "community_name": "app.py",
       "norm_label": "section_load()"
     },
     {
@@ -294,7 +294,7 @@
       "_origin": "ast",
       "id": "carescribe_app_section_process",
       "community": 27,
-      "community_name": "main",
+      "community_name": "app.py",
       "norm_label": "section_process()"
     },
     {
@@ -316,8 +316,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "dataframe",
-      "community": 27,
-      "community_name": "main",
+      "community": 24,
+      "community_name": "Document",
       "norm_label": "dataframe"
     },
     {
@@ -424,8 +424,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_review_span_style",
-      "community": 57,
-      "community_name": "app.py",
+      "community": 28,
+      "community_name": "core/__init__.py",
       "norm_label": "_review_span_style()"
     },
     {
@@ -436,8 +436,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_review_html",
-      "community": 57,
-      "community_name": "app.py",
+      "community": 24,
+      "community_name": "Document",
       "norm_label": "_render_review_html()"
     },
     {
@@ -521,18 +521,18 @@
       "_origin": "ast",
       "id": "carescribe_app_section_batch_status",
       "community": 27,
-      "community_name": "main",
+      "community_name": "app.py",
       "norm_label": "section_batch_status()"
     },
     {
       "label": "_draft_state()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1121",
+      "source_location": "L1128",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_draft_state",
-      "community": 57,
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "_draft_state()"
     },
@@ -540,7 +540,7 @@
       "label": "_form_draft_key()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1127",
+      "source_location": "L1134",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_form_draft_key",
@@ -552,11 +552,11 @@
       "label": "_form_draft_state()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1131",
+      "source_location": "L1138",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_form_draft_state",
-      "community": 57,
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "_form_draft_state()"
     },
@@ -564,23 +564,23 @@
       "label": "_invalidate_form_export()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1143",
+      "source_location": "L1150",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_invalidate_form_export",
-      "community": 41,
-      "community_name": "test_app_clinical_forms.py",
+      "community": 76,
+      "community_name": "select_backend",
       "norm_label": "_invalidate_form_export()"
     },
     {
       "label": "_header_values_complete()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1152",
+      "source_location": "L1159",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_header_values_complete",
-      "community": 57,
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "_header_values_complete()"
     },
@@ -588,23 +588,23 @@
       "label": "privacy_indicator()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1157",
+      "source_location": "L1164",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_privacy_indicator",
-      "community": 18,
-      "community_name": "backends.py",
+      "community": 26,
+      "community_name": "components.py",
       "norm_label": "privacy_indicator()"
     },
     {
       "label": "render_generation_status()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1190",
+      "source_location": "L1197",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_generation_status",
-      "community": 57,
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "render_generation_status()"
     },
@@ -612,11 +612,11 @@
       "label": "render_setup_card()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1232",
+      "source_location": "L1239",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_setup_card",
-      "community": 57,
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "render_setup_card()"
     },
@@ -624,7 +624,7 @@
       "label": "run_model_download()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1287",
+      "source_location": "L1294",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_run_model_download",
@@ -636,11 +636,11 @@
       "label": "run_ollama_pull()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1311",
+      "source_location": "L1318",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_run_ollama_pull",
-      "community": 57,
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "run_ollama_pull()"
     },
@@ -648,11 +648,11 @@
       "label": "render_test_generation()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1326",
+      "source_location": "L1333",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_test_generation",
-      "community": 57,
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "render_test_generation()"
     },
@@ -660,11 +660,11 @@
       "label": "render_generation_panel()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1349",
+      "source_location": "L1356",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_generation_panel",
-      "community": 57,
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "render_generation_panel()"
     },
@@ -672,11 +672,11 @@
       "label": "_stream_into()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1407",
+      "source_location": "L1414",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_stream_into",
-      "community": 52,
+      "community": 76,
       "community_name": "select_backend",
       "norm_label": "_stream_into()"
     },
@@ -684,19 +684,19 @@
       "label": "_run_generation()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1419",
+      "source_location": "L1426",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_run_generation",
-      "community": 52,
-      "community_name": "select_backend",
+      "community": 27,
+      "community_name": "app.py",
       "norm_label": "_run_generation()"
     },
     {
       "label": "render_draft()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1452",
+      "source_location": "L1459",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_draft",
@@ -708,11 +708,11 @@
       "label": "render_refinement()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1485",
+      "source_location": "L1492",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_refinement",
-      "community": 52,
+      "community": 76,
       "community_name": "select_backend",
       "norm_label": "render_refinement()"
     },
@@ -720,7 +720,7 @@
       "label": "render_reidentification()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1531",
+      "source_location": "L1538",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_reidentification",
@@ -732,7 +732,7 @@
       "label": "_render_template_uploader()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1590",
+      "source_location": "L1597",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_template_uploader",
@@ -744,7 +744,7 @@
       "label": "_render_reference_uploader()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1623",
+      "source_location": "L1630",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_reference_uploader",
@@ -756,11 +756,11 @@
       "label": "_render_reference_panel()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1655",
+      "source_location": "L1662",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_reference_panel",
-      "community": 96,
+      "community": 52,
       "community_name": "render_form_draft",
       "norm_label": "_render_reference_panel()"
     },
@@ -768,11 +768,11 @@
       "label": "render_clinical_form_panel()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1694",
+      "source_location": "L1701",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_clinical_form_panel",
-      "community": 57,
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "render_clinical_form_panel()"
     },
@@ -780,11 +780,11 @@
       "label": "_run_form_generation()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1751",
+      "source_location": "L1758",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_run_form_generation",
-      "community": 52,
+      "community": 76,
       "community_name": "select_backend",
       "norm_label": "_run_form_generation()"
     },
@@ -792,11 +792,11 @@
       "label": "render_form_draft()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1793",
+      "source_location": "L1800",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_form_draft",
-      "community": 96,
+      "community": 52,
       "community_name": "render_form_draft",
       "norm_label": "render_form_draft()"
     },
@@ -804,11 +804,11 @@
       "label": "render_form_refinement()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1821",
+      "source_location": "L1828",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_form_refinement",
-      "community": 52,
+      "community": 76,
       "community_name": "select_backend",
       "norm_label": "render_form_refinement()"
     },
@@ -816,19 +816,19 @@
       "label": "render_form_reidentification()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1862",
+      "source_location": "L1869",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_form_reidentification",
-      "community": 41,
-      "community_name": "test_app_clinical_forms.py",
+      "community": 76,
+      "community_name": "select_backend",
       "norm_label": "render_form_reidentification()"
     },
     {
       "label": "_as_docx()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1902",
+      "source_location": "L1909",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_as_docx",
@@ -840,11 +840,11 @@
       "label": "section_handoff()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1922",
+      "source_location": "L1929",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_section_handoff",
-      "community": 57,
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "section_handoff()"
     },
@@ -852,43 +852,43 @@
       "label": "_pipeline_step()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1969",
+      "source_location": "L1976",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_pipeline_step",
       "community": 27,
-      "community_name": "main",
+      "community_name": "app.py",
       "norm_label": "_pipeline_step()"
     },
     {
       "label": "_privacy_state()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1983",
+      "source_location": "L1990",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_privacy_state",
       "community": 27,
-      "community_name": "main",
+      "community_name": "app.py",
       "norm_label": "_privacy_state()"
     },
     {
       "label": "main()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L1991",
+      "source_location": "L1998",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_main",
       "community": 27,
-      "community_name": "main",
+      "community_name": "app.py",
       "norm_label": "main()"
     },
     {
       "label": "render_unexpected_error()",
       "file_type": "code",
       "source_file": "carescribe/app.py",
-      "source_location": "L2040",
+      "source_location": "L2047",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_app_render_unexpected_error",
@@ -914,7 +914,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "carescribe_app_rationale_1",
-      "community": 57,
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "carescribe \u2014 local, privacy-preserving de-identification and review. run with:..."
     },
@@ -959,7 +959,7 @@
       "_origin": "ast",
       "id": "carescribe_app_rationale_154",
       "community": 27,
-      "community_name": "main",
+      "community_name": "app.py",
       "norm_label": "a missing model must stop loudly, never fall back to fetching one."
     },
     {
@@ -992,7 +992,7 @@
       "_origin": "ast",
       "id": "carescribe_app_rationale_281",
       "community": 27,
-      "community_name": "main",
+      "community_name": "app.py",
       "norm_label": "extract text from uploads/paths into session state."
     },
     {
@@ -1065,32 +1065,32 @@
       "label": "Drop any previously re-identified/exportable content \u2014 called whenever the\u2026",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1144",
+      "source_location": "L1151",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1144",
-      "community": 41,
-      "community_name": "test_app_clinical_forms.py",
+      "id": "carescribe_app_rationale_1151",
+      "community": 76,
+      "community_name": "select_backend",
       "norm_label": "drop any previously re-identified/exportable content \u2014 called whenever the..."
     },
     {
       "label": "A persistent, honest statement of where data goes. It must change when cloud\u2026",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1158",
+      "source_location": "L1165",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1158",
-      "community": 18,
-      "community_name": "backends.py",
+      "id": "carescribe_app_rationale_1165",
+      "community": 26,
+      "community_name": "components.py",
       "norm_label": "a persistent, honest statement of where data goes. it must change when cloud..."
     },
     {
       "label": "Which backend will be used, and the fix if none is available.",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1191",
+      "source_location": "L1198",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1191",
-      "community": 57,
+      "id": "carescribe_app_rationale_1198",
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "which backend will be used, and the fix if none is available."
     },
@@ -1098,10 +1098,10 @@
       "label": "Shown instead of an empty panel when no model is available yet. An empty\u2026",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1233",
+      "source_location": "L1240",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1233",
-      "community": 57,
+      "id": "carescribe_app_rationale_1240",
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "shown instead of an empty panel when no model is available yet. an empty..."
     },
@@ -1109,9 +1109,9 @@
       "label": "Option A. The only outbound request the app makes, on an explicit click.",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1288",
+      "source_location": "L1295",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1288",
+      "id": "carescribe_app_rationale_1295",
       "community": 16,
       "community_name": "model_setup.py",
       "norm_label": "option a. the only outbound request the app makes, on an explicit click."
@@ -1120,10 +1120,10 @@
       "label": "Option B. Ollama does the fetching; the request goes to loopback.",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1312",
+      "source_location": "L1319",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1312",
-      "community": 57,
+      "id": "carescribe_app_rationale_1319",
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "option b. ollama does the fetching; the request goes to loopback."
     },
@@ -1131,10 +1131,10 @@
       "label": "A concrete \"it works\", rather than asking the clinician to trust a flag.",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1327",
+      "source_location": "L1334",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1327",
-      "community": 57,
+      "id": "carescribe_app_rationale_1334",
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "a concrete \"it works\", rather than asking the clinician to trust a flag."
     },
@@ -1142,10 +1142,10 @@
       "label": "Generate, refine, re-identify and export \u2014 for one approved document. Two\u2026",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1350",
+      "source_location": "L1357",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1350",
-      "community": 57,
+      "id": "carescribe_app_rationale_1357",
+      "community": 27,
       "community_name": "app.py",
       "norm_label": "generate, refine, re-identify and export \u2014 for one approved document. two..."
     },
@@ -1153,10 +1153,10 @@
       "label": "Render a stream token by token so a slow local model looks alive.",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1408",
+      "source_location": "L1415",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1408",
-      "community": 52,
+      "id": "carescribe_app_rationale_1415",
+      "community": 76,
       "community_name": "select_backend",
       "norm_label": "render a stream token by token so a slow local model looks alive."
     },
@@ -1164,20 +1164,20 @@
       "label": "First-pass generation. The model receives de-identified text only.",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1420",
+      "source_location": "L1427",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1420",
-      "community": 52,
-      "community_name": "select_backend",
+      "id": "carescribe_app_rationale_1427",
+      "community": 27,
+      "community_name": "app.py",
       "norm_label": "first-pass generation. the model receives de-identified text only."
     },
     {
       "label": "The de-identified draft, refinement, re-identification, and exports.",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1453",
+      "source_location": "L1460",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1453",
+      "id": "carescribe_app_rationale_1460",
       "community": 119,
       "community_name": "render_draft",
       "norm_label": "the de-identified draft, refinement, re-identification, and exports."
@@ -1186,10 +1186,10 @@
       "label": "Follow-up instructions, on de-identified text only.",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1486",
+      "source_location": "L1493",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1486",
-      "community": 52,
+      "id": "carescribe_app_rationale_1493",
+      "community": 76,
       "community_name": "select_backend",
       "norm_label": "follow-up instructions, on de-identified text only."
     },
@@ -1197,9 +1197,9 @@
       "label": "Opt-in, local-only substitution of placeholders back to real values.",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1532",
+      "source_location": "L1539",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1532",
+      "id": "carescribe_app_rationale_1539",
       "community": 119,
       "community_name": "render_draft",
       "norm_label": "opt-in, local-only substitution of placeholders back to real values."
@@ -1208,9 +1208,9 @@
       "label": "Let a clinic add its own table-based .docx form to the selector. Parsing and\u2026",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1591",
+      "source_location": "L1598",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1591",
+      "id": "carescribe_app_rationale_1598",
       "community": 6,
       "community_name": "template_ingest.py",
       "norm_label": "let a clinic add its own table-based .docx form to the selector. parsing and..."
@@ -1219,9 +1219,9 @@
       "label": "Add clinic reference files (formulary, pathways, protocols) to a local library.\u2026",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1624",
+      "source_location": "L1631",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1624",
+      "id": "carescribe_app_rationale_1631",
       "community": 121,
       "community_name": "reference_library.py",
       "norm_label": "add clinic reference files (formulary, pathways, protocols) to a local library...."
@@ -1230,10 +1230,10 @@
       "label": "Verbatim reference passages, retrieved per field at the granularity the planner\u2026",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1656",
+      "source_location": "L1663",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1656",
-      "community": 96,
+      "id": "carescribe_app_rationale_1663",
+      "community": 52,
       "community_name": "render_form_draft",
       "norm_label": "verbatim reference passages, retrieved per field at the granularity the planner..."
     },
@@ -1241,9 +1241,9 @@
       "label": "Render generated text to a .docx in memory \u2014 nothing touches disk.",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1903",
+      "source_location": "L1910",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1903",
+      "id": "carescribe_app_rationale_1910",
       "community": 119,
       "community_name": "render_draft",
       "norm_label": "render generated text to a .docx in memory \u2014 nothing touches disk."
@@ -1252,20 +1252,20 @@
       "label": "The 0-based step the reviewer stands on, for components.step_tracker().",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L1970",
+      "source_location": "L1977",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_1970",
+      "id": "carescribe_app_rationale_1977",
       "community": 27,
-      "community_name": "main",
+      "community_name": "app.py",
       "norm_label": "the 0-based step the reviewer stands on, for components.step_tracker()."
     },
     {
       "label": "The last line of defence: a calm message instead of a stack trace. A clinician\u2026",
       "file_type": "rationale",
       "source_file": "carescribe/app.py",
-      "source_location": "L2041",
+      "source_location": "L2048",
       "_origin": "ast",
-      "id": "carescribe_app_rationale_2041",
+      "id": "carescribe_app_rationale_2048",
       "community": 123,
       "community_name": "extract_text",
       "norm_label": "the last line of defence: a calm message instead of a stack trace. a clinician..."
@@ -1344,8 +1344,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "carescribe_core_init",
-      "community": 13,
-      "community_name": "generation_status",
+      "community": 28,
+      "community_name": "core/__init__.py",
       "norm_label": "core/__init__.py"
     },
     {
@@ -1355,8 +1355,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "carescribe_core_init_rationale_1",
-      "community": 13,
-      "community_name": "generation_status",
+      "community": 28,
+      "community_name": "core/__init__.py",
       "norm_label": "core logic: ollama access, ingestion, de-identification, care notes, phi..."
     },
     {
@@ -1685,8 +1685,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_core_backends_cloudbackend_generate",
-      "community": 31,
-      "community_name": "BackendError",
+      "community": 18,
+      "community_name": "backends.py",
       "norm_label": ".generate()"
     },
     {
@@ -1709,7 +1709,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_core_backends_select_backend",
-      "community": 52,
+      "community": 76,
       "community_name": "select_backend",
       "norm_label": "select_backend()"
     },
@@ -1808,7 +1808,7 @@
       "source_location": "L243",
       "_origin": "ast",
       "id": "carescribe_core_backends_rationale_243",
-      "community": 52,
+      "community": 76,
       "community_name": "select_backend",
       "norm_label": "pick a backend. returns ``(kind, backend, label)``. ``prefer`` lets the ui..."
     },
@@ -2457,8 +2457,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_core_carenotes_template_names",
-      "community": 117,
-      "community_name": "carenotes.py",
+      "community": 27,
+      "community_name": "app.py",
       "norm_label": "template_names()"
     },
     {
@@ -2996,7 +2996,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_core_clinical_forms_build_prompt",
-      "community": 63,
+      "community": 57,
       "community_name": "build_prompt",
       "norm_label": "build_prompt()"
     },
@@ -3009,7 +3009,7 @@
       "_origin": "ast",
       "id": "carescribe_core_clinical_forms_parse_fields",
       "community": 76,
-      "community_name": "parse_fields",
+      "community_name": "select_backend",
       "norm_label": "parse_fields()"
     },
     {
@@ -3177,7 +3177,7 @@
       "source_location": "L406",
       "_origin": "ast",
       "id": "carescribe_core_clinical_forms_rationale_406",
-      "community": 63,
+      "community": 57,
       "community_name": "build_prompt",
       "norm_label": "build the (system, user) prompt pair. ``exemplars`` maps a field key to house-..."
     },
@@ -3189,7 +3189,7 @@
       "_origin": "ast",
       "id": "carescribe_core_clinical_forms_rationale_428",
       "community": 76,
-      "community_name": "parse_fields",
+      "community_name": "select_backend",
       "norm_label": "turn the model's marker-delimited output into ``{field_key: text}``. any field..."
     },
     {
@@ -3971,7 +3971,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_core_deidentify_rebuild",
-      "community": 116,
+      "community": 63,
       "community_name": "rebuild",
       "norm_label": "rebuild()"
     },
@@ -4457,7 +4457,7 @@
       "source_location": "L1794",
       "_origin": "ast",
       "id": "carescribe_core_deidentify_rationale_1794",
-      "community": 116,
+      "community": 63,
       "community_name": "rebuild",
       "norm_label": "re-derive redacted text and the phi map from a reviewer-edited table. called..."
     },
@@ -4621,8 +4621,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_core_desktop_available_ram_gb",
-      "community": 120,
-      "community_name": "ram_verdict",
+      "community": 20,
+      "community_name": "test_desktop_packaging.py",
       "norm_label": "available_ram_gb()"
     },
     {
@@ -4633,8 +4633,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_core_desktop_ram_verdict",
-      "community": 120,
-      "community_name": "ram_verdict",
+      "community": 20,
+      "community_name": "test_desktop_packaging.py",
       "norm_label": "ram_verdict()"
     },
     {
@@ -4744,8 +4744,8 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "carescribe_core_desktop_rationale_132",
-      "community": 120,
-      "community_name": "ram_verdict",
+      "community": 20,
+      "community_name": "test_desktop_packaging.py",
       "norm_label": "total system ram in gb, or 0.0 if it cannot be determined."
     },
     {
@@ -4755,8 +4755,8 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "carescribe_core_desktop_rationale_142",
-      "community": 120,
-      "community_name": "ram_verdict",
+      "community": 20,
+      "community_name": "test_desktop_packaging.py",
       "norm_label": "whether this machine can run the bundled local model. returns a verdict rather..."
     },
     {
@@ -4873,8 +4873,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_core_docx_redact_has_unreachable_text",
-      "community": 7,
-      "community_name": "test_docx_roundtrip.py",
+      "community": 49,
+      "community_name": "docx_redact.py",
       "norm_label": "has_unreachable_text()"
     },
     {
@@ -4962,8 +4962,8 @@
       "source_location": "L190",
       "_origin": "ast",
       "id": "carescribe_core_docx_redact_rationale_190",
-      "community": 7,
-      "community_name": "test_docx_roundtrip.py",
+      "community": 49,
+      "community_name": "docx_redact.py",
       "norm_label": "true if the document holds text this module cannot reach. text boxes,..."
     },
     {
@@ -6486,8 +6486,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_core_ollama_client_status",
-      "community": 52,
-      "community_name": "select_backend",
+      "community": 42,
+      "community_name": "ollama_client.py",
       "norm_label": "status()"
     },
     {
@@ -6586,8 +6586,8 @@
       "source_location": "L127",
       "_origin": "ast",
       "id": "carescribe_core_ollama_client_rationale_127",
-      "community": 52,
-      "community_name": "select_backend",
+      "community": 42,
+      "community_name": "ollama_client.py",
       "norm_label": "everything the ui needs to describe the local generation backend."
     },
     {
@@ -6753,7 +6753,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_core_reference_library_is_empty",
-      "community": 96,
+      "community": 52,
       "community_name": "render_form_draft",
       "norm_label": "is_empty()"
     },
@@ -6765,7 +6765,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_core_reference_library_sources",
-      "community": 96,
+      "community": 52,
       "community_name": "render_form_draft",
       "norm_label": "sources()"
     },
@@ -6856,7 +6856,7 @@
       "source_location": "L160",
       "_origin": "ast",
       "id": "carescribe_core_reference_library_rationale_160",
-      "community": 96,
+      "community": 52,
       "community_name": "render_form_draft",
       "norm_label": "``(filename, paragraph_count)`` per loaded reference file."
     },
@@ -7021,7 +7021,7 @@
       "_origin": "ast",
       "id": "carescribe_core_review_checklist",
       "community": 94,
-      "community_name": "blocking_reason",
+      "community_name": "test_review_gate.py",
       "norm_label": "review_checklist.py"
     },
     {
@@ -7033,7 +7033,7 @@
       "_origin": "ast",
       "id": "carescribe_core_review_checklist_blocking_reason",
       "community": 94,
-      "community_name": "blocking_reason",
+      "community_name": "test_review_gate.py",
       "norm_label": "blocking_reason()"
     },
     {
@@ -7044,7 +7044,7 @@
       "_origin": "ast",
       "id": "carescribe_core_review_checklist_rationale_1",
       "community": 94,
-      "community_name": "blocking_reason",
+      "community_name": "test_review_gate.py",
       "norm_label": "the approval gate. only the **authoritative safety sweep** blocks approval. a..."
     },
     {
@@ -7055,7 +7055,7 @@
       "_origin": "ast",
       "id": "carescribe_core_review_checklist_rationale_20",
       "community": 94,
-      "community_name": "blocking_reason",
+      "community_name": "test_review_gate.py",
       "norm_label": "why approve is disabled, in one short line. empty string means it isn't...."
     },
     {
@@ -7215,8 +7215,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "carescribe_core_review_spans",
-      "community": 90,
-      "community_name": "review_spans",
+      "community": 28,
+      "community_name": "core/__init__.py",
       "norm_label": "review_spans.py"
     },
     {
@@ -7228,8 +7228,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "carescribe_core_review_spans_reviewspan",
-      "community": 90,
-      "community_name": "review_spans",
+      "community": 28,
+      "community_name": "core/__init__.py",
       "norm_label": "reviewspan"
     },
     {
@@ -7240,8 +7240,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_core_review_spans_entity_spans",
-      "community": 90,
-      "community_name": "review_spans",
+      "community": 28,
+      "community_name": "core/__init__.py",
       "norm_label": "_entity_spans()"
     },
     {
@@ -7252,8 +7252,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_core_review_spans_residual_spans",
-      "community": 90,
-      "community_name": "review_spans",
+      "community": 28,
+      "community_name": "core/__init__.py",
       "norm_label": "_residual_spans()"
     },
     {
@@ -7275,8 +7275,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "carescribe_core_review_spans_rationale_1",
-      "community": 90,
-      "community_name": "review_spans",
+      "community": 28,
+      "community_name": "core/__init__.py",
       "norm_label": "unifies the two things a reviewer might still need to act on in one document's..."
     },
     {
@@ -7286,8 +7286,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "carescribe_core_review_spans_rationale_30",
-      "community": 90,
-      "community_name": "review_spans",
+      "community": 28,
+      "community_name": "core/__init__.py",
       "norm_label": "one clickable span in a document's redacted text."
     },
     {
@@ -7297,8 +7297,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "carescribe_core_review_spans_rationale_46",
-      "community": 90,
-      "community_name": "review_spans",
+      "community": 28,
+      "community_name": "core/__init__.py",
       "norm_label": "placeholder occurrences for low-confidence, not-yet-confirmed entities."
     },
     {
@@ -8034,7 +8034,7 @@
       "label": "inject()",
       "file_type": "code",
       "source_file": "carescribe/ui/theme.py",
-      "source_location": "L347",
+      "source_location": "L366",
       "_callable": true,
       "_origin": "ast",
       "id": "carescribe_ui_theme_inject",
@@ -8057,9 +8057,9 @@
       "label": "Apply the stylesheet. Import Streamlit lazily so the module stays cheap.",
       "file_type": "rationale",
       "source_file": "carescribe/ui/theme.py",
-      "source_location": "L348",
+      "source_location": "L367",
       "_origin": "ast",
-      "id": "carescribe_ui_theme_rationale_348",
+      "id": "carescribe_ui_theme_rationale_367",
       "community": 126,
       "community_name": "theme.py",
       "norm_label": "apply the stylesheet. import streamlit lazily so the module stays cheap."
@@ -8127,8 +8127,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_assemble_build_dataset_fallback_inject",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 102,
+      "community_name": "build",
       "norm_label": "_fallback_inject()"
     },
     {
@@ -8139,8 +8139,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_assemble_build_dataset_resolve_inject",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 102,
+      "community_name": "build",
       "norm_label": "_resolve_inject()"
     },
     {
@@ -8150,8 +8150,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "injectfn",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 102,
+      "community_name": "build",
       "norm_label": "injectfn"
     },
     {
@@ -8162,8 +8162,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_assemble_build_dataset_build",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 102,
+      "community_name": "build",
       "norm_label": "build()"
     },
     {
@@ -8219,8 +8219,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "finetune_assemble_build_dataset_rationale_45",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 102,
+      "community_name": "build",
       "norm_label": "fill ``[[token]]`` slots with simple fake values. used only until..."
     },
     {
@@ -8230,8 +8230,8 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "finetune_assemble_build_dataset_rationale_95",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 102,
+      "community_name": "build",
       "norm_label": "return ``{\"pairs\": [...], \"kept\": k, \"dropped\": d, \"reasons\": {...}}``."
     },
     {
@@ -8361,8 +8361,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_assemble_build_target_build_target",
-      "community": 104,
-      "community_name": "EncounterFacts",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "build_target()"
     },
     {
@@ -8383,8 +8383,8 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "finetune_assemble_build_target_rationale_163",
-      "community": 104,
-      "community_name": "EncounterFacts",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "the ideal filled form for ``facts`` \u2014 deterministic, fact-placed only."
     },
     {
@@ -8394,8 +8394,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "finetune_assemble_deidentify_notes",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "deidentify_notes.py"
     },
     {
@@ -8407,8 +8407,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "finetune_assemble_deidentify_notes_deidentifiednote",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "deidentifiednote"
     },
     {
@@ -8419,8 +8419,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_assemble_deidentify_notes_deidentifiednote_known_placeholders",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": ".known_placeholders()"
     },
     {
@@ -8431,8 +8431,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_assemble_deidentify_notes_deidentify_note",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "deidentify_note()"
     },
     {
@@ -8443,8 +8443,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_assemble_deidentify_notes_leaked_values",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "leaked_values()"
     },
     {
@@ -8454,8 +8454,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "finetune_assemble_deidentify_notes_rationale_1",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "run the real carescribe de-identifier over a synthetic note. the fine-tune must..."
     },
     {
@@ -8465,8 +8465,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "finetune_assemble_deidentify_notes_rationale_34",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "de-identify one rendered+identified synthetic note."
     },
     {
@@ -8476,8 +8476,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "finetune_assemble_deidentify_notes_rationale_44",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "injected identifier values that de-id did not remove from the text. a non-empty..."
     },
     {
@@ -8781,8 +8781,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_assemble_validators_check_format",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 104,
+      "community_name": "EncounterFacts",
       "norm_label": "check_format()"
     },
     {
@@ -8805,8 +8805,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_assemble_validators_check_placeholders",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 104,
+      "community_name": "EncounterFacts",
       "norm_label": "check_placeholders()"
     },
     {
@@ -8817,8 +8817,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_assemble_validators_check_residual",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 104,
+      "community_name": "EncounterFacts",
       "norm_label": "check_residual()"
     },
     {
@@ -8862,8 +8862,8 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "finetune_assemble_validators_rationale_174",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 104,
+      "community_name": "EncounterFacts",
       "norm_label": "fail on a mangled or invented bracket token; ignore ``missing``. a filled form..."
     },
     {
@@ -9266,7 +9266,7 @@
       "_origin": "ast",
       "id": "finetune_datagen_render_note",
       "community": 102,
-      "community_name": "render",
+      "community_name": "build",
       "norm_label": "render_note.py"
     },
     {
@@ -9278,7 +9278,7 @@
       "_origin": "ast",
       "id": "finetune_datagen_render_note_med",
       "community": 102,
-      "community_name": "render",
+      "community_name": "build",
       "norm_label": "_med()"
     },
     {
@@ -9290,7 +9290,7 @@
       "_origin": "ast",
       "id": "finetune_datagen_render_note_lines",
       "community": 102,
-      "community_name": "render",
+      "community_name": "build",
       "norm_label": "_lines()"
     },
     {
@@ -9302,7 +9302,7 @@
       "_origin": "ast",
       "id": "finetune_datagen_render_note_degrade",
       "community": 102,
-      "community_name": "render",
+      "community_name": "build",
       "norm_label": "_degrade()"
     },
     {
@@ -9313,7 +9313,7 @@
       "_origin": "ast",
       "id": "finetune_datagen_render_note_py_random",
       "community": 102,
-      "community_name": "render",
+      "community_name": "build",
       "norm_label": "random"
     },
     {
@@ -9325,7 +9325,7 @@
       "_origin": "ast",
       "id": "finetune_datagen_render_note_header",
       "community": 102,
-      "community_name": "render",
+      "community_name": "build",
       "norm_label": "_header()"
     },
     {
@@ -9337,7 +9337,7 @@
       "_origin": "ast",
       "id": "finetune_datagen_render_note_render",
       "community": 102,
-      "community_name": "render",
+      "community_name": "build",
       "norm_label": "render()"
     },
     {
@@ -9348,7 +9348,7 @@
       "_origin": "ast",
       "id": "finetune_datagen_render_note_rationale_1",
       "community": 102,
-      "community_name": "render",
+      "community_name": "build",
       "norm_label": "`encounterfacts` -> a realistic, messy clinician note (the input side of a..."
     },
     {
@@ -9359,7 +9359,7 @@
       "_origin": "ast",
       "id": "finetune_datagen_render_note_rationale_35",
       "community": 102,
-      "community_name": "render",
+      "community_name": "build",
       "norm_label": "(section label, lines) in a fixed clinical order, skipping empty sections."
     },
     {
@@ -9370,7 +9370,7 @@
       "_origin": "ast",
       "id": "finetune_datagen_render_note_rationale_66",
       "community": 102,
-      "community_name": "render",
+      "community_name": "build",
       "norm_label": "a little ocr/casing/spacing noise, sampled."
     },
     {
@@ -9381,7 +9381,7 @@
       "_origin": "ast",
       "id": "finetune_datagen_render_note_rationale_94",
       "community": 102,
-      "community_name": "render",
+      "community_name": "build",
       "norm_label": "render one messy source note. deterministic for a given ``seed``."
     },
     {
@@ -9450,8 +9450,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_datagen_sampler_sample_encounters",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "sample_encounters()"
     },
     {
@@ -9483,8 +9483,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "finetune_datagen_sampler_rationale_110",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "yield ``n`` `encounterfacts`, deterministic for a given ``seed``."
     },
     {
@@ -9729,8 +9729,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "str",
-      "community": 3,
-      "community_name": "schema.py",
+      "community": 36,
+      "community_name": "FormType",
       "norm_label": "str"
     },
     {
@@ -9765,8 +9765,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_datagen_schema_looks_like_identifier",
-      "community": 3,
-      "community_name": "schema.py",
+      "community": 89,
+      "community_name": "._no_identifier_shapes",
       "norm_label": "_looks_like_identifier()"
     },
     {
@@ -9878,8 +9878,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "field_validator",
-      "community": 3,
-      "community_name": "schema.py",
+      "community": 89,
+      "community_name": "._no_identifier_shapes",
       "norm_label": "field_validator"
     },
     {
@@ -9890,8 +9890,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_datagen_schema_demographics_no_identifier_shapes",
-      "community": 3,
-      "community_name": "schema.py",
+      "community": 89,
+      "community_name": "._no_identifier_shapes",
       "norm_label": "._no_identifier_shapes()"
     },
     {
@@ -9915,8 +9915,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_datagen_schema_encounterfacts_non_empty",
-      "community": 3,
-      "community_name": "schema.py",
+      "community": 89,
+      "community_name": "._no_identifier_shapes",
       "norm_label": "._non_empty()"
     },
     {
@@ -9982,8 +9982,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "finetune_datagen_schema_rationale_58",
-      "community": 3,
-      "community_name": "schema.py",
+      "community": 89,
+      "community_name": "._no_identifier_shapes",
       "norm_label": "return a reason string if ``value`` looks like a leaked identifier."
     },
     {
@@ -10227,8 +10227,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "finetune_eval_metrics",
-      "community": 89,
-      "community_name": "metrics.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "metrics.py"
     },
     {
@@ -10264,8 +10264,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_eval_metrics_headings",
-      "community": 89,
-      "community_name": "metrics.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "_headings()"
     },
     {
@@ -10276,8 +10276,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_eval_metrics_order_agreement",
-      "community": 89,
-      "community_name": "metrics.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "_order_agreement()"
     },
     {
@@ -10288,8 +10288,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_eval_metrics_lexical_overlap",
-      "community": 89,
-      "community_name": "metrics.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "_lexical_overlap()"
     },
     {
@@ -10300,8 +10300,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_eval_metrics_style_match",
-      "community": 89,
-      "community_name": "metrics.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "style_match()"
     },
     {
@@ -10335,8 +10335,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "finetune_eval_metrics_rationale_1",
-      "community": 89,
-      "community_name": "metrics.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "the four target metrics, scored per draft and reducible to a mean. format,..."
     },
     {
@@ -10346,8 +10346,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "finetune_eval_metrics_rationale_49",
-      "community": 89,
-      "community_name": "metrics.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "fraction of ``a``'s headings that appear in ``b`` in the same relative order."
     },
     {
@@ -10357,8 +10357,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "finetune_eval_metrics_rationale_67",
-      "community": 89,
-      "community_name": "metrics.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "0..1 \u2014 heading-order agreement and lexical overlap, evenly weighted. falls back..."
     },
     {
@@ -10379,8 +10379,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "finetune_eval_regression",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "regression.py"
     },
     {
@@ -10392,8 +10392,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "finetune_eval_regression_regressionitem",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "regressionitem"
     },
     {
@@ -10404,8 +10404,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_eval_regression_regression_items",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "regression_items()"
     },
     {
@@ -10416,8 +10416,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_eval_regression_score_regression",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "score_regression()"
     },
     {
@@ -10439,8 +10439,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "finetune_eval_regression_rationale_1",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "a regression set built from the repo's own corpus, not synthetic data...."
     },
     {
@@ -10580,8 +10580,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_eval_run_eval_evalitem_messages",
-      "community": 84,
-      "community_name": "run_eval.py",
+      "community": 36,
+      "community_name": "FormType",
       "norm_label": ".messages()"
     },
     {
@@ -11093,8 +11093,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_assemble_pipeline_test_deidentify_note_replaces_identifiers_with_placeholders",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "test_deidentify_note_replaces_identifiers_with_placeholders()"
     },
     {
@@ -11163,8 +11163,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "finetune_tests_test_build_dataset",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 102,
+      "community_name": "build",
       "norm_label": "test_build_dataset.py"
     },
     {
@@ -11175,8 +11175,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_build_dataset_test_render_produces_every_style_with_identifier_slots",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 102,
+      "community_name": "build",
       "norm_label": "test_render_produces_every_style_with_identifier_slots()"
     },
     {
@@ -11187,8 +11187,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_build_dataset_test_dry_run_keeps_a_high_fraction_and_writes_valid_pairs",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 102,
+      "community_name": "build",
       "norm_label": "test_dry_run_keeps_a_high_fraction_and_writes_valid_pairs()"
     },
     {
@@ -11199,8 +11199,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_build_dataset_test_dry_run_is_deterministic",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 102,
+      "community_name": "build",
       "norm_label": "test_dry_run_is_deterministic()"
     },
     {
@@ -11211,8 +11211,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_build_dataset_test_main_writes_splits_and_manifest",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 102,
+      "community_name": "build",
       "norm_label": "test_main_writes_splits_and_manifest()"
     },
     {
@@ -11222,8 +11222,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "finetune_tests_test_build_dataset_rationale_1",
-      "community": 2,
-      "community_name": "build_dataset.py",
+      "community": 102,
+      "community_name": "build",
       "norm_label": "the m1 dry run: the whole datagen -> de-id -> validate loop end to end."
     },
     {
@@ -11233,8 +11233,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "finetune_tests_test_build_target",
-      "community": 104,
-      "community_name": "EncounterFacts",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "test_build_target.py"
     },
     {
@@ -11244,8 +11244,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "finetune_tests_test_build_target_py_parametrize",
-      "community": 104,
-      "community_name": "EncounterFacts",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "parametrize"
     },
     {
@@ -11256,8 +11256,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_build_target_test_scaffold_passes_its_own_validators",
-      "community": 104,
-      "community_name": "EncounterFacts",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "test_scaffold_passes_its_own_validators()"
     },
     {
@@ -11268,8 +11268,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_build_target_test_scaffold_is_deterministic",
-      "community": 104,
-      "community_name": "EncounterFacts",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "test_scaffold_is_deterministic()"
     },
     {
@@ -11280,8 +11280,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_build_target_test_a_gapped_section_reads_not_documented",
-      "community": 104,
-      "community_name": "EncounterFacts",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "test_a_gapped_section_reads_not_documented()"
     },
     {
@@ -11292,8 +11292,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_build_target_test_uploaded_template_is_not_yet_supported",
-      "community": 104,
-      "community_name": "EncounterFacts",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "test_uploaded_template_is_not_yet_supported()"
     },
     {
@@ -11303,8 +11303,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "finetune_tests_test_build_target_rationale_1",
-      "community": 104,
-      "community_name": "EncounterFacts",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "the deterministic scaffold must satisfy its own validators for every form."
     },
     {
@@ -11386,8 +11386,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_eval_test_style_match_is_one_for_identical_text",
-      "community": 89,
-      "community_name": "metrics.py",
+      "community": 84,
+      "community_name": "run_eval.py",
       "norm_label": "test_style_match_is_one_for_identical_text()"
     },
     {
@@ -11839,8 +11839,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_sampler_test_sampling_is_deterministic_for_a_seed",
-      "community": 3,
-      "community_name": "schema.py",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "test_sampling_is_deterministic_for_a_seed()"
     },
     {
@@ -11851,8 +11851,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_sampler_test_gap_probability_zero_produces_no_gaps",
-      "community": 3,
-      "community_name": "schema.py",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "test_gap_probability_zero_produces_no_gaps()"
     },
     {
@@ -11875,8 +11875,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_sampler_test_specialty_weight_of_zero_excludes_a_domain",
-      "community": 3,
-      "community_name": "schema.py",
+      "community": 25,
+      "community_name": "sample_encounters",
       "norm_label": "test_specialty_weight_of_zero_excludes_a_domain()"
     },
     {
@@ -12144,8 +12144,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "finetune_tests_test_validators",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 104,
+      "community_name": "EncounterFacts",
       "norm_label": "test_validators.py"
     },
     {
@@ -12156,8 +12156,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_validators_test_format_flags_a_missing_heading",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 104,
+      "community_name": "EncounterFacts",
       "norm_label": "test_format_flags_a_missing_heading()"
     },
     {
@@ -12168,8 +12168,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_validators_test_format_flags_text_before_the_first_heading",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 104,
+      "community_name": "EncounterFacts",
       "norm_label": "test_format_flags_text_before_the_first_heading()"
     },
     {
@@ -12204,8 +12204,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_validators_test_placeholder_check_flags_a_mangled_token",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 104,
+      "community_name": "EncounterFacts",
       "norm_label": "test_placeholder_check_flags_a_mangled_token()"
     },
     {
@@ -12216,8 +12216,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_validators_test_residual_check_flags_a_phone_number_but_not_a_placeholder",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 104,
+      "community_name": "EncounterFacts",
       "norm_label": "test_residual_check_flags_a_phone_number_but_not_a_placeholder()"
     },
     {
@@ -12228,8 +12228,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_validators_test_residual_check_honours_acknowledged_findings",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 104,
+      "community_name": "EncounterFacts",
       "norm_label": "test_residual_check_honours_acknowledged_findings()"
     },
     {
@@ -12240,8 +12240,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "finetune_tests_test_validators_test_validate_aggregates",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 104,
+      "community_name": "EncounterFacts",
       "norm_label": "test_validate_aggregates()"
     },
     {
@@ -12251,8 +12251,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "finetune_tests_test_validators_rationale_1",
-      "community": 28,
-      "community_name": "test_validators.py",
+      "community": 104,
+      "community_name": "EncounterFacts",
       "norm_label": "the four gates catch the failure modes that matter."
     },
     {
@@ -13226,8 +13226,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sample_documents_make_sample_docs",
-      "community": 25,
-      "community_name": "make_sample_docs.py",
+      "community": 24,
+      "community_name": "Document",
       "norm_label": "make_sample_docs.py"
     },
     {
@@ -13238,8 +13238,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "sample_documents_make_sample_docs_heading",
-      "community": 25,
-      "community_name": "make_sample_docs.py",
+      "community": 24,
+      "community_name": "Document",
       "norm_label": "_heading()"
     },
     {
@@ -13250,8 +13250,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "sample_documents_make_sample_docs_para",
-      "community": 25,
-      "community_name": "make_sample_docs.py",
+      "community": 24,
+      "community_name": "Document",
       "norm_label": "_para()"
     },
     {
@@ -13262,8 +13262,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "sample_documents_make_sample_docs_two_col_table",
-      "community": 25,
-      "community_name": "make_sample_docs.py",
+      "community": 24,
+      "community_name": "Document",
       "norm_label": "_two_col_table()"
     },
     {
@@ -13274,8 +13274,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "sample_documents_make_sample_docs_grid_table",
-      "community": 25,
-      "community_name": "make_sample_docs.py",
+      "community": 24,
+      "community_name": "Document",
       "norm_label": "_grid_table()"
     },
     {
@@ -13286,8 +13286,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "sample_documents_make_sample_docs_build_referral_letter",
-      "community": 25,
-      "community_name": "make_sample_docs.py",
+      "community": 24,
+      "community_name": "Document",
       "norm_label": "build_referral_letter()"
     },
     {
@@ -13298,8 +13298,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "sample_documents_make_sample_docs_build_intake_notes",
-      "community": 25,
-      "community_name": "make_sample_docs.py",
+      "community": 24,
+      "community_name": "Document",
       "norm_label": "build_intake_notes()"
     },
     {
@@ -13310,8 +13310,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "sample_documents_make_sample_docs_build_session_log",
-      "community": 25,
-      "community_name": "make_sample_docs.py",
+      "community": 24,
+      "community_name": "Document",
       "norm_label": "build_session_log()"
     },
     {
@@ -13322,8 +13322,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "sample_documents_make_sample_docs_build_treatment_review_source",
-      "community": 25,
-      "community_name": "make_sample_docs.py",
+      "community": 24,
+      "community_name": "Document",
       "norm_label": "build_treatment_review_source()"
     },
     {
@@ -13333,8 +13333,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sample_documents_make_sample_docs_rationale_1",
-      "community": 25,
-      "community_name": "make_sample_docs.py",
+      "community": 24,
+      "community_name": "Document",
       "norm_label": "generate synthetic, complex .docx source documents for manually testing the..."
     },
     {
@@ -13513,8 +13513,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_stress_report",
-      "community": 88,
-      "community_name": "test_deid_pipeline.py",
+      "community": 145,
+      "community_name": "stress_report.py",
       "norm_label": "stress_report.py"
     },
     {
@@ -13525,8 +13525,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_stress_report_normalise",
-      "community": 88,
-      "community_name": "test_deid_pipeline.py",
+      "community": 145,
+      "community_name": "stress_report.py",
       "norm_label": "normalise()"
     },
     {
@@ -13537,8 +13537,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_stress_report_main",
-      "community": 88,
-      "community_name": "test_deid_pipeline.py",
+      "community": 145,
+      "community_name": "stress_report.py",
       "norm_label": "main()"
     },
     {
@@ -13548,8 +13548,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_stress_report_rationale_1",
-      "community": 88,
-      "community_name": "test_deid_pipeline.py",
+      "community": 145,
+      "community_name": "stress_report.py",
       "norm_label": "per-document pass/fail report for the stress corpus. python..."
     },
     {
@@ -14076,8 +14076,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_app_clinical_forms_test_invalidate_form_export_drops_stale_resolved_values",
-      "community": 41,
-      "community_name": "test_app_clinical_forms.py",
+      "community": 76,
+      "community_name": "select_backend",
       "norm_label": "test_invalidate_form_export_drops_stale_resolved_values()"
     },
     {
@@ -14662,8 +14662,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_clinical_forms_test_no_field_key_collides_within_a_spec",
-      "community": 11,
-      "community_name": "test_template_ingest.py",
+      "community": 21,
+      "community_name": "get_form_spec",
       "norm_label": "test_no_field_key_collides_within_a_spec()"
     },
     {
@@ -14918,8 +14918,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_clinical_forms_fill_test_fill_template_raises_clinical_form_error_on_header_shape_drift",
-      "community": 1,
-      "community_name": "clinical_forms.py",
+      "community": 19,
+      "community_name": "fill_template",
       "norm_label": "test_fill_template_raises_clinical_form_error_on_header_shape_drift()"
     },
     {
@@ -14930,8 +14930,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_clinical_forms_fill_test_fill_template_raises_clinical_form_error_on_field_shape_drift",
-      "community": 1,
-      "community_name": "clinical_forms.py",
+      "community": 19,
+      "community_name": "fill_template",
       "norm_label": "test_fill_template_raises_clinical_form_error_on_field_shape_drift()"
     },
     {
@@ -15072,7 +15072,7 @@
       "_origin": "ast",
       "id": "tests_test_clinical_forms_parse",
       "community": 76,
-      "community_name": "parse_fields",
+      "community_name": "select_backend",
       "norm_label": "test_clinical_forms_parse.py"
     },
     {
@@ -15084,7 +15084,7 @@
       "_origin": "ast",
       "id": "tests_test_clinical_forms_parse_spec",
       "community": 76,
-      "community_name": "parse_fields",
+      "community_name": "select_backend",
       "norm_label": "_spec()"
     },
     {
@@ -15096,7 +15096,7 @@
       "_origin": "ast",
       "id": "tests_test_clinical_forms_parse_test_parse_fields_happy_path",
       "community": 76,
-      "community_name": "parse_fields",
+      "community_name": "select_backend",
       "norm_label": "test_parse_fields_happy_path()"
     },
     {
@@ -15108,7 +15108,7 @@
       "_origin": "ast",
       "id": "tests_test_clinical_forms_parse_test_parse_fields_defaults_missing_field_to_not_documented",
       "community": 76,
-      "community_name": "parse_fields",
+      "community_name": "select_backend",
       "norm_label": "test_parse_fields_defaults_missing_field_to_not_documented()"
     },
     {
@@ -15120,7 +15120,7 @@
       "_origin": "ast",
       "id": "tests_test_clinical_forms_parse_test_parse_fields_first_occurrence_wins_on_duplicate_marker",
       "community": 76,
-      "community_name": "parse_fields",
+      "community_name": "select_backend",
       "norm_label": "test_parse_fields_first_occurrence_wins_on_duplicate_marker()"
     },
     {
@@ -15132,7 +15132,7 @@
       "_origin": "ast",
       "id": "tests_test_clinical_forms_parse_test_parse_fields_ignores_unknown_marker_without_raising",
       "community": 76,
-      "community_name": "parse_fields",
+      "community_name": "select_backend",
       "norm_label": "test_parse_fields_ignores_unknown_marker_without_raising()"
     },
     {
@@ -15144,7 +15144,7 @@
       "_origin": "ast",
       "id": "tests_test_clinical_forms_parse_test_parse_fields_handles_empty_output",
       "community": 76,
-      "community_name": "parse_fields",
+      "community_name": "select_backend",
       "norm_label": "test_parse_fields_handles_empty_output()"
     },
     {
@@ -15156,7 +15156,7 @@
       "_origin": "ast",
       "id": "tests_test_clinical_forms_parse_test_parse_fields_treats_whitespace_only_content_as_not_documented",
       "community": 76,
-      "community_name": "parse_fields",
+      "community_name": "select_backend",
       "norm_label": "test_parse_fields_treats_whitespace_only_content_as_not_documented()"
     },
     {
@@ -15166,7 +15166,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_test_clinical_forms_prompt",
-      "community": 63,
+      "community": 57,
       "community_name": "build_prompt",
       "norm_label": "test_clinical_forms_prompt.py"
     },
@@ -15178,7 +15178,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_clinical_forms_prompt_test_build_prompt_lists_every_field_marker_in_order",
-      "community": 63,
+      "community": 57,
       "community_name": "build_prompt",
       "norm_label": "test_build_prompt_lists_every_field_marker_in_order()"
     },
@@ -15190,7 +15190,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_clinical_forms_prompt_test_build_prompt_never_echoes_a_real_identifier_pattern",
-      "community": 63,
+      "community": 57,
       "community_name": "build_prompt",
       "norm_label": "test_build_prompt_never_echoes_a_real_identifier_pattern()"
     },
@@ -15882,7 +15882,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_deid_pipeline_test_keep_action_leaves_the_text_alone",
-      "community": 116,
+      "community": 63,
       "community_name": "rebuild",
       "norm_label": "test_keep_action_leaves_the_text_alone()"
     },
@@ -15978,7 +15978,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_deid_pipeline_test_rebuild_preserves_a_reviewer_edited_placeholder",
-      "community": 116,
+      "community": 63,
       "community_name": "rebuild",
       "norm_label": "test_rebuild_preserves_a_reviewer_edited_placeholder()"
     },
@@ -15990,7 +15990,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_deid_pipeline_test_rebuild_does_not_resurrect_deleted_rows",
-      "community": 116,
+      "community": 63,
       "community_name": "rebuild",
       "norm_label": "test_rebuild_does_not_resurrect_deleted_rows()"
     },
@@ -16271,7 +16271,7 @@
       "source_location": "L291",
       "_origin": "ast",
       "id": "tests_test_deid_pipeline_rationale_291",
-      "community": 116,
+      "community": 63,
       "community_name": "rebuild",
       "norm_label": "marking a row keep must un-redact exactly that value and nothing else."
     },
@@ -16337,7 +16337,7 @@
       "source_location": "L375",
       "_origin": "ast",
       "id": "tests_test_deid_pipeline_rationale_375",
-      "community": 116,
+      "community": 63,
       "community_name": "rebuild",
       "norm_label": "a false positive the reviewer deleted must stay deleted."
     },
@@ -16875,8 +16875,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "tests_test_desktop_packaging_stubbackend",
-      "community": 91,
-      "community_name": "NoEgress",
+      "community": 0,
+      "community_name": "test_batch.py",
       "norm_label": "stubbackend"
     },
     {
@@ -16887,8 +16887,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_desktop_packaging_stubbackend_generate",
-      "community": 91,
-      "community_name": "NoEgress",
+      "community": 0,
+      "community_name": "test_batch.py",
       "norm_label": ".generate()"
     },
     {
@@ -16911,8 +16911,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_desktop_packaging_test_reidentification_opens_no_socket",
-      "community": 20,
-      "community_name": "test_desktop_packaging.py",
+      "community": 91,
+      "community_name": "NoEgress",
       "norm_label": "test_reidentification_opens_no_socket()"
     },
     {
@@ -17006,8 +17006,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_desktop_packaging_test_cloud_selection_is_never_reached_while_off",
-      "community": 20,
-      "community_name": "test_desktop_packaging.py",
+      "community": 76,
+      "community_name": "select_backend",
       "norm_label": "test_cloud_selection_is_never_reached_while_off()"
     },
     {
@@ -17018,8 +17018,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_desktop_packaging_test_the_backend_ladder_prefers_local_over_cloud",
-      "community": 20,
-      "community_name": "test_desktop_packaging.py",
+      "community": 76,
+      "community_name": "select_backend",
       "norm_label": "test_the_backend_ladder_prefers_local_over_cloud()"
     },
     {
@@ -17078,8 +17078,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_desktop_packaging_test_a_weak_laptop_gets_a_warning_not_a_crash",
-      "community": 120,
-      "community_name": "ram_verdict",
+      "community": 20,
+      "community_name": "test_desktop_packaging.py",
       "norm_label": "test_a_weak_laptop_gets_a_warning_not_a_crash()"
     },
     {
@@ -17090,8 +17090,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_desktop_packaging_test_a_capable_laptop_gets_no_warning",
-      "community": 120,
-      "community_name": "ram_verdict",
+      "community": 20,
+      "community_name": "test_desktop_packaging.py",
       "norm_label": "test_a_capable_laptop_gets_no_warning()"
     },
     {
@@ -17114,8 +17114,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_desktop_packaging_test_a_fine_tuned_clinical_model_is_preferred_over_the_stock_base",
-      "community": 20,
-      "community_name": "test_desktop_packaging.py",
+      "community": 77,
+      "community_name": "desktop.py",
       "norm_label": "test_a_fine_tuned_clinical_model_is_preferred_over_the_stock_base()"
     },
     {
@@ -17231,8 +17231,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "tests_test_desktop_packaging_rationale_66",
-      "community": 91,
-      "community_name": "NoEgress",
+      "community": 0,
+      "community_name": "test_batch.py",
       "norm_label": "stands in for a model so the egress test does not need one installed."
     },
     {
@@ -17253,8 +17253,8 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "tests_test_desktop_packaging_rationale_99",
-      "community": 20,
-      "community_name": "test_desktop_packaging.py",
+      "community": 91,
+      "community_name": "NoEgress",
       "norm_label": "re-identification is pure python \u2014 it must not phone anywhere."
     },
     {
@@ -17297,8 +17297,8 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "tests_test_desktop_packaging_rationale_163",
-      "community": 20,
-      "community_name": "test_desktop_packaging.py",
+      "community": 76,
+      "community_name": "select_backend",
       "norm_label": "even fully configured, cloud is last."
     },
     {
@@ -17849,7 +17849,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_exemplars_test_build_prompt_injects_house_style_lines_and_the_caveat",
-      "community": 63,
+      "community": 57,
       "community_name": "build_prompt",
       "norm_label": "test_build_prompt_injects_house_style_lines_and_the_caveat()"
     },
@@ -17861,7 +17861,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_exemplars_test_build_prompt_without_exemplars_is_unchanged",
-      "community": 63,
+      "community": 57,
       "community_name": "build_prompt",
       "norm_label": "test_build_prompt_without_exemplars_is_unchanged()"
     },
@@ -17874,7 +17874,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "tests_test_exemplars_recordingbackend",
-      "community": 127,
+      "community": 96,
       "community_name": "_RecordingBackend",
       "norm_label": "_recordingbackend"
     },
@@ -17886,7 +17886,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_exemplars_recordingbackend_init",
-      "community": 127,
+      "community": 96,
       "community_name": "_RecordingBackend",
       "norm_label": ".__init__()"
     },
@@ -17898,7 +17898,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_exemplars_recordingbackend_generate",
-      "community": 127,
+      "community": 96,
       "community_name": "_RecordingBackend",
       "norm_label": ".generate()"
     },
@@ -17910,7 +17910,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_exemplars_test_generate_form_document_threads_exemplars_into_the_prompt",
-      "community": 127,
+      "community": 96,
       "community_name": "_RecordingBackend",
       "norm_label": "test_generate_form_document_threads_exemplars_into_the_prompt()"
     },
@@ -18076,8 +18076,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_generation_test_refine_also_rescans_the_source_for_missed_identifiers",
-      "community": 73,
-      "community_name": "generate_document",
+      "community": 99,
+      "community_name": "refine_document",
       "norm_label": "test_refine_also_rescans_the_source_for_missed_identifiers()"
     },
     {
@@ -18496,8 +18496,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_generation_test_refine_document_accepts_a_system_and_refine_prompt_override",
-      "community": 99,
-      "community_name": "refine_document",
+      "community": 73,
+      "community_name": "generate_document",
       "norm_label": "test_refine_document_accepts_a_system_and_refine_prompt_override()"
     },
     {
@@ -18926,8 +18926,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_generation_setup_test_the_whole_deid_path_works_with_no_model_at_all",
-      "community": 0,
-      "community_name": "test_batch.py",
+      "community": 13,
+      "community_name": "generation_status",
       "norm_label": "test_the_whole_deid_path_works_with_no_model_at_all()"
     },
     {
@@ -18938,8 +18938,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_generation_setup_test_inference_opens_no_socket_even_after_setup",
-      "community": 91,
-      "community_name": "NoEgress",
+      "community": 0,
+      "community_name": "test_batch.py",
       "norm_label": "test_inference_opens_no_socket_even_after_setup()"
     },
     {
@@ -19241,8 +19241,8 @@
       "source_location": "L239",
       "_origin": "ast",
       "id": "tests_test_generation_setup_rationale_239",
-      "community": 0,
-      "community_name": "test_batch.py",
+      "community": 13,
+      "community_name": "generation_status",
       "norm_label": "a fresh pc must still de-identify, review and approve."
     },
     {
@@ -19964,7 +19964,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_reference_library_test_empty_library",
-      "community": 96,
+      "community": 52,
       "community_name": "render_form_draft",
       "norm_label": "test_empty_library()"
     },
@@ -19976,7 +19976,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_reference_library_test_add_file_then_sources_and_not_empty",
-      "community": 96,
+      "community": 52,
       "community_name": "render_form_draft",
       "norm_label": "test_add_file_then_sources_and_not_empty()"
     },
@@ -20036,7 +20036,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_reference_library_test_cache_refreshes_when_a_file_is_added",
-      "community": 96,
+      "community": 52,
       "community_name": "render_form_draft",
       "norm_label": "test_cache_refreshes_when_a_file_is_added()"
     },
@@ -20248,7 +20248,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_test_review_gate",
-      "community": 108,
+      "community": 94,
       "community_name": "test_review_gate.py",
       "norm_label": "test_review_gate.py"
     },
@@ -20261,7 +20261,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_flag_values",
       "community": 108,
-      "community_name": "test_review_gate.py",
+      "community_name": "_flag_values",
       "norm_label": "_flag_values()"
     },
     {
@@ -20272,7 +20272,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_py_parametrize",
       "community": 108,
-      "community_name": "test_review_gate.py",
+      "community_name": "_flag_values",
       "norm_label": "parametrize"
     },
     {
@@ -20284,7 +20284,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_test_a_planted_residual_is_flagged",
       "community": 108,
-      "community_name": "test_review_gate.py",
+      "community_name": "_flag_values",
       "norm_label": "test_a_planted_residual_is_flagged()"
     },
     {
@@ -20296,7 +20296,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_test_each_flag_carries_its_kind_and_reason",
       "community": 108,
-      "community_name": "test_review_gate.py",
+      "community_name": "_flag_values",
       "norm_label": "test_each_flag_carries_its_kind_and_reason()"
     },
     {
@@ -20320,7 +20320,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_test_clinical_and_legal_terms_are_not_flagged",
       "community": 108,
-      "community_name": "test_review_gate.py",
+      "community_name": "_flag_values",
       "norm_label": "test_clinical_and_legal_terms_are_not_flagged()"
     },
     {
@@ -20392,7 +20392,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_test_blocking_reason_empty_when_nothing_outstanding",
       "community": 94,
-      "community_name": "blocking_reason",
+      "community_name": "test_review_gate.py",
       "norm_label": "test_blocking_reason_empty_when_nothing_outstanding()"
     },
     {
@@ -20404,7 +20404,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_test_blocking_reason_reports_residual_first",
       "community": 94,
-      "community_name": "blocking_reason",
+      "community_name": "test_review_gate.py",
       "norm_label": "test_blocking_reason_reports_residual_first()"
     },
     {
@@ -20416,7 +20416,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_test_advisory_spans_do_not_block_approval",
       "community": 94,
-      "community_name": "blocking_reason",
+      "community_name": "test_review_gate.py",
       "norm_label": "test_advisory_spans_do_not_block_approval()"
     },
     {
@@ -20428,7 +20428,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_test_an_advisory_flag_alone_no_longer_blocks_approval",
       "community": 94,
-      "community_name": "blocking_reason",
+      "community_name": "test_review_gate.py",
       "norm_label": "test_an_advisory_flag_alone_no_longer_blocks_approval()"
     },
     {
@@ -20440,7 +20440,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_test_approval_is_blocked_while_the_sweep_has_findings",
       "community": 94,
-      "community_name": "blocking_reason",
+      "community_name": "test_review_gate.py",
       "norm_label": "test_approval_is_blocked_while_the_sweep_has_findings()"
     },
     {
@@ -20452,7 +20452,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_test_approval_unblocks_once_everything_is_resolved",
       "community": 94,
-      "community_name": "blocking_reason",
+      "community_name": "test_review_gate.py",
       "norm_label": "test_approval_unblocks_once_everything_is_resolved()"
     },
     {
@@ -20474,7 +20474,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "tests_test_review_gate_py_fixture",
-      "community": 108,
+      "community": 94,
       "community_name": "test_review_gate.py",
       "norm_label": "fixture"
     },
@@ -20486,7 +20486,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_review_gate_record",
-      "community": 108,
+      "community": 94,
       "community_name": "test_review_gate.py",
       "norm_label": "record()"
     },
@@ -20498,7 +20498,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_review_gate_test_the_sidecar_records_the_review",
-      "community": 108,
+      "community": 94,
       "community_name": "test_review_gate.py",
       "norm_label": "test_the_sidecar_records_the_review()"
     },
@@ -20522,7 +20522,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_review_gate_test_the_sidecar_tallies_placeholders_by_type",
-      "community": 108,
+      "community": 94,
       "community_name": "test_review_gate.py",
       "norm_label": "test_the_sidecar_tallies_placeholders_by_type()"
     },
@@ -20535,7 +20535,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_test_the_sidecar_contains_no_identifier_value",
       "community": 108,
-      "community_name": "test_review_gate.py",
+      "community_name": "_flag_values",
       "norm_label": "test_the_sidecar_contains_no_identifier_value()"
     },
     {
@@ -20546,7 +20546,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_review_gate_test_the_sidecar_contains_no_mapping",
-      "community": 108,
+      "community": 94,
       "community_name": "test_review_gate.py",
       "norm_label": "test_the_sidecar_contains_no_mapping()"
     },
@@ -20558,7 +20558,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_review_gate_test_no_corpus_identifier_reaches_the_sidecar",
-      "community": 108,
+      "community": 94,
       "community_name": "test_review_gate.py",
       "norm_label": "test_no_corpus_identifier_reaches_the_sidecar()"
     },
@@ -20570,7 +20570,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_review_gate_test_the_app_registers_the_new_state_keys_for_wiping",
-      "community": 108,
+      "community": 94,
       "community_name": "test_review_gate.py",
       "norm_label": "test_the_app_registers_the_new_state_keys_for_wiping()"
     },
@@ -20581,7 +20581,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_test_review_gate_rationale_1",
-      "community": 108,
+      "community": 94,
       "community_name": "test_review_gate.py",
       "norm_label": "the reviewer gate: candidate highlighting, the adaptive checklist, and the no-..."
     },
@@ -20604,7 +20604,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_rationale_127",
       "community": 94,
-      "community_name": "blocking_reason",
+      "community_name": "test_review_gate.py",
       "norm_label": "low-confidence redactions are already in place; the permissive flags are..."
     },
     {
@@ -20615,7 +20615,7 @@
       "_origin": "ast",
       "id": "tests_test_review_gate_rationale_134",
       "community": 94,
-      "community_name": "blocking_reason",
+      "community_name": "test_review_gate.py",
       "norm_label": "the streamlined gate: a permissive flag the reviewer left untouched does not..."
     },
     {
@@ -20625,7 +20625,7 @@
       "source_location": "L238",
       "_origin": "ast",
       "id": "tests_test_review_gate_rationale_238",
-      "community": 108,
+      "community": 94,
       "community_name": "test_review_gate.py",
       "norm_label": "the real test: nothing the corpus calls an identifier may appear."
     },
@@ -20636,7 +20636,7 @@
       "source_location": "L261",
       "_origin": "ast",
       "id": "tests_test_review_gate_rationale_261",
-      "community": 108,
+      "community": 94,
       "community_name": "test_review_gate.py",
       "norm_label": "a dismissal key holds the span text, so it must be wiped with the rest."
     },
@@ -20743,8 +20743,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "tests_test_review_spans_test_dismissed_residual_flags_are_excluded",
-      "community": 29,
-      "community_name": "candidate_residuals",
+      "community": 90,
+      "community_name": "review_spans",
       "norm_label": "test_dismissed_residual_flags_are_excluded()"
     },
     {
@@ -21579,6 +21579,112 @@
       "community": 11,
       "community_name": "test_template_ingest.py",
       "norm_label": "a clinic can add its own table-based .docx form. the generic parser must infer..."
+    },
+    {
+      "label": "test_ui_components.py",
+      "file_type": "code",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tests_test_ui_components",
+      "community": 26,
+      "community_name": "components.py",
+      "norm_label": "test_ui_components.py"
+    },
+    {
+      "label": "test_hero_carries_the_title_sub_and_privacy_pill()",
+      "file_type": "code",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L8",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "tests_test_ui_components_test_hero_carries_the_title_sub_and_privacy_pill",
+      "community": 26,
+      "community_name": "components.py",
+      "norm_label": "test_hero_carries_the_title_sub_and_privacy_pill()"
+    },
+    {
+      "label": "test_step_tracker_states_and_count()",
+      "file_type": "code",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L20",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "tests_test_ui_components_test_step_tracker_states_and_count",
+      "community": 26,
+      "community_name": "components.py",
+      "norm_label": "test_step_tracker_states_and_count()"
+    },
+    {
+      "label": "test_chip_and_status_chip()",
+      "file_type": "code",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L39",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "tests_test_ui_components_test_chip_and_status_chip",
+      "community": 26,
+      "community_name": "components.py",
+      "norm_label": "test_chip_and_status_chip()"
+    },
+    {
+      "label": "test_detection_layer()",
+      "file_type": "code",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L51",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "tests_test_ui_components_test_detection_layer",
+      "community": 26,
+      "community_name": "components.py",
+      "norm_label": "test_detection_layer()"
+    },
+    {
+      "label": "test_stat_strip_and_empty_state()",
+      "file_type": "code",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L60",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "tests_test_ui_components_test_stat_strip_and_empty_state",
+      "community": 26,
+      "community_name": "components.py",
+      "norm_label": "test_stat_strip_and_empty_state()"
+    },
+    {
+      "label": "test_values_are_html_escaped()",
+      "file_type": "code",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L70",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "tests_test_ui_components_test_values_are_html_escaped",
+      "community": 26,
+      "community_name": "components.py",
+      "norm_label": "test_values_are_html_escaped()"
+    },
+    {
+      "label": "test_unknown_icon_falls_back_to_dot()",
+      "file_type": "code",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L76",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "tests_test_ui_components_test_unknown_icon_falls_back_to_dot",
+      "community": 26,
+      "community_name": "components.py",
+      "norm_label": "test_unknown_icon_falls_back_to_dot()"
+    },
+    {
+      "label": "The HTML-string UI helpers \u2014 pure functions, no Streamlit.",
+      "file_type": "rationale",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tests_test_ui_components_rationale_1",
+      "community": 26,
+      "community_name": "components.py",
+      "norm_label": "the html-string ui helpers \u2014 pure functions, no streamlit."
     },
     {
       "label": "BOARD.md",
@@ -24256,7 +24362,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 63,
+      "community": 57,
       "norm_label": "stable per-entity placeholder scheme",
       "_origin": "semantic",
       "community_name": "build_prompt",
@@ -24272,7 +24378,7 @@
       "author": null,
       "contributor": null,
       "rationale": "REDACT_INPROSE_DATES defaults False because in-prose dates are the highest-false-positive category; only identity-anchored and labelled date fields are always redacted.",
-      "community": 63,
+      "community": 57,
       "norm_label": "in-prose date redaction policy",
       "_origin": "semantic",
       "community_name": "build_prompt",
@@ -24287,7 +24393,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 63,
+      "community": 57,
       "norm_label": "redact_inprose_dates flag",
       "_origin": "semantic",
       "community_name": "build_prompt",
@@ -24712,10 +24818,10 @@
       "author": null,
       "contributor": null,
       "rationale": "Code was modeled on the free-form draft dict and reset a dead 'reidentified' key instead of invalidating 'resolved_field_values' \u2014 the key the download button actually reads \u2014 so a practitioner could review revision N and download revision N-1.",
-      "community": 41,
+      "community": 76,
       "norm_label": "bug: stale re-identified export race after refine/regenerate",
       "_origin": "semantic",
-      "community_name": "test_app_clinical_forms.py",
+      "community_name": "select_backend",
       "id": "docs_superpowers_plans_2026_08_13_clinical_forms_bug2_stale_export_race"
     },
     {
@@ -24759,10 +24865,10 @@
       "author": null,
       "contributor": null,
       "rationale": "Templates are bundled read-only assets; every fill happens on an in-memory python-docx Document re-saved to BytesIO, matching the existing pattern already used elsewhere in the app rather than writing a working copy to a temp file.",
-      "community": 30,
+      "community": 49,
       "norm_label": "'nothing touches disk' in-memory fill pattern",
       "_origin": "semantic",
-      "community_name": "Backend",
+      "community_name": "docx_redact.py",
       "id": "docs_superpowers_specs_2026_08_13_clinical_forms_design_nothing_touches_disk_pattern"
     },
     {
@@ -24775,10 +24881,10 @@
       "author": null,
       "contributor": null,
       "rationale": "Cited as the precedent the clinical-form fill path follows for keeping document generation entirely in memory.",
-      "community": 30,
+      "community": 49,
       "norm_label": "existing _as_docx() nothing-touches-disk precedent",
       "_origin": "semantic",
-      "community_name": "Backend",
+      "community_name": "docx_redact.py",
       "id": "docs_superpowers_specs_2026_08_13_clinical_forms_design_as_docx_pattern"
     },
     {
@@ -24955,10 +25061,10 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 25,
+      "community": 135,
       "norm_label": "clinical-forms pipeline (upload -> de-identify -> approve -> combine sources -> generate form)",
       "_origin": "semantic",
-      "community_name": "make_sample_docs.py",
+      "community_name": "Jordan Whitfield (fictional test client)",
       "id": "sample_documents_readme_clinical_forms_pipeline"
     },
     {
@@ -24970,10 +25076,10 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 25,
+      "community": 135,
       "norm_label": "jordan whitfield (fictional test client)",
       "_origin": "semantic",
-      "community_name": "make_sample_docs.py",
+      "community_name": "Jordan Whitfield (fictional test client)",
       "id": "sample_documents_readme_jordan_whitfield"
     },
     {
@@ -24985,10 +25091,10 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 25,
+      "community": 135,
       "norm_label": "biopsychosocial assessment form",
       "_origin": "semantic",
-      "community_name": "make_sample_docs.py",
+      "community_name": "Jordan Whitfield (fictional test client)",
       "id": "sample_documents_readme_biopsychosocial_assessment"
     },
     {
@@ -25000,10 +25106,10 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 25,
+      "community": 135,
       "norm_label": "client session notes form",
       "_origin": "semantic",
-      "community_name": "make_sample_docs.py",
+      "community_name": "Jordan Whitfield (fictional test client)",
       "id": "sample_documents_readme_client_session_notes"
     },
     {
@@ -25015,10 +25121,10 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 25,
+      "community": 135,
       "norm_label": "client treatment review form",
       "_origin": "semantic",
-      "community_name": "make_sample_docs.py",
+      "community_name": "Jordan Whitfield (fictional test client)",
       "id": "sample_documents_readme_client_treatment_review"
     },
     {
@@ -25030,10 +25136,10 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 25,
+      "community": 135,
       "norm_label": "01_gp_referral_letter.docx",
       "_origin": "semantic",
-      "community_name": "make_sample_docs.py",
+      "community_name": "Jordan Whitfield (fictional test client)",
       "id": "sample_documents_readme_01_gp_referral_letter"
     },
     {
@@ -25045,10 +25151,10 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 25,
+      "community": 135,
       "norm_label": "02_biopsychosocial_intake_notes.docx",
       "_origin": "semantic",
-      "community_name": "make_sample_docs.py",
+      "community_name": "Jordan Whitfield (fictional test client)",
       "id": "sample_documents_readme_02_biopsychosocial_intake_notes"
     },
     {
@@ -25060,10 +25166,10 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 25,
+      "community": 135,
       "norm_label": "03_session_log_progress_notes.docx",
       "_origin": "semantic",
-      "community_name": "make_sample_docs.py",
+      "community_name": "Jordan Whitfield (fictional test client)",
       "id": "sample_documents_readme_03_session_log_progress_notes"
     },
     {
@@ -25075,10 +25181,10 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 25,
+      "community": 135,
       "norm_label": "04_treatment_review_source.docx",
       "_origin": "semantic",
-      "community_name": "make_sample_docs.py",
+      "community_name": "Jordan Whitfield (fictional test client)",
       "id": "sample_documents_readme_04_treatment_review_source"
     },
     {
@@ -25548,7 +25654,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1902",
+      "source_location": "L1909",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25592,7 +25698,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1121",
+      "source_location": "L1128",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25647,7 +25753,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1127",
+      "source_location": "L1134",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25658,7 +25764,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1131",
+      "source_location": "L1138",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25669,7 +25775,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1152",
+      "source_location": "L1159",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25702,7 +25808,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1143",
+      "source_location": "L1150",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25724,7 +25830,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1991",
+      "source_location": "L1998",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25735,7 +25841,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1969",
+      "source_location": "L1976",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25746,7 +25852,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1157",
+      "source_location": "L1164",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25757,7 +25863,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1983",
+      "source_location": "L1990",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25823,7 +25929,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1694",
+      "source_location": "L1701",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25856,7 +25962,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1452",
+      "source_location": "L1459",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25889,7 +25995,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1793",
+      "source_location": "L1800",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25900,7 +26006,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1821",
+      "source_location": "L1828",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25911,7 +26017,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1862",
+      "source_location": "L1869",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25933,7 +26039,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1349",
+      "source_location": "L1356",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25944,7 +26050,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1190",
+      "source_location": "L1197",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25955,7 +26061,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1655",
+      "source_location": "L1662",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25966,7 +26072,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1623",
+      "source_location": "L1630",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25977,7 +26083,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1485",
+      "source_location": "L1492",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -25988,7 +26094,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1531",
+      "source_location": "L1538",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26021,7 +26127,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1232",
+      "source_location": "L1239",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26054,7 +26160,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1590",
+      "source_location": "L1597",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26065,7 +26171,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1326",
+      "source_location": "L1333",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26076,7 +26182,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L2040",
+      "source_location": "L2047",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26098,7 +26204,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1751",
+      "source_location": "L1758",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26109,7 +26215,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1419",
+      "source_location": "L1426",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26120,7 +26226,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1287",
+      "source_location": "L1294",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26131,7 +26237,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1311",
+      "source_location": "L1318",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26153,7 +26259,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1922",
+      "source_location": "L1929",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26197,7 +26303,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1407",
+      "source_location": "L1414",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26291,7 +26397,7 @@
       "context": "submodule_import",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1596",
+      "source_location": "L1603",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26327,7 +26433,7 @@
       "context": "submodule_import",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1752",
+      "source_location": "L1759",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26399,7 +26505,7 @@
       "context": "submodule_import",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1627",
+      "source_location": "L1634",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26411,7 +26517,7 @@
       "context": "submodule_import",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1658",
+      "source_location": "L1665",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26459,7 +26565,7 @@
       "context": "submodule_import",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1596",
+      "source_location": "L1603",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app",
@@ -26704,7 +26810,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L2007",
+      "source_location": "L2014",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -26727,7 +26833,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L2009",
+      "source_location": "L2016",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -26786,7 +26892,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L2012",
+      "source_location": "L2019",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -26822,7 +26928,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1923",
+      "source_location": "L1930",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_section_handoff",
@@ -26988,7 +27094,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1993",
+      "source_location": "L2000",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -27095,7 +27201,7 @@
       "context": "collection",
       "confidence": "INFERRED",
       "source_file": "carescribe/app.py",
-      "source_location": "L2022",
+      "source_location": "L2029",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -27119,7 +27225,7 @@
       "context": "collection",
       "confidence": "INFERRED",
       "source_file": "carescribe/app.py",
-      "source_location": "L2022",
+      "source_location": "L2029",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -27184,18 +27290,6 @@
       "_origin": "ast",
       "source": "carescribe_app_render_entity_table",
       "target": "carescribe_app_entity_frame",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "carescribe/app.py",
-      "source_location": "L1111",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "carescribe_app_section_batch_status",
-      "target": "dataframe",
       "confidence_score": 1.0
     },
     {
@@ -27846,7 +27940,7 @@
       "context": "collection",
       "confidence": "INFERRED",
       "source_file": "carescribe/app.py",
-      "source_location": "L2023",
+      "source_location": "L2030",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -27917,7 +28011,7 @@
       "context": "collection",
       "confidence": "INFERRED",
       "source_file": "carescribe/app.py",
-      "source_location": "L2023",
+      "source_location": "L2030",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -27928,8 +28022,20 @@
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1370",
+      "source_location": "L1107",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "carescribe_app_section_batch_status",
+      "target": "carescribe_ui_components_status_chip"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "carescribe/app.py",
+      "source_location": "L1377",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_generation_panel",
@@ -27988,10 +28094,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1144",
+      "source_location": "L1151",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1144",
+      "source": "carescribe_app_rationale_1151",
       "target": "carescribe_app_invalidate_form_export",
       "confidence_score": 1.0
     },
@@ -28072,7 +28178,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1164",
+      "source_location": "L1171",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_privacy_indicator",
@@ -28084,7 +28190,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1166",
+      "source_location": "L1173",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_privacy_indicator",
@@ -28094,10 +28200,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1158",
+      "source_location": "L1165",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1158",
+      "source": "carescribe_app_rationale_1165",
       "target": "carescribe_app_privacy_indicator",
       "confidence_score": 1.0
     },
@@ -28105,10 +28211,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1191",
+      "source_location": "L1198",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1191",
+      "source": "carescribe_app_rationale_1198",
       "target": "carescribe_app_render_generation_status",
       "confidence_score": 1.0
     },
@@ -28117,7 +28223,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1736",
+      "source_location": "L1743",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_clinical_form_panel",
@@ -28129,7 +28235,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1376",
+      "source_location": "L1383",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_generation_panel",
@@ -28142,7 +28248,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1192",
+      "source_location": "L1199",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_generation_status",
@@ -28154,7 +28260,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1194",
+      "source_location": "L1201",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_generation_status",
@@ -28164,10 +28270,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1233",
+      "source_location": "L1240",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1233",
+      "source": "carescribe_app_rationale_1240",
       "target": "carescribe_app_render_setup_card",
       "confidence_score": 1.0
     },
@@ -28176,7 +28282,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1733",
+      "source_location": "L1740",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_clinical_form_panel",
@@ -28188,7 +28294,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1373",
+      "source_location": "L1380",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_generation_panel",
@@ -28200,7 +28306,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1258",
+      "source_location": "L1265",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_setup_card",
@@ -28212,7 +28318,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1268",
+      "source_location": "L1275",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_setup_card",
@@ -28225,7 +28331,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1238",
+      "source_location": "L1245",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_setup_card",
@@ -28237,7 +28343,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1242",
+      "source_location": "L1249",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_setup_card",
@@ -28248,7 +28354,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1949",
+      "source_location": "L1956",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_section_handoff",
@@ -28259,10 +28365,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1288",
+      "source_location": "L1295",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1288",
+      "source": "carescribe_app_rationale_1295",
       "target": "carescribe_app_run_model_download",
       "confidence_score": 1.0
     },
@@ -28272,7 +28378,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1302",
+      "source_location": "L1309",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_run_model_download",
@@ -28284,7 +28390,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1292",
+      "source_location": "L1299",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_run_model_download",
@@ -28294,10 +28400,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1312",
+      "source_location": "L1319",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1312",
+      "source": "carescribe_app_rationale_1319",
       "target": "carescribe_app_run_ollama_pull",
       "confidence_score": 1.0
     },
@@ -28307,7 +28413,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1315",
+      "source_location": "L1322",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_run_ollama_pull",
@@ -28317,10 +28423,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1327",
+      "source_location": "L1334",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1327",
+      "source": "carescribe_app_rationale_1334",
       "target": "carescribe_app_render_test_generation",
       "confidence_score": 1.0
     },
@@ -28329,7 +28435,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1377",
+      "source_location": "L1384",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_generation_panel",
@@ -28342,7 +28448,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1331",
+      "source_location": "L1338",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_test_generation",
@@ -28354,7 +28460,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1333",
+      "source_location": "L1340",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_test_generation",
@@ -28364,10 +28470,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1350",
+      "source_location": "L1357",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1350",
+      "source": "carescribe_app_rationale_1357",
       "target": "carescribe_app_render_generation_panel",
       "confidence_score": 1.0
     },
@@ -28376,7 +28482,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1404",
+      "source_location": "L1411",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_generation_panel",
@@ -28388,7 +28494,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1401",
+      "source_location": "L1408",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_generation_panel",
@@ -28400,7 +28506,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1349",
+      "source_location": "L1356",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_generation_panel",
@@ -28413,7 +28519,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1380",
+      "source_location": "L1387",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_generation_panel",
@@ -28425,7 +28531,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1372",
+      "source_location": "L1379",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_generation_panel",
@@ -28436,7 +28542,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1962",
+      "source_location": "L1969",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_section_handoff",
@@ -28447,10 +28553,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1408",
+      "source_location": "L1415",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1408",
+      "source": "carescribe_app_rationale_1415",
       "target": "carescribe_app_stream_into",
       "confidence_score": 1.0
     },
@@ -28459,7 +28565,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1849",
+      "source_location": "L1856",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_form_refinement",
@@ -28471,7 +28577,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1518",
+      "source_location": "L1525",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_refinement",
@@ -28483,7 +28589,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1779",
+      "source_location": "L1786",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_run_form_generation",
@@ -28495,7 +28601,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1438",
+      "source_location": "L1445",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_run_generation",
@@ -28506,10 +28612,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1420",
+      "source_location": "L1427",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1420",
+      "source": "carescribe_app_rationale_1427",
       "target": "carescribe_app_run_generation",
       "confidence_score": 1.0
     },
@@ -28519,7 +28625,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1425",
+      "source_location": "L1432",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_run_generation",
@@ -28531,7 +28637,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1426",
+      "source_location": "L1433",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_run_generation",
@@ -28543,7 +28649,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1445",
+      "source_location": "L1452",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_run_generation",
@@ -28553,35 +28659,11 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1453",
+      "source_location": "L1460",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1453",
+      "source": "carescribe_app_rationale_1460",
       "target": "carescribe_app_render_draft",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "carescribe/app.py",
-      "source_location": "L1475",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "carescribe_app_render_draft",
-      "target": "carescribe_app_as_docx",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "carescribe/app.py",
-      "source_location": "L1481",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "carescribe_app_render_draft",
-      "target": "carescribe_app_render_refinement",
       "confidence_score": 1.0
     },
     {
@@ -28593,6 +28675,30 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_draft",
+      "target": "carescribe_app_as_docx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "carescribe/app.py",
+      "source_location": "L1488",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "carescribe_app_render_draft",
+      "target": "carescribe_app_render_refinement",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "carescribe/app.py",
+      "source_location": "L1489",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "carescribe_app_render_draft",
       "target": "carescribe_app_render_reidentification",
       "confidence_score": 1.0
     },
@@ -28601,7 +28707,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1452",
+      "source_location": "L1459",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_draft",
@@ -28614,7 +28720,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1461",
+      "source_location": "L1468",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_draft",
@@ -28624,10 +28730,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1486",
+      "source_location": "L1493",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1486",
+      "source": "carescribe_app_rationale_1493",
       "target": "carescribe_app_render_refinement",
       "confidence_score": 1.0
     },
@@ -28637,7 +28743,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1512",
+      "source_location": "L1519",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_refinement",
@@ -28648,7 +28754,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1485",
+      "source_location": "L1492",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_refinement",
@@ -28661,7 +28767,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1508",
+      "source_location": "L1515",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_refinement",
@@ -28673,7 +28779,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1525",
+      "source_location": "L1532",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_refinement",
@@ -28685,7 +28791,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1499",
+      "source_location": "L1506",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_refinement",
@@ -28695,10 +28801,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1532",
+      "source_location": "L1539",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1532",
+      "source": "carescribe_app_rationale_1539",
       "target": "carescribe_app_render_reidentification",
       "confidence_score": 1.0
     },
@@ -28707,7 +28813,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1583",
+      "source_location": "L1590",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_reidentification",
@@ -28719,7 +28825,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1531",
+      "source_location": "L1538",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_reidentification",
@@ -28732,7 +28838,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1573",
+      "source_location": "L1580",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_reidentification",
@@ -28744,7 +28850,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1555",
+      "source_location": "L1562",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_reidentification",
@@ -28756,7 +28862,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1541",
+      "source_location": "L1548",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_reidentification",
@@ -28766,10 +28872,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1591",
+      "source_location": "L1598",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1591",
+      "source": "carescribe_app_rationale_1598",
       "target": "carescribe_app_render_template_uploader",
       "confidence_score": 1.0
     },
@@ -28778,7 +28884,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1702",
+      "source_location": "L1709",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_clinical_form_panel",
@@ -28791,7 +28897,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1607",
+      "source_location": "L1614",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_template_uploader",
@@ -28803,7 +28909,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1618",
+      "source_location": "L1625",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_template_uploader",
@@ -28813,10 +28919,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1624",
+      "source_location": "L1631",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1624",
+      "source": "carescribe_app_rationale_1631",
       "target": "carescribe_app_render_reference_uploader",
       "confidence_score": 1.0
     },
@@ -28825,7 +28931,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1703",
+      "source_location": "L1710",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_clinical_form_panel",
@@ -28838,7 +28944,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1648",
+      "source_location": "L1655",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_reference_uploader",
@@ -28850,7 +28956,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1641",
+      "source_location": "L1648",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_reference_uploader",
@@ -28862,7 +28968,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1629",
+      "source_location": "L1636",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_reference_uploader",
@@ -28872,10 +28978,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1656",
+      "source_location": "L1663",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1656",
+      "source": "carescribe_app_rationale_1663",
       "target": "carescribe_app_render_reference_panel",
       "confidence_score": 1.0
     },
@@ -28884,7 +28990,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1815",
+      "source_location": "L1822",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_form_draft",
@@ -28897,7 +29003,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1660",
+      "source_location": "L1667",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_reference_panel",
@@ -28909,7 +29015,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1669",
+      "source_location": "L1676",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_reference_panel",
@@ -28921,7 +29027,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1663",
+      "source_location": "L1670",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_reference_panel",
@@ -28957,7 +29063,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1705",
+      "source_location": "L1712",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_clinical_form_panel",
@@ -28969,7 +29075,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1710",
+      "source_location": "L1717",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_clinical_form_panel",
@@ -28981,7 +29087,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1732",
+      "source_location": "L1739",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_clinical_form_panel",
@@ -29005,7 +29111,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1774",
+      "source_location": "L1781",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_run_form_generation",
@@ -29053,7 +29159,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1766",
+      "source_location": "L1773",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_run_form_generation",
@@ -29065,7 +29171,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1761",
+      "source_location": "L1768",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_run_form_generation",
@@ -29113,7 +29219,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1805",
+      "source_location": "L1812",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_form_draft",
@@ -29125,7 +29231,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1800",
+      "source_location": "L1807",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_form_draft",
@@ -29137,7 +29243,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1845",
+      "source_location": "L1852",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_form_refinement",
@@ -29149,7 +29255,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1857",
+      "source_location": "L1864",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_form_refinement",
@@ -29173,7 +29279,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1834",
+      "source_location": "L1841",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_form_refinement",
@@ -29185,7 +29291,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1896",
+      "source_location": "L1903",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_form_reidentification",
@@ -29197,7 +29303,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1876",
+      "source_location": "L1883",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_form_reidentification",
@@ -29230,10 +29336,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1903",
+      "source_location": "L1910",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1903",
+      "source": "carescribe_app_rationale_1910",
       "target": "carescribe_app_as_docx",
       "confidence_score": 1.0
     },
@@ -29242,7 +29348,7 @@
       "context": "collection",
       "confidence": "INFERRED",
       "source_file": "carescribe/app.py",
-      "source_location": "L2024",
+      "source_location": "L2031",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -29255,7 +29361,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1947",
+      "source_location": "L1954",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_section_handoff",
@@ -29266,7 +29372,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L2014",
+      "source_location": "L2021",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -29277,10 +29383,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L1970",
+      "source_location": "L1977",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_1970",
+      "source": "carescribe_app_rationale_1977",
       "target": "carescribe_app_pipeline_step",
       "confidence_score": 1.0
     },
@@ -29289,7 +29395,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L2000",
+      "source_location": "L2007",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -29302,7 +29408,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1984",
+      "source_location": "L1991",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_privacy_state",
@@ -29314,7 +29420,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L2036",
+      "source_location": "L2043",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -29326,7 +29432,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1996",
+      "source_location": "L2003",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -29338,7 +29444,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L2014",
+      "source_location": "L2021",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -29350,7 +29456,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L1992",
+      "source_location": "L1999",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_main",
@@ -29360,10 +29466,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L2041",
+      "source_location": "L2048",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_app_rationale_2041",
+      "source": "carescribe_app_rationale_2048",
       "target": "carescribe_app_render_unexpected_error",
       "confidence_score": 1.0
     },
@@ -29372,7 +29478,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/app.py",
-      "source_location": "L2040",
+      "source_location": "L2047",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_unexpected_error",
@@ -29385,7 +29491,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L2048",
+      "source_location": "L2055",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_unexpected_error",
@@ -29397,7 +29503,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "carescribe/app.py",
-      "source_location": "L2059",
+      "source_location": "L2066",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_app_render_unexpected_error",
@@ -48592,6 +48698,18 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "context": "submodule_import",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components",
+      "target": "carescribe_ui_components",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -48626,6 +48744,18 @@
       "source": "carescribe_ui_components_empty_state",
       "target": "carescribe_ui_components_icon",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L77",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components_test_unknown_icon_falls_back_to_dot",
+      "target": "carescribe_ui_components_icon"
     },
     {
       "relation": "calls",
@@ -48700,6 +48830,30 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components_test_hero_carries_the_title_sub_and_privacy_pill",
+      "target": "carescribe_ui_components_hero"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L71",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components_test_values_are_html_escaped",
+      "target": "carescribe_ui_components_hero"
+    },
+    {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/ui/components.py",
@@ -48714,6 +48868,18 @@
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components_test_step_tracker_states_and_count",
+      "target": "carescribe_ui_components_step_tracker"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
       "source_file": "carescribe/ui/components.py",
       "source_location": "L152",
       "weight": 1.0,
@@ -48721,6 +48887,30 @@
       "source": "carescribe_ui_components_status_chip",
       "target": "carescribe_ui_components_chip",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components_test_chip_and_status_chip",
+      "target": "carescribe_ui_components_chip"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L44",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components_test_chip_and_status_chip",
+      "target": "carescribe_ui_components_status_chip"
     },
     {
       "relation": "rationale_for",
@@ -48734,10 +48924,46 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L52",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components_test_detection_layer",
+      "target": "carescribe_ui_components_detection_layer"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L61",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components_test_stat_strip_and_empty_state",
+      "target": "carescribe_ui_components_stat_strip"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L65",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components_test_stat_strip_and_empty_state",
+      "target": "carescribe_ui_components_empty_state"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/ui/theme.py",
-      "source_location": "L347",
+      "source_location": "L366",
       "weight": 1.0,
       "_origin": "ast",
       "source": "carescribe_ui_theme",
@@ -48759,10 +48985,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "carescribe/ui/theme.py",
-      "source_location": "L348",
+      "source_location": "L367",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "carescribe_ui_theme_rationale_348",
+      "source": "carescribe_ui_theme_rationale_367",
       "target": "carescribe_ui_theme_inject",
       "confidence_score": 1.0
     },
@@ -70357,6 +70583,94 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components",
+      "target": "tests_test_ui_components_test_chip_and_status_chip",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L51",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components",
+      "target": "tests_test_ui_components_test_detection_layer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components",
+      "target": "tests_test_ui_components_test_hero_carries_the_title_sub_and_privacy_pill",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L60",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components",
+      "target": "tests_test_ui_components_test_stat_strip_and_empty_state",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components",
+      "target": "tests_test_ui_components_test_step_tracker_states_and_count",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L76",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components",
+      "target": "tests_test_ui_components_test_unknown_icon_falls_back_to_dot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L70",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components",
+      "target": "tests_test_ui_components_test_values_are_html_escaped",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_ui_components.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "tests_test_ui_components_rationale_1",
+      "target": "tests_test_ui_components",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": ".agents/BOARD.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -73704,5 +74018,5 @@
       "source_file": "stress_corpus/doc01_community_mh_letter.txt"
     }
   ],
-  "built_at_commit": "cfa617ed0f4f8cc78e76fe5d509a64fe52a260bb"
+  "built_at_commit": "e5d7d27c7f61bf431d31f88fc2b5e5305860463c"
 }

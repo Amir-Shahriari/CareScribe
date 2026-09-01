@@ -1085,30 +1085,37 @@ def section_batch_status() -> None:
 
     st.subheader("4. Batch status")
 
-    rows = []
+    def _kind(doc: batch.Document) -> str:
+        if doc.error:
+            return "failed"
+        if doc.approved:
+            return "approved"
+        if doc.residual:
+            return "blocked"
+        if doc.analyzed:
+            return "review"
+        return "pending"
+
+    body = []
     for position, name in enumerate(order, start=1):
         doc = docs[name]
-        if doc.error:
-            state = "❌ Failed"
-        elif doc.approved:
-            state = "✅ Approved"
-        elif doc.residual:
-            state = "⛔ Blocked by safety sweep"
-        elif doc.analyzed:
-            state = "🔍 Awaiting review"
-        else:
-            state = "⏳ Not yet processed"
-        rows.append(
-            {
-                "#": position,
-                "Document": name,
-                "Status": state,
-                "Identifiers": len(doc.entities),
-                "Approved output": doc.approved_path or "—",
-            }
+        out = html.escape(doc.approved_path) if doc.approved_path else "&mdash;"
+        body.append(
+            "<tr>"
+            f'<td>{position}</td>'
+            f'<td><span class="cs-mono">{html.escape(name)}</span></td>'
+            f'<td>{ui.status_chip(_kind(doc))}</td>'
+            f'<td>{len(doc.entities)}</td>'
+            f'<td><span class="cs-mono">{out}</span></td>'
+            "</tr>"
         )
-
-    st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+    st.markdown(
+        '<table class="cs-table"><thead><tr>'
+        "<th>#</th><th>Document</th><th>Status</th>"
+        "<th>Identifiers</th><th>Approved output</th>"
+        f'</tr></thead><tbody>{"".join(body)}</tbody></table>',
+        unsafe_allow_html=True,
+    )
 
     approved = sum(1 for doc in docs.values() if doc.approved)
     st.caption(f"{approved} of {len(order)} approved.")

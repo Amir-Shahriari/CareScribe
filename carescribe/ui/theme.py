@@ -322,6 +322,25 @@ code, kbd, pre, [data-testid="stCode"] *, .stCode *,
   border: 1px solid var(--cs-border); border-radius: 12px; overflow: hidden;
 }}
 
+/* hand-rolled batch-status table (section_batch_status) */
+.cs-table {{ width: 100%; border-collapse: collapse; margin-top: 0.6rem; }}
+.cs-table th {{
+  text-align: left; font-size: 0.72rem; font-weight: 650;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--cs-faint);
+  padding: 0 0.7rem 0.5rem; border-bottom: 1px solid var(--cs-border);
+}}
+.cs-table td {{
+  font-size: 0.86rem; color: var(--cs-ink-soft);
+  padding: 0.6rem 0.7rem; border-bottom: 1px solid var(--cs-line);
+  vertical-align: middle;
+}}
+.cs-table tr:last-child td {{ border-bottom: 0; }}
+.cs-table th:first-child, .cs-table td:first-child {{ padding-left: 0; width: 2.2rem; color: var(--cs-faint); }}
+.cs-table th:last-child, .cs-table td:last-child {{ padding-right: 0; }}
+.cs-table td:nth-child(4) {{ text-align: right; font-variant-numeric: tabular-nums; }}
+.cs-table th:nth-child(4) {{ text-align: right; }}
+.cs-table .cs-mono {{ font-size: 0.8rem; color: var(--cs-ink-soft); overflow-wrap: anywhere; }}
+
 [data-testid="stFileUploaderDropzone"] {{
   border: 1.5px dashed #cdd2dc; border-radius: 14px; background: #fafbfd;
   transition: border-color .16s var(--cs-ease), background .16s var(--cs-ease), color .16s var(--cs-ease);
