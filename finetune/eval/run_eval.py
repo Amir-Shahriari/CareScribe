@@ -165,6 +165,53 @@ class CallableCompleter:
         return self._fn(system, user)
 
 
+class HFCompleter:
+    """Greedy generation from a HF model, optionally with a LoRA adapter.
+
+    Much faster than the GGUF path for the base-vs-tuned comparison because it
+    runs on the GPU. Use :class:`GgufCompleter` to also confirm the shipped
+    quantised artefact behaves.
+    """
+
+    def __init__(
+        self, base_model: str, adapter_dir: str | None = None, *, max_new_tokens: int = 900
+    ):
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+
+        self.tok = AutoTokenizer.from_pretrained(base_model)
+        model = AutoModelForCausalLM.from_pretrained(
+            base_model, dtype=torch.bfloat16, device_map="auto"
+        )
+        if adapter_dir:
+            from peft import PeftModel
+
+            model = PeftModel.from_pretrained(model, adapter_dir)
+        self.model = model.eval()
+        self.max_new_tokens = max_new_tokens
+
+    def complete(self, system: str, user: str) -> str:
+        import torch
+
+        msgs = [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ]
+        ids = self.tok.apply_chat_template(
+            msgs, add_generation_prompt=True, return_tensors="pt"
+        ).to(self.model.device)
+        with torch.no_grad():
+            out = self.model.generate(
+                ids,
+                max_new_tokens=self.max_new_tokens,
+                do_sample=False,
+                temperature=None,
+                top_p=None,
+                pad_token_id=self.tok.pad_token_id or self.tok.eos_token_id,
+            )
+        return self.tok.decode(out[0][ids.shape[1]:], skip_special_tokens=True)
+
+
 def main(argv: list[str] | None = None) -> int:
     import argparse
 
@@ -202,9 +249,11 @@ __all__ = [
     "Completer",
     "EvalItem",
     "GgufCompleter",
+    "HFCompleter",
     "LATENCY_CEILING",
     "RunResult",
     "compare",
+    "main",
     "make_eval_set",
     "run",
 ]
