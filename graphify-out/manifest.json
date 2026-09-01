@@ -295,13 +295,13 @@
     "semantic_hash": "e5e9983ebca4d8e5499071f670e3ba49"
   },
   "packaging/build_macos.sh": {
-    "mtime": 1788212554.6408463,
-    "ast_hash": "801af5f5e438e7b22403ee728aebe620",
+    "mtime": 1788248252.7646968,
+    "ast_hash": "23cc821099f048b43c659a44d292a445",
     "semantic_hash": ""
   },
   "packaging/build_windows.ps1": {
-    "mtime": 1788212554.6413574,
-    "ast_hash": "4b2cf2464c19c35c0bc62d0b407d5f45",
+    "mtime": 1788248249.0671113,
+    "ast_hash": "f946610af4cffcaa9c917cc371898589",
     "semantic_hash": ""
   },
   "packaging/hooks/rthook_carescribe.py": {
@@ -325,8 +325,8 @@
     "semantic_hash": "37644cf98ed2c2cb8e4868fe66a2ff36"
   },
   "tests/test_desktop_packaging.py": {
-    "mtime": 1787317441.6947677,
-    "ast_hash": "0f72c3d6b7a0d19cfd4c8303688cf641",
+    "mtime": 1788248265.3184824,
+    "ast_hash": "ae13e94daca8896a501ea56f047a4e1a",
     "semantic_hash": ""
   },
   "tests/test_generation_setup.py": {
@@ -555,8 +555,8 @@
     "semantic_hash": ""
   },
   ".agents/BOARD.md": {
-    "mtime": 1788212710.1674662,
-    "ast_hash": "1ec635937e58e5367f2333dfbe009b31",
+    "mtime": 1788250621.0834408,
+    "ast_hash": "58fd449f2a4aa9b69cb0c0bc51cfc48e",
     "semantic_hash": ""
   },
   ".agents/tasks/TEMPLATE.md": {
@@ -575,8 +575,8 @@
     "semantic_hash": ""
   },
   "packaging/requirements-build.txt": {
-    "mtime": 1788212554.6632483,
-    "ast_hash": "11765844c9d42ddf32136c33100e6249",
+    "mtime": 1788248222.7747748,
+    "ast_hash": "b2d1853f5c90aa7b12756b9359ac9b1f",
     "semantic_hash": ""
   },
   "docs/download-and-install.md": {
@@ -587,6 +587,146 @@
   ".github/workflows/release.yml": {
     "mtime": 1788213011.9606054,
     "ast_hash": "99a3c3a5ba0e2c75e77aa6f8a9071f7c",
+    "semantic_hash": ""
+  },
+  "carescribe/core/buildinfo.py": {
+    "mtime": 1788238081.413828,
+    "ast_hash": "0b1a694b98ba1d77b05d93833ae1e354",
+    "semantic_hash": ""
+  },
+  "tests/test_buildinfo.py": {
+    "mtime": 1788238081.4143448,
+    "ast_hash": "85c018a512d9ac0751643864875e2e59",
+    "semantic_hash": ""
+  },
+  "CHANGELOG.md": {
+    "mtime": 1788237135.195974,
+    "ast_hash": "8434039dd7f0e7828a5b25f1c1488b95",
+    "semantic_hash": ""
+  },
+  "docs/swarm-pipeline.md": {
+    "mtime": 1788237610.6593237,
+    "ast_hash": "6e489c5d7d42c3ceed979f82e7acf490",
+    "semantic_hash": ""
+  },
+  "finetune/__init__.py": {
+    "mtime": 1788250468.1810846,
+    "ast_hash": "bd149e3e92fba66e0c056ac874b47235",
+    "semantic_hash": ""
+  },
+  "finetune/datagen/__init__.py": {
+    "mtime": 1788250468.1826024,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": ""
+  },
+  "finetune/datagen/schema.py": {
+    "mtime": 1788250494.4324207,
+    "ast_hash": "206e4a68737b5e3a8cb3e3f9273c07f1",
+    "semantic_hash": ""
+  },
+  "finetune/integrate/__init__.py": {
+    "mtime": 1788250525.713809,
+    "ast_hash": "74aa88f71f5cdd0724ef179664e6d7b6",
+    "semantic_hash": ""
+  },
+  "finetune/integrate/prompt_template.py": {
+    "mtime": 1788250539.6931512,
+    "ast_hash": "1fb69c3f1731a6878393c9606bea9769",
+    "semantic_hash": ""
+  },
+  "finetune/pyproject.toml": {
+    "mtime": 1788250468.1831143,
+    "ast_hash": "55de9633df381db3d123d53477a9a929",
+    "semantic_hash": ""
+  },
+  "finetune/tests/__init__.py": {
+    "mtime": 1788250468.1836262,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": ""
+  },
+  "finetune/tests/test_prompt_template.py": {
+    "mtime": 1788250563.793026,
+    "ast_hash": "9620467d9ad256e4d58c06ec9b6ca6d6",
+    "semantic_hash": ""
+  },
+  "finetune/tests/test_schema.py": {
+    "mtime": 1788250554.4721754,
+    "ast_hash": "159297fa6d4979a938eab158cacb9257",
+    "semantic_hash": ""
+  },
+  "packaging/verify_frozen.py": {
+    "mtime": 1788248244.2824018,
+    "ast_hash": "a0ba869de191e31ddd6586c919e22178",
+    "semantic_hash": ""
+  },
+  "finetune/README.md": {
+    "mtime": 1788250468.1810846,
+    "ast_hash": "890cef1eb319d94304f680024eeaecb9",
+    "semantic_hash": ""
+  },
+  "finetune/config/datagen.yaml": {
+    "mtime": 1788250468.1820872,
+    "ast_hash": "bc707bf5cf15f15e3625d4bd668f615f",
+    "semantic_hash": ""
+  },
+  "finetune/config/models.yaml": {
+    "mtime": 1788250468.1820872,
+    "ast_hash": "d67305bb810f44313b83c75dbca1d3ea",
+    "semantic_hash": ""
+  },
+  "finetune/config/train.yaml": {
+    "mtime": 1788250468.1826024,
+    "ast_hash": "e3e6003817fe8a83f113e5eeeebcde2c",
+    "semantic_hash": ""
+  },
+  "finetune/datagen/sampler.py": {
+    "mtime": 1788250785.067901,
+    "ast_hash": "1a5a54016c11dffac24e0b25c73c032e",
+    "semantic_hash": ""
+  },
+  "finetune/datagen/sampling.py": {
+    "mtime": 1788250652.1117127,
+    "ast_hash": "d22d3a3f7fe496b82fdc2f4d4a0f33c0",
+    "semantic_hash": ""
+  },
+  "finetune/datagen/vignettes/__init__.py": {
+    "mtime": 1788250768.9000676,
+    "ast_hash": "ddca1074867a2beabb7ce31a1eb8a889",
+    "semantic_hash": ""
+  },
+  "finetune/datagen/vignettes/base.py": {
+    "mtime": 1788250678.5434904,
+    "ast_hash": "bcf2d0adf1881cb4e61f30eb850e0770",
+    "semantic_hash": ""
+  },
+  "finetune/datagen/vignettes/cardiology.py": {
+    "mtime": 1788250729.002143,
+    "ast_hash": "c3ee4cd74eda5ea302aaabd3215f45c0",
+    "semantic_hash": ""
+  },
+  "finetune/datagen/vignettes/elderly_care.py": {
+    "mtime": 1788250762.0828755,
+    "ast_hash": "634f66c77efd937547cbb04a43fd761f",
+    "semantic_hash": ""
+  },
+  "finetune/datagen/vignettes/general_practice.py": {
+    "mtime": 1788250695.922579,
+    "ast_hash": "b611e8d301161acbe8c204a2738c3a45",
+    "semantic_hash": ""
+  },
+  "finetune/datagen/vignettes/mental_health.py": {
+    "mtime": 1788250712.894108,
+    "ast_hash": "6d64c5e522342af87a6d9b18e8f70a46",
+    "semantic_hash": ""
+  },
+  "finetune/datagen/vignettes/respiratory.py": {
+    "mtime": 1788250745.278956,
+    "ast_hash": "caae99bf163e52a251922007f2258dfe",
+    "semantic_hash": ""
+  },
+  "finetune/tests/test_sampler.py": {
+    "mtime": 1788250795.5593886,
+    "ast_hash": "7a348ccee093d761b558fdfb899dbf03",
     "semantic_hash": ""
   }
 }

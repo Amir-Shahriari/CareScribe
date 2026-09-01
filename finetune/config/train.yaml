@@ -1,0 +1,32 @@
+# config/train.yaml
+#
+# CPU LoRA fine-tune settings (train/). Skeleton only — keys named per design
+# doc §8.1; real hyperparameters come in the train workstream.
+
+method:
+  # TODO: peft method — expect "lora".
+  name: "lora"
+
+lora:
+  rank: 0            # TODO
+  alpha: 0           # TODO
+  target_modules: [] # TODO
+  dropout: 0.0       # TODO
+
+optim:
+  # TODO: learning rate / scheduler / weight decay.
+  learning_rate: 0.0
+  weight_decay: 0.0
+  scheduler: "TODO"
+
+runtime:
+  # TODO: CPU-only constraints.
+  devices: 1            # TODO
+  batch_size: 0         # TODO
+  gradient_accumulation_steps: 1  # TODO
+  max_seq_length: 0     # TODO
+
+epochs: 0              # TODO
+eval:
+  # TODO: steps between evals + which eval workstream gate to run.
+  steps: 0             # TODO

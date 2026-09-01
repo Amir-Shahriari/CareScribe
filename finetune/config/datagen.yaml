@@ -1,0 +1,29 @@
+# config/datagen.yaml
+#
+# Controls the synthetic encounter sampler (datagen/). Skeleton only — keys
+# named per design doc §6.1/§6.2; real defaults come later.
+
+rng:
+  # TODO: seed for reproducible corpora (None => unseeded).
+  seed: null
+
+counts:
+  # TODO: how many encounters to emit per encounter type / specialty.
+  total: 0            # TODO
+  per_specialty: {}   # TODO  e.g. {respiratory: 40, psychiatry: 30}
+
+specialties:
+  # TODO: list of specialty names the sampler may draw from.
+  - "TODO"
+
+form_types:
+  # TODO: subset of finetune.datagen.schema.FormType to render targets for.
+  - SOAP
+  - PROGRESS_NOTE
+
+# TODO: distribution weights over EncounterType (NEW/FOLLOW_UP/DISCHARGE/HANDOVER/CRISIS).
+encounter_type_weights: {}   # TODO
+
+# TODO: realism knobs (gap rate, allergy med-rate, etc.) wired into the sampler later.
+quality:
+  gap_probability: 0.0    # TODO

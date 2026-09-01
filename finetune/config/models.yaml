@@ -1,0 +1,22 @@
+# config/models.yaml
+#
+# Which local model(s) the fine-tune targets. Skeleton only — values are
+# placeholders; real choices come in a later workstream (see design doc §4).
+# Everything here must be a CPU-runnable, local checkpoint. No HF downloads
+# at train time in CI.
+
+base_model:
+  # TODO: local checkpoint id or local path to the base clinical LLM.
+  name: "TODO/base-clinical-model"
+
+adapter:
+  # TODO: peft / LoRA adapter to load for the starting point (empty to start scratch).
+  path: ""
+
+quantization:
+  # TODO: CPU-friendly precision / bits (e.g. "bf16").
+  dtype: "TODO"
+
+# TODO: any per-model generation defaults the sampler/renderers will read.
+generation:
+  max_new_tokens: 0  # TODO
