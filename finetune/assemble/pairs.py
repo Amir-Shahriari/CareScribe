@@ -56,6 +56,36 @@ def make_pair(
     )
 
 
+def make_template_pair(
+    facts: EncounterFacts,
+    form_spec,
+    placeholdered_document: str,
+    target: str,
+) -> Pair:
+    """A pair for an uploaded clinic template — the system/user prompt is
+    built by the real ``carescribe.core.clinical_forms.build_prompt`` so it
+    matches production exactly."""
+    from carescribe.core.clinical_forms import build_prompt
+
+    system, user = build_prompt(form_spec, placeholdered_document)
+    return Pair(
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+            {"role": "assistant", "content": target},
+        ],
+        meta={
+            "form_type": FormType.UPLOADED_TEMPLATE.value,
+            "specialty": facts.specialty,
+            "encounter_type": facts.encounter_type.value,
+            "styled": False,
+            "polished": False,
+            "form_id": form_spec.form_id,
+            "documented_gaps": list(facts.documented_gaps),
+        },
+    )
+
+
 def _stratum(pair: Pair) -> tuple:
     m = pair.meta
     return (m["form_type"], m["specialty"], m["styled"])
@@ -103,4 +133,10 @@ def write_jsonl(pairs: Iterable[Pair], path: str | Path) -> int:
     return count
 
 
-__all__ = ["Pair", "make_pair", "stratified_split", "write_jsonl"]
+__all__ = [
+    "Pair",
+    "make_pair",
+    "make_template_pair",
+    "stratified_split",
+    "write_jsonl",
+]

@@ -124,7 +124,32 @@ def _sections(output: str, headings: list[str]) -> dict[str, str]:
     return bodies
 
 
-def check_format(output: str, form: FormType) -> tuple[bool, list[str]]:
+_MARKER_RE = re.compile(r"<<FIELD:([a-z0-9_.]+)>>")
+
+
+def _check_marker_format(output: str, form_spec) -> tuple[bool, list[str]]:
+    """Every ``<<FIELD:key>>`` marker present, in the spec's order, nothing
+    before the first."""
+    problems: list[str] = []
+    want = [f.key for f in form_spec.fields]
+    seen = [m.group(1) for m in _MARKER_RE.finditer(output)]
+    first = _MARKER_RE.search(output)
+    if first is not None and output[: first.start()].strip():
+        problems.append("text before the first field marker")
+    for key in want:
+        if key not in seen:
+            problems.append(f"missing field marker: {key}")
+    ordered = [k for k in seen if k in want]
+    if ordered != [k for k in want if k in ordered]:
+        problems.append("field markers out of order")
+    return not problems, problems
+
+
+def check_format(output: str, form: FormType, form_spec=None) -> tuple[bool, list[str]]:
+    if form == FormType.UPLOADED_TEMPLATE:
+        if form_spec is None:
+            return False, ["UPLOADED_TEMPLATE format check needs a form_spec"]
+        return _check_marker_format(output, form_spec)
     headings = _HEADINGS.get(form)
     if headings is None:
         return False, [f"no heading spec for {form}"]
@@ -205,9 +230,10 @@ def validate(
     *,
     known_placeholders=(),
     acknowledged=(),
+    form_spec=None,
 ) -> Report:
     r = Report()
-    r.format_ok, p1 = check_format(output, form)
+    r.format_ok, p1 = check_format(output, form, form_spec)
     r.faithful_ok, p2 = check_faithfulness(output, facts, form)
     r.placeholder_ok, p3 = check_placeholders(output, known_placeholders)
     r.residual_ok, p4 = check_residual(output, acknowledged)

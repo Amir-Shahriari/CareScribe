@@ -84,16 +84,33 @@ def _resolve_inject(inject_fn: InjectFn | None) -> InjectFn:
     return _adapt
 
 
+_TEMPLATE_FORM_IDS = ("client_session_notes", "client_treatment_review")
+
+
+def _template_specs():
+    from carescribe.core import clinical_forms
+
+    return [clinical_forms.get_form_spec(fid) for fid in _TEMPLATE_FORM_IDS]
+
+
 def build(
     n: int,
     *,
     seed: int = 0,
     forms: tuple[FormType, ...] = _DEFAULT_FORMS,
     gap_probability: float = 0.25,
+    template_fraction: float = 0.25,
     inject_fn: InjectFn | None = None,
 ) -> dict:
-    """Return ``{"pairs": [...], "kept": k, "dropped": d, "reasons": {...}}``."""
+    """Return ``{"pairs": [...], "kept": k, "dropped": d, "reasons": {...}}``.
+
+    ``template_fraction`` of the pairs target an uploaded clinic template
+    (``<<FIELD:key>>`` markers) instead of a built-in note type, so the model
+    also learns that format and its "Not documented" discipline."""
+    from finetune.assemble.pairs import make_template_pair
+
     inject = _resolve_inject(inject_fn)
+    specs = _template_specs()
     pairs = []
     dropped = 0
     reasons: dict[str, int] = {}
@@ -101,7 +118,6 @@ def build(
     for i, facts in enumerate(
         sample_encounters(n, seed=seed, gap_probability=gap_probability)
     ):
-        form = forms[i % len(forms)]
         note = render(facts, seed=seed + i)
         identified, values = inject(note, seed + i)
         deid = deidentify_note(identified)
@@ -114,17 +130,34 @@ def build(
             )
             continue
 
-        target = build_target(facts, form)
-        report = validate(
-            target, facts, form, known_placeholders=deid.known_placeholders
-        )
+        _stride = max(1, round(1 / template_fraction)) if template_fraction > 0 else 0
+        as_template = bool(specs) and _stride and (i % _stride == 0)
+        if as_template:
+            spec = specs[i % len(specs)]
+            form = FormType.UPLOADED_TEMPLATE
+            target = build_target(facts, form, form_spec=spec)
+            report = validate(
+                target, facts, form,
+                known_placeholders=deid.known_placeholders, form_spec=spec,
+            )
+        else:
+            spec = None
+            form = forms[i % len(forms)]
+            target = build_target(facts, form)
+            report = validate(
+                target, facts, form, known_placeholders=deid.known_placeholders
+            )
+
         if not report.ok:
             dropped += 1
             key = report.problems[0].split(":")[0] if report.problems else "unknown"
             reasons[key] = reasons.get(key, 0) + 1
             continue
 
-        pairs.append(make_pair(facts, form, deid.placeholdered_text, target))
+        if as_template:
+            pairs.append(make_template_pair(facts, spec, deid.placeholdered_text, target))
+        else:
+            pairs.append(make_pair(facts, form, deid.placeholdered_text, target))
 
     return {"pairs": pairs, "kept": len(pairs), "dropped": dropped, "reasons": reasons}
 

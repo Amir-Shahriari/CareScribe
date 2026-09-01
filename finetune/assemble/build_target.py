@@ -159,14 +159,91 @@ _SCAFFOLDS = {
 }
 
 
-def build_target(facts: EncounterFacts, form: FormType) -> str:
-    """The ideal filled form for ``facts`` — deterministic, fact-placed only."""
+# --------------------------------------------------------------------------
+# Uploaded clinic template — <<FIELD:key>> markers, one per FormSpec field
+# --------------------------------------------------------------------------
+
+_FIELD_MARKER = "<<FIELD:{key}>>"
+
+
+def _field_content(label: str, facts: EncounterFacts) -> str:
+    """Map an arbitrary clinic-form field to the encounter fact that fits it, or
+    NOT_DOCUMENTED. Deliberately conservative — a field with no clear source
+    trains the model to write 'Not documented', which is the point."""
+    low = label.lower()
+
+    def any_of(*words: str) -> bool:
+        return any(w in low for w in words)
+
+    if any_of("diagnos", "prognos", "impression", "formulation") and facts.impression:
+        return "; ".join(facts.impression)
+    if any_of("presenting problem", "presenting issue", "main issue", "session agenda",
+              "reason for referral"):
+        return facts.presenting_complaint.strip().rstrip(".") + "."
+    if any_of("risk", "suicidal", "self-harm", "self harm", "homicidal", "violence",
+              "vulnerab", "abscond", "impulsivit"):
+        risk = [
+            f.value or f.finding for f in facts.examination
+            if "risk" in f.system.lower() or "risk" in f.finding.lower()
+        ]
+        return "; ".join(risk) if risk else NOT_DOCUMENTED
+    if any_of("medication", "current medications", "daily dose"):
+        return "; ".join(_med_line(m) for m in facts.meds) if facts.meds else NOT_DOCUMENTED
+    if any_of("goal", "treatment plan", "plan for treatment", "intervention applied",
+              "next phase", "relapse prevention", "discharge"):
+        lines = _plan_lines(facts, with_follow_up=False)
+        return "; ".join(lines) if lines else NOT_DOCUMENTED
+    if any_of("review date", "follow-up", "follow up"):
+        return facts.follow_up or NOT_DOCUMENTED
+    if any_of("mood", "affect"):
+        hits = [f.value or f.finding for f in facts.examination
+                if "mood" in (f.finding + f.system).lower() or "affect" in f.finding.lower()]
+        return "; ".join(hits) if hits else NOT_DOCUMENTED
+    if any_of("mental state", "symptom"):
+        hits = [f"{f.finding}: {f.value}" if f.value else f.finding
+                for f in facts.examination if "mental state" in f.system.lower()]
+        return "; ".join(hits) if hits else NOT_DOCUMENTED
+    if any_of("history of presenting", "psychiatric history", "medical history",
+              "previous assessment"):
+        hist = list(facts.pmh) + [
+            f"{h.label}: {h.detail}" if h.detail else h.label for h in facts.history
+        ]
+        return "; ".join(hist) if hist else NOT_DOCUMENTED
+    if any_of("progress", "obstacle", "setback", "response to treatment"):
+        hits = [h.detail for h in facts.history
+                if h.detail and any(w in h.label.lower() for w in ("progress", "response", "mood", "status"))]
+        return "; ".join(hits) if hits else NOT_DOCUMENTED
+    if any_of("outcome measure", "psychometric", "scoring"):
+        hits = [f"{r.test} {r.value}" for r in facts.investigations
+                if any(c.isdigit() for c in r.value)]
+        return "; ".join(hits) if hits else NOT_DOCUMENTED
+    return NOT_DOCUMENTED
+
+
+def uploaded_template_target(facts: EncounterFacts, form_spec) -> str:
+    """<<FIELD:key>> content, one line per field, in the spec's field order."""
+    parts = []
+    for field in form_spec.fields:
+        parts.append(
+            _FIELD_MARKER.format(key=field.key) + "\n" + _field_content(field.label, facts)
+        )
+    return "\n".join(parts)
+
+
+def build_target(facts: EncounterFacts, form: FormType, form_spec=None) -> str:
+    """The ideal filled form for ``facts`` — deterministic, fact-placed only.
+
+    ``form_spec`` is required for ``FormType.UPLOADED_TEMPLATE`` (a
+    ``carescribe.core.clinical_forms.FormSpec``)."""
+    if form == FormType.UPLOADED_TEMPLATE:
+        if form_spec is None:
+            raise ValueError("UPLOADED_TEMPLATE needs a form_spec")
+        return uploaded_template_target(facts, form_spec)
     try:
         scaffold = _SCAFFOLDS[form]
     except KeyError:
         raise NotImplementedError(
-            f"no deterministic scaffold for {form}; uploaded templates use a "
-            f"FormSpec and are built in a later slice"
+            f"no deterministic scaffold for {form}"
         )
     return scaffold(facts)
 

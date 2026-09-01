@@ -43,7 +43,21 @@ def test_a_gapped_section_reads_not_documented():
     assert validate(soap, facts, FormType.SOAP, known_placeholders=[]).ok
 
 
-def test_uploaded_template_is_not_yet_supported():
+def test_uploaded_template_fills_every_field_marker():
+    from carescribe.core import clinical_forms
+
+    from finetune.assemble.validators import validate
+
+    spec = clinical_forms.get_form_spec("client_session_notes")
     facts = next(sample_encounters(1, seed=1))
-    with pytest.raises(NotImplementedError):
-        build_target(facts, FormType.UPLOADED_TEMPLATE)
+
+    with pytest.raises(ValueError):
+        build_target(facts, FormType.UPLOADED_TEMPLATE)  # needs a spec
+
+    target = build_target(facts, FormType.UPLOADED_TEMPLATE, form_spec=spec)
+    for field in spec.fields:
+        assert f"<<FIELD:{field.key}>>" in target
+    report = validate(
+        target, facts, FormType.UPLOADED_TEMPLATE, known_placeholders=[], form_spec=spec
+    )
+    assert report.ok, report.problems
