@@ -197,19 +197,22 @@ class HFCompleter:
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ]
-        ids = self.tok.apply_chat_template(
-            msgs, add_generation_prompt=True, return_tensors="pt"
-        ).to(self.model.device)
+        enc = self.tok.apply_chat_template(
+            msgs,
+            add_generation_prompt=True,
+            return_tensors="pt",
+            return_dict=True,
+        )
+        enc = {k: v.to(self.model.device) for k, v in enc.items()}
+        prompt_len = enc["input_ids"].shape[1]
         with torch.no_grad():
             out = self.model.generate(
-                ids,
+                **enc,
                 max_new_tokens=self.max_new_tokens,
                 do_sample=False,
-                temperature=None,
-                top_p=None,
                 pad_token_id=self.tok.pad_token_id or self.tok.eos_token_id,
             )
-        return self.tok.decode(out[0][ids.shape[1]:], skip_special_tokens=True)
+        return self.tok.decode(out[0][prompt_len:], skip_special_tokens=True)
 
 
 def main(argv: list[str] | None = None) -> int:

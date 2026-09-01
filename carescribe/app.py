@@ -184,6 +184,25 @@ def refresh(document: batch.Document, entities: list[dict]) -> None:
 # Sidebar
 # --------------------------------------------------------------------------
 
+def _render_generation_model() -> None:
+    """Name the generation model, and show its model card if one ships with it."""
+    from carescribe.core import desktop
+
+    model_path = desktop.find_local_model()
+    if model_path is None:
+        return
+    st.sidebar.subheader("Generation model")
+    st.sidebar.markdown(f"🧠 `{model_path.stem}`")
+
+    stem = model_path.name.split(".", 1)[0]
+    card = model_path.parent / f"{stem}.MODEL_CARD.md"
+    if not card.is_file():
+        card = model_path.parent / "MODEL_CARD.md"
+    if card.is_file():
+        with st.sidebar.expander("Model card", expanded=False):
+            st.markdown(card.read_text(encoding="utf-8"))
+
+
 def render_sidebar() -> None:
     st.sidebar.title("🩺 CareScribe")
     with st.sidebar:
@@ -211,6 +230,8 @@ def render_sidebar() -> None:
         "In-prose dates: "
         + ("redacted" if status["inprose_dates"] else "kept unless identity-anchored")
     )
+
+    _render_generation_model()
 
     st.sidebar.divider()
 
