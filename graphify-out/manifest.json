@@ -5,8 +5,8 @@
     "semantic_hash": "533e72a4166008742fe4d6516435cf00"
   },
   "carescribe/app.py": {
-    "mtime": 1788267327.3032615,
-    "ast_hash": "c109d7e3f87979194e4fbe389cdd25dc",
+    "mtime": 1788274364.6314018,
+    "ast_hash": "f5f09313b8ef13efd0fe84ae4416f04e",
     "semantic_hash": ""
   },
   "carescribe/core/__init__.py": {
@@ -80,8 +80,8 @@
     "semantic_hash": "b17fc9d83133ecd962fc1ae3d53c0115"
   },
   "tests/test_app.py": {
-    "mtime": 1788260435.5834434,
-    "ast_hash": "9a5679c7b3b713837ca65b3af25021f4",
+    "mtime": 1788274409.5825605,
+    "ast_hash": "29ca1f51d91edc6626d382811b886c6d",
     "semantic_hash": ""
   },
   "tests/test_batch.py": {
@@ -330,8 +330,8 @@
     "semantic_hash": ""
   },
   "tests/test_generation_setup.py": {
-    "mtime": 1788267567.3267448,
-    "ast_hash": "0bc61dcbc78f6024c038b4726da656d7",
+    "mtime": 1788274405.360688,
+    "ast_hash": "d9e4e165a4b3968b6a0f4f9c1886f3ba",
     "semantic_hash": ""
   },
   "SETUP_ON_A_NEW_PC.md": {
@@ -545,8 +545,8 @@
     "semantic_hash": ""
   },
   ".agents/BOARD.md": {
-    "mtime": 1788261361.3907611,
-    "ast_hash": "39851fe1d9657ba223ede7a49442856a",
+    "mtime": 1788275285.7640963,
+    "ast_hash": "b6b970a9710947106cc4d61c7072734b",
     "semantic_hash": ""
   },
   ".agents/tasks/TEMPLATE.md": {
@@ -665,8 +665,8 @@
     "semantic_hash": ""
   },
   "finetune/config/train.yaml": {
-    "mtime": 1788255389.4055614,
-    "ast_hash": "ad264f35c73e8053d5b28b6d797ee563",
+    "mtime": 1788275255.1695673,
+    "ast_hash": "203ab51031aa9a3514b1711c0f8584ef",
     "semantic_hash": ""
   },
   "finetune/datagen/sampler.py": {
@@ -725,13 +725,13 @@
     "semantic_hash": ""
   },
   "finetune/assemble/build_dataset.py": {
-    "mtime": 1788252942.446587,
-    "ast_hash": "08da65257386c4825589eb29c818611c",
+    "mtime": 1788275177.1501703,
+    "ast_hash": "68289354f4f40b3f3f7eeccd4ca38a8f",
     "semantic_hash": ""
   },
   "finetune/assemble/build_target.py": {
-    "mtime": 1788251966.1858292,
-    "ast_hash": "323f4e47338a45c4eaa2043749f03f3c",
+    "mtime": 1788274549.1977098,
+    "ast_hash": "7335ed89ffcec03cfcb5cec31782883e",
     "semantic_hash": ""
   },
   "finetune/assemble/deidentify_notes.py": {
@@ -745,13 +745,13 @@
     "semantic_hash": ""
   },
   "finetune/assemble/pairs.py": {
-    "mtime": 1788251657.9577749,
-    "ast_hash": "5ca54acb83290616f85ad3c0527de42c",
+    "mtime": 1788274600.141822,
+    "ast_hash": "a4889dce3de401e5e215e502bd030710",
     "semantic_hash": ""
   },
   "finetune/assemble/validators.py": {
-    "mtime": 1788251892.9133608,
-    "ast_hash": "83cc17ee2e5021a89f5085bc81759b32",
+    "mtime": 1788274581.3451157,
+    "ast_hash": "4d6c1b37932f5d662ef27862f94328b4",
     "semantic_hash": ""
   },
   "finetune/datagen/generator_backend.py": {
@@ -775,8 +775,8 @@
     "semantic_hash": ""
   },
   "finetune/tests/test_build_target.py": {
-    "mtime": 1788251597.4303565,
-    "ast_hash": "1de0d7ee8ea7de417e0c8bc619274140",
+    "mtime": 1788274703.7384708,
+    "ast_hash": "9488d1dcc3f40018d7a3256730ab00f8",
     "semantic_hash": ""
   },
   "finetune/tests/test_generator_backend.py": {
@@ -905,8 +905,8 @@
     "semantic_hash": ""
   },
   "carescribe/ui/theme.py": {
-    "mtime": 1788267357.365169,
-    "ast_hash": "c09b251da12d3467c170f3e4408fd44c",
+    "mtime": 1788275929.0044377,
+    "ast_hash": "77d73c8ef0fb228423f85467d5f73d0f",
     "semantic_hash": ""
   },
   "tests/test_ui_components.py": {
@@ -922,6 +922,16 @@
   "tests/test_grammar.py": {
     "mtime": 1788274145.4388728,
     "ast_hash": "5cc23e4745aa63ace7a6cdb7c3610e4d",
+    "semantic_hash": ""
+  },
+  "tests/test_app_screens.py": {
+    "mtime": 1788274845.610897,
+    "ast_hash": "39709d59a9dfc7927d31d41e887e3d42",
+    "semantic_hash": ""
+  },
+  "DESIGN.md": {
+    "mtime": 1788275061.9662962,
+    "ast_hash": "5be7bcdd550d459f788cc4d697051746",
     "semantic_hash": ""
   }
 }

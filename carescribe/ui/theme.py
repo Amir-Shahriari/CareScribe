@@ -79,12 +79,16 @@ code, kbd, pre, [data-testid="stCode"] *, .stCode *,
     var(--cs-bg);
 }}
 [data-testid="stMain"] {{ background: transparent; }}
+[data-testid="stAppViewContainer"], [data-testid="stMain"], .stApp {{ overflow-x: clip; }}
 [data-testid="stMainBlockContainer"], .stMainBlockContainer, section.main .block-container {{
   max-width: 1000px !important;
   padding-top: 2.4rem !important;
   padding-bottom: 5rem !important;
   padding-inline: clamp(1rem, 4vw, 2rem) !important;
 }}
+/* nothing but a self-contained scroller may push the page wider than the viewport */
+.cs-hero, .cs-hero__row, .cs-steps, .cs-stats {{ max-width: 100%; }}
+.cs-hero__title {{ overflow-wrap: anywhere; }}
 
 /* strip Streamlit's dev chrome — this ships as a local clinical tool */
 [data-testid="stDecoration"], [data-testid="stToolbar"], [data-testid="stStatusWidget"] {{ display: none; }}
@@ -156,6 +160,11 @@ code, kbd, pre, [data-testid="stCode"] *, .stCode *,
 @media (max-width: 640px) {{
   .cs-step__label {{ display: none; }}
   .cs-steps {{ margin-top: 0.8rem; padding: 0.85rem 0.25rem; }}
+  .cs-step__dot {{ width: 30px; height: 30px; font-size: 0.8rem; }}
+  .cs-step::before {{ top: 15px; }}
+  .cs-hero__row {{ gap: 0.9rem; }}
+  .cs-hero__row > .cs-lockpill {{ margin-top: 0; }}
+  [data-testid="stMainBlockContainer"] {{ padding-top: 1.6rem !important; }}
 }}
 @media (prefers-reduced-motion: reduce) {{ .cs-step[data-state="active"]::before {{ animation: none !important; }} }}
 
