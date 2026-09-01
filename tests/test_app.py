@@ -61,7 +61,9 @@ def text_of(*element_lists) -> str:
 
 def test_empty_app_renders():
     app = run_app()
-    assert any("CareScribe" in heading.value for heading in app.title)
+    # The masthead ships as an HTML component (components.hero), not st.title.
+    assert "CareScribe" in text_of(app.markdown)
+    assert "cs-steps" in text_of(app.markdown)  # the step tracker rendered
 
 
 def test_sidebar_reports_the_detection_layers():

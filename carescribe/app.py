@@ -38,6 +38,7 @@ from carescribe.core import (  # noqa: E402
     review_spans,
 )
 from carescribe.components.highlight_review import highlight_review  # noqa: E402
+from carescribe.ui import components as ui, theme as ui_theme  # noqa: E402
 
 st.set_page_config(page_title="CareScribe", page_icon="🩺", layout="wide")
 
@@ -192,7 +193,11 @@ def _render_generation_model() -> None:
     if model_path is None:
         return
     st.sidebar.subheader("Generation model")
-    st.sidebar.markdown(f"🧠 `{model_path.stem}`")
+    st.sidebar.markdown(
+        f'<div class="cs-layer" data-state="on">{ui.icon("cpu")}'
+        f'<span class="cs-mono" style="font-size:.8rem">{model_path.stem}</span></div>',
+        unsafe_allow_html=True,
+    )
 
     stem = model_path.name.split(".", 1)[0]
     card = model_path.parent / f"{stem}.MODEL_CARD.md"
@@ -204,27 +209,32 @@ def _render_generation_model() -> None:
 
 
 def render_sidebar() -> None:
-    st.sidebar.title("🩺 CareScribe")
+    st.sidebar.markdown(
+        f'<h1 style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0 .1rem">'
+        f'<span style="color:var(--cs-accent);display:inline-flex">{ui.icon("shield")}'
+        f'</span>CareScribe</h1>',
+        unsafe_allow_html=True,
+    )
     with st.sidebar:
         privacy_indicator()
 
     st.sidebar.subheader("Detection layers")
     status = deidentify.engine_status()
 
-    st.sidebar.markdown("✅ **1. Structured regex** — always on")
-
+    layers = [ui.detection_layer("on", 1, "Structured regex", "always on")]
     if status["ner"]:
-        st.sidebar.markdown(f"✅ **2. Presidio + spaCy** — `{status['ner_model']}`")
+        layers.append(ui.detection_layer("on", 2, "Presidio + spaCy", status["ner_model"]))
     elif status["ner_error"]:
-        st.sidebar.markdown("⚠️ **2. Presidio + spaCy** — unavailable")
-        st.sidebar.caption(status["ner_error"])
+        layers.append(ui.detection_layer("warn", 2, "Presidio + spaCy", "unavailable"))
     else:
-        st.sidebar.markdown("⏳ **2. Presidio + spaCy** — loads on first document")
-
+        layers.append(ui.detection_layer("wait", 2, "Presidio + spaCy", "loads on first document"))
     if status["gliner"]:
-        st.sidebar.markdown("✅ **3. GLiNER** — loaded")
+        layers.append(ui.detection_layer("on", 3, "GLiNER", "loaded"))
     else:
-        st.sidebar.markdown("➖ **3. GLiNER** — not installed (optional)")
+        layers.append(ui.detection_layer("off", 3, "GLiNER", "not installed (optional)"))
+    st.sidebar.markdown("".join(layers), unsafe_allow_html=True)
+    if status["ner_error"]:
+        st.sidebar.caption(status["ner_error"])
 
     st.sidebar.caption(
         "In-prose dates: "
@@ -239,13 +249,18 @@ def render_sidebar() -> None:
     docs = documents()
     approved = sum(1 for doc in docs.values() if doc.approved)
     identifiers = sum(len(doc.entities) for doc in docs.values())
-    st.sidebar.caption(
-        f"In memory: {len(docs)} documents, {identifiers} identifiers, "
-        f"{approved} approved."
+    st.sidebar.markdown(
+        ui.stat_strip([
+            ("Documents in memory", len(docs)),
+            ("Identifiers detected", identifiers),
+            ("Approved", f"{approved} / {len(docs)}" if docs else "0"),
+        ]),
+        unsafe_allow_html=True,
     )
+    st.sidebar.write("")
 
     if st.sidebar.button(
-        "🧹 Clear session / wipe PHI", type="primary",
+        "Clear session — wipe PHI", type="primary",
         use_container_width=True, key="wipe_phi_btn",
     ):
         wipe_phi()
@@ -1154,21 +1169,21 @@ def privacy_indicator() -> None:
             "only, never real identifiers — is sent to "
             f"{backends.cloud_provider()}. Generation still requires your "
             "approval and a clean safety sweep first.",
-            icon="☁",
+            icon=":material/cloud:",
         )
     elif st.session_state.get("downloading_model"):
         st.info(
             "**Downloading the AI model onto this computer.** Weights are "
             "coming *in*; no patient data is going out. Nothing about any "
             "document is part of this request.",
-            icon="⬇",
+            icon=":material/download:",
         )
     else:
         st.success(
             "**Running fully offline — no data leaves this computer.** "
             "Documents are read into memory, de-identified, reviewed and "
             "drafted here. Nothing is uploaded.",
-            icon="🔒",
+            icon=":material/lock:",
         )
 
 
@@ -1951,225 +1966,40 @@ def section_handoff() -> None:
 # Main
 # --------------------------------------------------------------------------
 
-_APP_CSS = """
-<style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;450;500;600;700&display=swap');
-
-:root {
-  --cs-bg:#ffffff; --cs-surface:#ffffff; --cs-panel:#f7f8fa;
-  --cs-border:#e7e9ee; --cs-line:#eef0f4;
-  --cs-ink:#101828; --cs-muted:#667085;
-  --cs-accent:#4f46e5; --cs-accent-hover:#4338ca; --cs-accent-soft:#eef2ff;
-  --cs-safe:#059669; --cs-safe-soft:#ecfdf5; --cs-safe-line:#a7f3d0;
-  --cs-warn:#b45309; --cs-warn-soft:#fff7ed; --cs-warn-line:#fed7aa;
-  --cs-danger:#b91c1c; --cs-danger-soft:#fef2f2; --cs-danger-line:#fecaca;
-  --cs-radius:16px; --cs-radius-sm:11px;
-  --cs-shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.06);
-}
-
-/* ---------- typography ---------- */
-html, body, [data-testid="stAppViewContainer"], .stApp,
-button, input, textarea, select, [data-testid="stMarkdownContainer"],
-h1, h2, h3, h4, h5, h6, [data-testid="stHeadingContainer"] {
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important;
-  -webkit-font-smoothing: antialiased;
-}
-code, kbd, pre, [data-testid="stCode"] *, .stCode *,
-[data-testid="stCodeBlock"] * {
-  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace !important;
-}
-
-/* ---------- page canvas: calm, centred, a soft wash ---------- */
-[data-testid="stAppViewContainer"], .stApp {
-  background:
-    radial-gradient(1200px 500px at 82% -12%, rgba(79,70,229,.06), transparent 60%),
-    radial-gradient(900px 420px at -12% 8%, rgba(5,150,105,.045), transparent 55%),
-    var(--cs-bg);
-}
-[data-testid="stMain"] { background: transparent; }
-[data-testid="stMainBlockContainer"], .stMainBlockContainer, section.main .block-container {
-  max-width: 1040px !important;
-  padding-top: 2rem !important;
-  padding-bottom: 5rem !important;
-  padding-inline: clamp(1rem, 4vw, 2rem) !important;
-}
-
-/* strip Streamlit's dev chrome — this ships as a local clinical tool */
-[data-testid="stDecoration"], [data-testid="stToolbar"], [data-testid="stStatusWidget"] { display: none; }
-[data-testid="stHeader"] { background: transparent; border-bottom: 0; height: 0; }
-
-/* ---------- page title ---------- */
-[data-testid="stAppViewContainer"] h1 {
-  font-size: 1.55rem; font-weight: 700; letter-spacing: -0.02em; padding: 0; margin: 0 0 0.15rem;
-}
-[data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] * { color: var(--cs-muted); }
-
-/* ---------- cards: one per numbered step ----------
-   Only the step containers opened in main() carry a `.cs-card` marker as their
-   first child; scoping to that keeps the treatment off Streamlit's own border
-   wrappers (the sidebar shell, the file-uploader, the main block wrapper). */
-.cs-card { display: none; }
-[data-testid="stElementContainer"]:has(> div > [data-testid="stMarkdownContainer"] > .cs-card) {
-  display: none;
-}
-[data-testid="stVerticalBlockBorderWrapper"]:has(
-  > div > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"]:first-child .cs-card
-) {
-  background: var(--cs-surface);
-  border: 1px solid var(--cs-border) !important;
-  border-radius: var(--cs-radius) !important;
-  box-shadow: var(--cs-shadow);
-  padding: clamp(1.2rem, 2.4vw, 2rem) !important;
-  margin-top: 1.25rem;
-}
-
-/* step heading = card title */
-[data-testid="stAppViewContainer"] h3 {
-  font-size: 1.2rem; font-weight: 650; letter-spacing: -0.01em;
-  margin: 0 0 0.35rem; padding: 0; border: 0;
-}
-[data-testid="stAppViewContainer"] h2 {
-  font-size: 1rem; font-weight: 600; margin: 1.1rem 0 0.4rem; padding: 0; border: 0;
-}
-[data-testid="stAppViewContainer"] h4, [data-testid="stAppViewContainer"] h5 {
-  font-size: 0.9rem; font-weight: 600; color: var(--cs-muted); margin: 1rem 0 0.3rem;
-}
-[data-testid="stAppViewContainer"] hr { margin: 1.4rem 0; border-color: var(--cs-line); }
-
-/* keep secondary text-blocks legible (the redacted-preview tail, etc.) */
-[data-testid="stText"], .stText { color: var(--cs-ink); }
-[data-testid="stCode"], pre, [data-testid="stCodeBlock"] {
-  border: 1px solid var(--cs-border) !important;
-  border-radius: var(--cs-radius-sm) !important;
-  background: #fafbfd !important;
-}
-
-/* ---------- sidebar: quiet, out of the way ---------- */
-[data-testid="stSidebar"] { background: var(--cs-panel); border-right: 1px solid var(--cs-border); }
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h1 { font-size: 1.05rem; font-weight: 700; }
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h2,
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3 {
-  font-size: 0.8rem; font-weight: 600; letter-spacing: .03em; text-transform: uppercase;
-  color: var(--cs-muted); border: 0; margin: 1.2rem 0 0.4rem;
-}
-[data-testid="stSidebar"] p, [data-testid="stSidebar"] [data-testid="stCaptionContainer"] { font-size: 0.82rem; }
-
-/* ---------- buttons: one shape, full state vocabulary ---------- */
-.stButton > button, [data-testid="stBaseButton-secondary"],
-[data-testid="stBaseButton-primary"], [data-testid="stBaseButton-secondaryFormSubmit"] {
-  border-radius: var(--cs-radius-sm);
-  font-weight: 600; font-size: 0.9rem;
-  padding: 0.6rem 1.25rem;
-  border: 1px solid var(--cs-border);
-  transition: background .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease, transform .12s ease;
-}
-[data-testid="stBaseButton-secondary"] { background: var(--cs-surface); color: var(--cs-ink); }
-[data-testid="stBaseButton-secondary"]:hover:not(:disabled) {
-  border-color: var(--cs-accent); color: var(--cs-accent); background: var(--cs-accent-soft);
-}
-[data-testid="stBaseButton-primary"] {
-  background: var(--cs-accent); border-color: var(--cs-accent); color: #fff;
-  box-shadow: 0 4px 14px rgba(79,70,229,.28);
-}
-[data-testid="stBaseButton-primary"]:hover:not(:disabled) {
-  background: var(--cs-accent-hover); border-color: var(--cs-accent-hover); transform: translateY(-1px);
-}
-.stButton > button:active:not(:disabled) { transform: translateY(0); }
-.stButton > button:disabled, [data-testid^="stBaseButton"]:disabled { opacity: 0.5; box-shadow: none; }
-.stButton > button:focus-visible, [data-testid^="stBaseButton"]:focus-visible {
-  outline: 2px solid var(--cs-accent); outline-offset: 2px;
-}
-
-/* destructive action reads as a warning, not the happy path */
-.st-key-wipe_phi_btn [data-testid="stBaseButton-primary"] {
-  background: var(--cs-danger-soft); border-color: var(--cs-danger-line); color: var(--cs-danger); box-shadow: none;
-}
-.st-key-wipe_phi_btn [data-testid="stBaseButton-primary"]:hover:not(:disabled) {
-  background: var(--cs-danger); border-color: var(--cs-danger); color: #fff; transform: none;
-}
-
-/* ---------- inputs ---------- */
-[data-testid="stTextInput"] input, [data-testid="stTextArea"] textarea,
-[data-testid="stNumberInput"] input, [data-baseweb="select"] > div {
-  border-radius: var(--cs-radius-sm) !important;
-  border-color: var(--cs-border) !important;
-  background: var(--cs-surface) !important;
-  transition: border-color .16s ease, box-shadow .16s ease;
-}
-[data-testid="stTextInput"] input:focus, [data-testid="stTextArea"] textarea:focus {
-  border-color: var(--cs-accent) !important;
-  box-shadow: 0 0 0 3px rgba(79,70,229,.12) !important;
-}
-
-/* ---------- tabs: a segmented pill ---------- */
-[data-baseweb="tab-list"] {
-  background: #f3f4f6; border-radius: 10px; padding: 4px; gap: 4px;
-  border-bottom: 0; display: inline-flex;
-}
-[data-baseweb="tab"] {
-  border-radius: 8px; padding: 0.4rem 1rem;
-  font-size: 0.88rem; font-weight: 550; color: var(--cs-muted);
-  transition: background .15s ease, color .15s ease, box-shadow .15s ease;
-}
-[data-baseweb="tab"][aria-selected="true"] {
-  background: #fff; color: var(--cs-ink); box-shadow: 0 1px 3px rgba(0,0,0,.09);
-}
-[data-baseweb="tab-highlight"], [data-baseweb="tab-border"] { display: none; }
-
-/* ---------- expanders, alerts, dataframe, dropzone: consistent surface ---------- */
-[data-testid="stExpander"] details {
-  border: 1px solid var(--cs-border); border-radius: 12px; background: var(--cs-surface);
-}
-[data-testid="stExpander"] summary:hover { color: var(--cs-accent); }
-
-[data-testid="stAlert"] { border-radius: 12px; border: 1px solid var(--cs-border); }
-[data-testid="stAlertContentInfo"] { background: var(--cs-accent-soft); border-color: #c7d2fe; }
-[data-testid="stAlertContentSuccess"] { background: var(--cs-safe-soft); border-color: var(--cs-safe-line); }
-[data-testid="stAlertContentWarning"] { background: var(--cs-warn-soft); border-color: var(--cs-warn-line); }
-[data-testid="stAlertContentError"] { background: var(--cs-danger-soft); border-color: var(--cs-danger-line); }
-
-[data-testid="stDataFrame"], [data-testid="stTable"] {
-  border: 1px solid var(--cs-border); border-radius: 12px; overflow: hidden;
-}
-
-[data-testid="stFileUploaderDropzone"] {
-  border: 1.5px dashed #cdd2dc; border-radius: 14px; background: #fafbfd;
-  transition: border-color .16s ease, background .16s ease, color .16s ease;
-}
-[data-testid="stFileUploaderDropzone"]:hover {
-  border-color: var(--cs-accent); background: var(--cs-accent-soft); color: var(--cs-accent);
-}
-
-[data-testid="stProgress"] > div > div > div { background: var(--cs-accent); }
-
-[data-testid="stRadio"] label, [data-testid="stCheckbox"] label { transition: color .16s ease; }
-
-/* selectable text in the redacted preview / code blocks */
-::selection { background: rgba(79,70,229,.18); }
-</style>
-"""
+def _pipeline_step(docs: dict) -> int:
+    """The 0-based step the reviewer stands on, for components.step_tracker()."""
+    if not docs:
+        return 0
+    values = list(docs.values())
+    if not all(d.analyzed or d.error for d in values):
+        return 1
+    if not any(d.approved for d in values):
+        return 2
+    if not all(d.approved or d.error for d in values):
+        return 3
+    return 4
 
 
-def _inject_app_css() -> None:
-    """CareScribe's visual identity, applied once per rerun.
-
-    Streamlit's theming only reaches five colour tokens and a font family
-    (see ``.streamlit/config.toml``); everything else — typography scale,
-    component state vocabulary, the section-header stepper, the destructive
-    button treatment — is this CSS. It touches presentation only; no widget
-    behaviour, key, or callback changes.
-    """
-    st.markdown(_APP_CSS, unsafe_allow_html=True)
+def _privacy_state() -> str:
+    if backends.cloud_enabled():
+        return "cloud"
+    if st.session_state.get("downloading_model"):
+        return "downloading"
+    return "offline"
 
 
 def main() -> None:
-    _inject_app_css()
+    ui_theme.inject()
     render_sidebar()
 
-    st.title("CareScribe — de-identification & review")
-    st.caption(
-        "Load a batch, de-identify each document locally on the CPU, review and "
-        "correct what was found, then approve. Nothing leaves this machine."
+    st.markdown(
+        ui.hero(
+            "CareScribe — de-identification & review",
+            "Load a batch, de-identify each document locally on the CPU, review "
+            "and correct what was found, then approve. Nothing leaves this machine.",
+            _privacy_state(),
+        ),
+        unsafe_allow_html=True,
     )
 
     # Load the model before anything can ask for it, so the first click is
@@ -2179,11 +2009,13 @@ def main() -> None:
         render_engine_failure(engine_state)
         return
 
-    # Each numbered step gets its own card (see _APP_CSS). Sections still guard
-    # themselves — the predicates here only decide whether to open a card, so a
-    # step that has nothing to show never leaves an empty box behind.
     docs = documents()
     order = st.session_state.order
+    st.markdown(ui.step_tracker(_pipeline_step(docs)), unsafe_allow_html=True)
+
+    # Each numbered step gets its own card (see ui.theme.CSS). Sections still
+    # guard themselves — the predicates here only decide whether to open a card,
+    # so a step that has nothing to show never leaves an empty box behind.
     has_review = bool(docs) and any(
         docs[name].analyzed and not docs[name].error for name in order
     )
@@ -2194,7 +2026,7 @@ def main() -> None:
         if not show:
             continue
         with st.container(border=True):
-            # Marks this border wrapper as a step card for _APP_CSS; hidden.
+            # Marks this border wrapper as a step card for ui.theme.CSS; hidden.
             st.markdown('<span class="cs-card"></span>', unsafe_allow_html=True)
             section()
 
