@@ -129,26 +129,46 @@ def build(
     return {"pairs": pairs, "kept": len(pairs), "dropped": dropped, "reasons": reasons}
 
 
+def _load_datagen_config(path: Path) -> dict:
+    try:
+        import yaml
+
+        return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except Exception:  # noqa: BLE001 — config is optional
+        return {}
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--n", type=int, default=200)
-    ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--gap-probability", type=float, default=0.25)
-    ap.add_argument("--out", type=Path, default=Path("data/dryrun"))
+    ap.add_argument("--n", type=int, default=None, help="override config count")
+    ap.add_argument("--seed", type=int, default=None)
+    ap.add_argument("--gap-probability", type=float, default=None)
+    ap.add_argument("--config", type=Path, default=Path("finetune/config/datagen.yaml"))
+    ap.add_argument("--out", type=Path, default=Path("finetune/data/dryrun"))
     args = ap.parse_args(argv)
 
-    result = build(args.n, seed=args.seed, gap_probability=args.gap_probability)
-    splits = stratified_split(result["pairs"], seed=args.seed)
+    cfg = _load_datagen_config(args.config)
+    n = args.n if args.n is not None else int(
+        (cfg.get("counts", {}) or {}).get("total", 200)
+    )
+    seed = args.seed if args.seed is not None else int(
+        (cfg.get("rng", {}) or {}).get("seed", 0)
+    )
+    gap = args.gap_probability if args.gap_probability is not None else float(
+        (cfg.get("quality", {}) or {}).get("gap_probability", 0.25)
+    )
+
+    result = build(n, seed=seed, gap_probability=gap)
+    splits = stratified_split(result["pairs"], seed=seed)
     for name, group in splits.items():
         write_jsonl(group, args.out / f"{name}.jsonl")
     manifest = build_manifest(
-        splits, generator_backend="template", generator_model=None, seed=args.seed
+        splits, generator_backend="template", generator_model=None, seed=seed
     )
     write_manifest(manifest, args.out / "dataset_manifest.json")
 
     print(
-        f"kept {result['kept']} / dropped {result['dropped']}  "
-        f"({args.n} sampled)\n"
+        f"kept {result['kept']} / dropped {result['dropped']}  ({n} sampled)\n"
         f"reasons: {json.dumps(result['reasons'])}\n"
         f"splits: {manifest['counts']}\n"
         f"-> {args.out}/"
