@@ -84,6 +84,42 @@ passed, 1 skipped. ~83 finetune tests.** Commits `e9bcc3b`..`51440f1`.
 prose polish), **M4 the QLoRA run on the RTX 5080** (per README), then
 M5 wiring the winning GGUF + grammar + model card into the app.
 
+### M3–M5 DONE — model trained, evaluated, integrated (2026-09-01)
+Commits `dd3b495`..`c984518`. Ran on the RTX 5080 (torch cu128 in
+`qwarm_env`; carescribe + pydantic installed there too for the eval).
+
+- **Corpus (M1/M2-lite):** `finetune/data/full/` — 2500 synthetic encounters
+  → 2014/243/243, `template` backend, all validators green. Logging silenced
+  (the running desktop app holds `carescribe.log` open; every emit from a batch
+  process spews a logging-error block — silence `logging.getLogger("carescribe")`).
+- **sft.py fixed for trl 1.12 / transformers 5.16** (`warmup_ratio`→`warmup_steps`,
+  `max_seq_length`→`max_length`, `torch_dtype`→`dtype`, `from_yaml` now reads
+  every runtime field — `packing:false` was ignored). packing off (no
+  flash-attn on Windows).
+- **M4:** Phi-3.5-mini + QLoRA r16/a32, 3 epochs / 378 steps, ~35 min,
+  `train_loss 0.037`. Adapter at `finetune/runs/phi35-v1/adapter/`.
+- **GGUF:** merge → `convert_hf_to_gguf.py` (needs `tokenizer.model` copied into
+  the merged dir; `PYTHONPATH` = llama.cpp `gguf-py`) → `llama-quantize.exe`
+  Q4_K_M → **`carescribe-clinical-phi35-v1.Q4_K_M.gguf` (2.28 GB)** in `models/`.
+- **Eval — SHIP GATE PASS.** Held-out synthetic (50): format 0.52→1.00,
+  faithfulness 0.74→1.00, placeholder 1.00→1.00, residual 0.94→1.00,
+  style 0.55→1.00; median s/draft 5.42→4.41 (tuned faster — learned to stop).
+  Regression (10 real de-identified stress_corpus docs): no regression,
+  residual 0.70→0.90. `finetune/runs/phi35-v1/EVAL_REPORT.md`.
+- **M5:** `desktop.find_local_model()` prefers `carescribe-clinical-*.gguf`;
+  app sidebar "Generation model" section + model-card expander;
+  `MODEL_CARD.md` rendered from manifest + eval. Verified end-to-end through
+  `carenotes.generate_document` (the fixed `assert_deidentified` guard passes;
+  no leak, faithful).
+- **Known rough edges (v2 work):** the corpus is `template`-backend only
+  (deterministic scaffold targets), so the model slightly overfits the exact
+  scaffold format and wobbles on very short out-of-distribution prose notes
+  ("Objective" without the `**O — Objective**` markup, a garbled "Not
+  documented"). Tighten with M2 (ollama prose backend), a larger/more varied
+  corpus, and 2 epochs instead of 3. `integrate/grammar.py` (GBNF) is built
+  but not yet wired into `LocalGGUFBackend` — would hard-fix the format wobble.
+- Full repo suite: **1103 passed, 1 skipped.**
+
 ### SWARM WORKERS: not viable for this build (2026-09-01)
 Tally on fine-tune tasks: coder no-op'd 008 & 011, produced working code on
 013 (then idled into the 600s cap); quick timed out on 012 (scaffold only)
