@@ -1,32 +1,35 @@
-# config/train.yaml
-#
-# CPU LoRA fine-tune settings (train/). Skeleton only — keys named per design
-# doc §8.1; real hyperparameters come in the train workstream.
+# QLoRA SFT — tuned for a single 16 GB GPU (RTX 5080).
+# Read by finetune.train.sft.TrainConfig.from_yaml.
 
 method:
-  # TODO: peft method — expect "lora".
-  name: "lora"
+  name: "qlora"          # 4-bit NF4 base + LoRA
 
 lora:
-  rank: 0            # TODO
-  alpha: 0           # TODO
-  target_modules: [] # TODO
-  dropout: 0.0       # TODO
+  rank: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
 
 optim:
-  # TODO: learning rate / scheduler / weight decay.
-  learning_rate: 0.0
+  learning_rate: 0.0001   # 1e-4
   weight_decay: 0.0
-  scheduler: "TODO"
+  scheduler: "cosine"
+  warmup_ratio: 0.03
 
 runtime:
-  # TODO: CPU-only constraints.
-  devices: 1            # TODO
-  batch_size: 0         # TODO
-  gradient_accumulation_steps: 1  # TODO
-  max_seq_length: 0     # TODO
+  devices: 1
+  batch_size: 1                       # per-device; 16 GB is tight at seq 4096
+  gradient_accumulation_steps: 16     # effective batch 16
+  max_seq_length: 4096
+  gradient_checkpointing: true
+  optim: "paged_adamw_8bit"
+  bf16: true
+  packing: true
 
-epochs: 0              # TODO
+epochs: 3
+
 eval:
-  # TODO: steps between evals + which eval workstream gate to run.
-  steps: 0             # TODO
+  steps: 100          # run the Phase-D metrics on dev, not just loss
+  save_steps: 200
+
+seed: 0
