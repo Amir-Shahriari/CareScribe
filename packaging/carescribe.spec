@@ -79,25 +79,45 @@ for dist in (
 # On a clinic network behind a captive portal that does not fail, it hangs.
 # collect_all pulls the module, its data and its binaries; copy_metadata is what
 # stops the download path being reached at all.
-for model in ("en_core_web_sm", "en_core_web_md", "en_core_web_lg"):
-    try:
-        import importlib.util as _util
+#
+# Exactly ONE model is bundled, regardless of what is installed on the build
+# box, so a local build and a CI build produce the same app. The default is
+# carescribe.core.deidentify.PACKAGED_DEFAULT_MODEL (en_core_web_sm: ~12 MB,
+# fast to load on a light laptop); override with CARESCRIBE_SPACY_MODEL to ship
+# a larger one deliberately. A missing model is a hard build error — never a
+# silent fall-through to whatever bigger model happens to be present.
+import importlib.util as _util
 
-        if _util.find_spec(model) is None:
-            print(f"[carescribe.spec] spaCy model {model} not installed - skipping")
-            continue
-        model_datas, model_binaries, model_hidden = collect_all(model)
-        datas += model_datas
-        binaries += model_binaries
-        hiddenimports += model_hidden
-        hiddenimports.append(model)
-        try:
-            datas += copy_metadata(model)
-        except Exception as meta_exc:  # noqa: BLE001
-            print(f"[carescribe.spec] no metadata for {model}: {meta_exc}")
-        print(f"[carescribe.spec] bundled spaCy model: {model}")
-    except Exception as exc:  # noqa: BLE001
-        print(f"[carescribe.spec] spaCy model {model} not bundled: {exc}")
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+try:
+    from carescribe.core import deidentify as _deid
+
+    _default_model = _deid.PACKAGED_DEFAULT_MODEL
+except Exception as exc:  # noqa: BLE001 — fall back to the known default name
+    print(f"[carescribe.spec] could not import deidentify ({exc}); using en_core_web_sm")
+    _default_model = "en_core_web_sm"
+
+SPACY_MODEL = os.environ.get("CARESCRIBE_SPACY_MODEL", "").strip() or _default_model
+
+if _util.find_spec(SPACY_MODEL) is None:
+    raise SystemExit(
+        f"[carescribe.spec] spaCy model {SPACY_MODEL!r} is not installed.\n"
+        f"    Run:  python -m spacy download {SPACY_MODEL}\n"
+        f"    (or set CARESCRIBE_SPACY_MODEL to one that is installed)."
+    )
+
+model_datas, model_binaries, model_hidden = collect_all(SPACY_MODEL)
+datas += model_datas
+binaries += model_binaries
+hiddenimports += model_hidden
+hiddenimports.append(SPACY_MODEL)
+try:
+    datas += copy_metadata(SPACY_MODEL)
+except Exception as meta_exc:  # noqa: BLE001
+    print(f"[carescribe.spec] no metadata for {SPACY_MODEL}: {meta_exc}")
+print(f"[carescribe.spec] bundled spaCy model: {SPACY_MODEL}")
 
 # The app itself: source, prompts, protected terms, Streamlit config.
 datas += [
@@ -123,7 +143,7 @@ hiddenimports += [
     "carescribe", "carescribe.app", "carescribe.core",
     "streamlit.web.cli", "streamlit.runtime.scriptrunner.magic_funcs",
     "presidio_analyzer.predefined_recognizers",
-    "sklearn.utils._typedefs", "srsly.msgpack.util", "blis",
+    "srsly.msgpack.util", "blis",
 ]
 
 block_cipher = None

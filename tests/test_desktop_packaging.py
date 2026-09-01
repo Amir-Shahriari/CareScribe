@@ -303,3 +303,49 @@ def test_the_runtime_hook_pins_loopback_before_streamlit_starts():
     assert "STREAMLIT_SERVER_ADDRESS" in hook
     assert "127.0.0.1" in hook
     assert "STREAMLIT_BROWSER_GATHER_USAGE_STATS" in hook
+
+
+# ==========================================================================
+# Task 11 — the build is reproducible and checks its own output
+# ==========================================================================
+
+PACKAGING = Path(__file__).resolve().parent.parent / "packaging"
+
+
+def test_the_spec_bundles_exactly_one_pinned_spacy_model():
+    """A local build and a CI build must freeze the same model."""
+    spec = (PACKAGING / "carescribe.spec").read_text(encoding="utf-8")
+    # No loop over every model, bundling whatever is installed.
+    assert 'for model in ("en_core_web_sm"' not in spec
+    # Pinned to the documented default, overridable, hard-error if absent.
+    assert "PACKAGED_DEFAULT_MODEL" in spec
+    assert "CARESCRIBE_SPACY_MODEL" in spec
+    assert "raise SystemExit" in spec
+    # The bogus hidden import that logged a build-time ERROR is gone.
+    assert "sklearn.utils._typedefs" not in spec
+
+
+def test_the_frozen_launch_check_exists_and_is_wired_into_both_builds():
+    verify = PACKAGING / "verify_frozen.py"
+    source = verify.read_text(encoding="utf-8")
+    assert "/_stcore/health" in source
+    assert "--carescribe-server" in source
+
+    import ast
+
+    tree = ast.parse(source)
+    assert any(
+        isinstance(node, ast.FunctionDef) and node.name == "main"
+        for node in tree.body
+    ), "verify_frozen.py must expose a main()"
+
+    win = (PACKAGING / "build_windows.ps1").read_text(encoding="utf-8")
+    mac = (PACKAGING / "build_macos.sh").read_text(encoding="utf-8")
+    assert "verify_frozen.py" in win
+    assert "verify_frozen.py" in mac
+
+
+def test_build_tool_pins_are_current():
+    reqs = (PACKAGING / "requirements-build.txt").read_text(encoding="utf-8")
+    assert "pyinstaller==6.10.0" not in reqs
+    assert "pyinstaller==6.21" in reqs

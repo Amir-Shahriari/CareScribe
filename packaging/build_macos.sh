@@ -17,6 +17,11 @@ python3 -m PyInstaller packaging/carescribe.spec --noconfirm --clean
 test -d dist/CareScribe.app || { echo "Build failed"; exit 1; }
 echo "Built dist/CareScribe.app"
 
+echo "Verifying the frozen app launches..."
+python3 packaging/verify_frozen.py dist/CareScribe.app || {
+    echo "Frozen app failed its launch smoke check"; exit 1;
+}
+
 bash packaging/build_dmg.sh
 
 # ---------------------------------------------------------------------------
