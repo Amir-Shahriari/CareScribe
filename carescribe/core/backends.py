@@ -256,11 +256,19 @@ def describe_backends() -> dict:
     }
 
 
-def select_backend(prefer: str | None = None):
+def select_backend(
+    prefer: str | None = None,
+    model: str | None = None,
+    temperature: float | None = None,
+):
     """Pick a backend. Returns ``(kind, backend, label)``.
 
-    ``prefer`` lets the UI honour an explicit choice; without it the ladder is
-    Ollama → bundled GGUF → cloud-only-if-configured.
+    ``prefer`` lets the UI honour an explicit backend choice; without it the
+    ladder is Ollama -> bundled GGUF -> cloud-only-if-configured. ``model``
+    pins an explicit installed Ollama model (falling back to the guessed
+    default if it is not actually installed — a stale saved preference must
+    not turn into an error). ``temperature`` overrides the backend's own
+    default on Ollama and the bundled GGUF backend.
     """
     state = describe_backends()
 
@@ -268,13 +276,16 @@ def select_backend(prefer: str | None = None):
         if kind == BACKEND_OLLAMA and state["ollama"]["available"]:
             from .carenotes import OllamaBackend
 
-            model = state["ollama"]["default_model"]
-            return kind, OllamaBackend(model), f"Ollama · {model}"
+            chosen = model if model in state["ollama"]["models"] else None
+            chosen = chosen or state["ollama"]["default_model"]
+            kwargs = {} if temperature is None else {"temperature": temperature}
+            return kind, OllamaBackend(chosen, **kwargs), f"Ollama · {chosen}"
         if kind == BACKEND_LOCAL_GGUF and state["local"]["available"]:
             from pathlib import Path
 
             name = Path(state["local"]["model_path"]).name
-            return kind, LocalGGUFBackend(), f"Built-in model · {name}"
+            kwargs = {} if temperature is None else {"temperature": temperature}
+            return kind, LocalGGUFBackend(**kwargs), f"Built-in model · {name}"
         if kind == BACKEND_CLOUD and state["cloud"]["available"]:
             provider = state["cloud"]["provider"]
             return kind, CloudBackend(provider), f"Cloud · {provider}"

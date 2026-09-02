@@ -68,7 +68,7 @@ class Backend(Protocol):
 class OllamaBackend:
     """Local generation through the loopback-pinned Ollama daemon."""
 
-    def __init__(self, model: str, temperature: float = 0.2) -> None:
+    def __init__(self, model: str, temperature: float = 0.0) -> None:
         self.model = model
         self.temperature = temperature
 
