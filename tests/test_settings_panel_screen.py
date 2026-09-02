@@ -32,10 +32,10 @@ def test_saving_settings_persists_and_survives_reload(tmp_path, monkeypatch):
     import carescribe.core.settings as settings_mod
 
     monkeypatch.setattr(settings_mod.desktop, "app_data_dir", lambda: tmp_path)
-    app = _run()
-    # Open the settings expander, pick backend "local", save.
-    app.sidebar.expander[0].expanded = True
-    app.run()
+    # Reveal the settings panel (normally a click on the "⚙ Settings" toggle
+    # button) before interacting with its contents — it no longer renders
+    # unconditionally, so a bare base render has no selectbox to find here.
+    app = _run(show_settings=True)
     selects = app.sidebar.selectbox
     backend_select = next(s for s in selects if s.key == "settings_backend")
     backend_select.set_value("local").run()

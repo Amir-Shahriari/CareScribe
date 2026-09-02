@@ -291,47 +291,50 @@ def render_sidebar() -> None:
     _render_generation_model()
 
     st.sidebar.write("")
-    with st.sidebar.expander("⚙ Settings"):
-        cfg = settings.load_settings()
-        backend_options = ["", backends.BACKEND_OLLAMA, backends.BACKEND_LOCAL_GGUF, backends.BACKEND_CLOUD]
-        backend_labels = {
-            "": "Automatic (recommended)",
-            backends.BACKEND_OLLAMA: "Ollama",
-            backends.BACKEND_LOCAL_GGUF: "Built-in model",
-            backends.BACKEND_CLOUD: "Cloud",
-        }
-        chosen_backend = st.selectbox(
-            "Generation backend", backend_options,
-            index=backend_options.index(cfg.backend) if cfg.backend in backend_options else 0,
-            format_func=lambda k: backend_labels[k], key="settings_backend",
-        )
-        installed = ollama_client.list_models() if ollama_client.is_up() else []
-        chosen_model = ""
-        if installed:
-            model_options = [""] + installed
-            chosen_model = st.selectbox(
-                "Ollama model", model_options,
-                index=model_options.index(cfg.ollama_model) if cfg.ollama_model in model_options else 0,
-                format_func=lambda m: "Automatic" if m == "" else m, key="settings_ollama_model",
+    if st.sidebar.button("⚙ Settings", key="settings_toggle"):
+        st.session_state["show_settings"] = not st.session_state.get("show_settings", False)
+    if st.session_state.get("show_settings"):
+        with st.sidebar.expander("⚙ Settings", expanded=True):
+            cfg = settings.load_settings()
+            backend_options = ["", backends.BACKEND_OLLAMA, backends.BACKEND_LOCAL_GGUF, backends.BACKEND_CLOUD]
+            backend_labels = {
+                "": "Automatic (recommended)",
+                backends.BACKEND_OLLAMA: "Ollama",
+                backends.BACKEND_LOCAL_GGUF: "Built-in model",
+                backends.BACKEND_CLOUD: "Cloud",
+            }
+            chosen_backend = st.selectbox(
+                "Generation backend", backend_options,
+                index=backend_options.index(cfg.backend) if cfg.backend in backend_options else 0,
+                format_func=lambda k: backend_labels[k], key="settings_backend",
             )
-        chosen_temperature = st.number_input(
-            "Temperature", min_value=0.0, max_value=1.0, step=0.1,
-            value=cfg.temperature, key="settings_temperature",
-        )
-        st.caption(
-            "Cloud provider settings are configured via environment variables "
-            "(see docs/deployer-cloud-note.md) — the API key is never saved here."
-        )
-        if st.button("Save settings", key="settings_save"):
-            settings.save_settings(settings.Settings(
-                backend=chosen_backend,
-                ollama_model=chosen_model,
-                temperature=float(chosen_temperature),
-                cloud_provider=cfg.cloud_provider,
-                cloud_base_url=cfg.cloud_base_url,
-                cloud_model=cfg.cloud_model,
-            ))
-            st.success("Saved.")
+            installed = ollama_client.list_models() if ollama_client.is_up() else []
+            chosen_model = ""
+            if installed:
+                model_options = [""] + installed
+                chosen_model = st.selectbox(
+                    "Ollama model", model_options,
+                    index=model_options.index(cfg.ollama_model) if cfg.ollama_model in model_options else 0,
+                    format_func=lambda m: "Automatic" if m == "" else m, key="settings_ollama_model",
+                )
+            chosen_temperature = st.number_input(
+                "Temperature", min_value=0.0, max_value=1.0, step=0.1,
+                value=cfg.temperature, key="settings_temperature",
+            )
+            st.caption(
+                "Cloud provider settings are configured via environment variables "
+                "(see docs/deployer-cloud-note.md) — the API key is never saved here."
+            )
+            if st.button("Save settings", key="settings_save"):
+                settings.save_settings(settings.Settings(
+                    backend=chosen_backend,
+                    ollama_model=chosen_model,
+                    temperature=float(chosen_temperature),
+                    cloud_provider=cfg.cloud_provider,
+                    cloud_base_url=cfg.cloud_base_url,
+                    cloud_model=cfg.cloud_model,
+                ))
+                st.success("Saved.")
 
 
 # --------------------------------------------------------------------------
