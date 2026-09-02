@@ -415,14 +415,14 @@
     "semantic_hash": "638ab9e93b5f8d9da380f8a92896fa15"
   },
   "sample_documents/make_sample_docs.py": {
-    "mtime": 1787307329.7664483,
-    "ast_hash": "487a9ed4b11cbc72f865e143eed5e8c7",
-    "semantic_hash": "487a9ed4b11cbc72f865e143eed5e8c7"
+    "mtime": 1788353767.9871843,
+    "ast_hash": "d76bb03dff261054b27e73d600ef7a16",
+    "semantic_hash": ""
   },
   "sample_documents/README.md": {
-    "mtime": 1787307333.2541335,
-    "ast_hash": "e2686818bc6403ed62cfd7631813a524",
-    "semantic_hash": "e2686818bc6403ed62cfd7631813a524"
+    "mtime": 1788353401.2762737,
+    "ast_hash": "433456cecc926cbfb9d3e9a8eb2a1a19",
+    "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-08-21-review-ux-redesign-design.md": {
     "mtime": 1787312777.447983,
@@ -1012,6 +1012,11 @@
   "stress_corpus/doc20_telephone_triage_log.txt": {
     "mtime": 1788343650.8170745,
     "ast_hash": "2d42a470ea44afbc16c4d0d3718c809f",
+    "semantic_hash": ""
+  },
+  "tests/test_full_pipeline_sample_documents.py": {
+    "mtime": 1788353991.401418,
+    "ast_hash": "c070161afcde7c663e5e0edb9b653166",
     "semantic_hash": ""
   }
 }
