@@ -406,15 +406,20 @@ _STRUCTURED_COMPILED = {
 # "Trust ID"/"Trust No" is a UK trust's own local patient identifier, distinct
 # from the national NHS number — document #11's corpus sibling used "Local
 # Trust ID: TR-2026-00458" and the old label list had no entry for it at all,
-# so a letter-prefixed local ID sailed through untouched. GMC/NMC/HCPC numbers
-# are a different identifier again: not the patient's, but the treating
-# clinician's public professional-register number, which is at least as
-# identifying as their name and was likewise never anchored.
+# so a letter-prefixed local ID sailed through untouched. GMC/NMC/HCPC/GPhC
+# numbers are a different identifier again: not the patient's, but the
+# treating clinician's public professional-register number, which is at least
+# as identifying as their name and was likewise never anchored. GPhC (General
+# Pharmaceutical Council) is the pharmacist's register, the same shape of gap
+# as the other three when a pharmacy medication review names the prescriber —
+# corpus document #19's registration number sailed through untouched before
+# this label was added.
 _MRN_LABELS = (
     r"MRN|Hospital\s*(?:No|Number)|Record\s*(?:No|Number)|Case\s*(?:No|Number)|"
     r"Chart\s*(?:No|Number)|Patient\s*(?:No|Number)|Unit\s*(?:No|Number)|"
     r"Patient\s*ID|Hosp\s*No|NHS\s*Trust\s*No|Trust\s*(?:No|Number|ID)|"
-    r"GMC\s*(?:No|Number)?|NMC\s*(?:No|Number|PIN)?|HCPC\s*(?:No|Number|Registration)?"
+    r"GMC\s*(?:No|Number)?|NMC\s*(?:No|Number|PIN)?|HCPC\s*(?:No|Number|Registration)?|"
+    r"GPhC\s*(?:No|Number|Registration)?"
 )
 
 MRN_CONTEXT = re.compile(

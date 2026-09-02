@@ -1,0 +1,26 @@
+MEADOWGATE PHARMACY MEDICINES OPTIMISATION REVIEW
+Wetherby, West Yorkshire
+
+Patient:     Denis Okoro
+NHS No:      671 220 4488
+DOB:         2 May 1958
+
+MEDICATION REVIEW
+
+Drug          | Dose    | Prescriber            | Reg No       | Review date
+Atorvastatin  | 20mg    | Dr S. Ibrahim          | GMC 7712340  | 04/2026
+Ramipril      | 5mg     | Dr N. Fairweather      | GMC 6650218  | 04/2026
+Metformin     | 500mg   | Dr O. Adeyemi          | GMC 6031177  | 05/2026
+Warfarin      | 3mg     | J. Braithwaite (ANP)   | NMC 5567012  | 05/2026
+Salbutamol    | 100mcg  | S. Osei (Pharmacist)   | GPhC 2109456 | 06/2026
+
+Bloods showed normal U&E and eGFR. INR was within target range at 2.3.
+HbA1c was 52, unchanged since the last review.
+
+The patient remains stable on the current regimen. No clinically
+significant interactions were identified between the listed medicines.
+Denis has been counselled on the importance of adherence and reports no
+adverse effects.
+
+Overall recommendation: continue current regimen and review again in
+three months.

@@ -25,8 +25,8 @@
     "semantic_hash": ""
   },
   "carescribe/core/deidentify.py": {
-    "mtime": 1788342513.085169,
-    "ast_hash": "2294493155099249457f800dcb7e53e1",
+    "mtime": 1788343691.495818,
+    "ast_hash": "84e8c4cccb084ec63c3c427e14593c6b",
     "semantic_hash": ""
   },
   "carescribe/core/ingest.py": {
@@ -135,8 +135,8 @@
     "semantic_hash": "86dea7acc9859f805171b10038c618f8"
   },
   "stress_corpus/answer_key.json": {
-    "mtime": 1788342092.1327164,
-    "ast_hash": "34cdbcc93db9e9dd31aac6b1c8d05bf1",
+    "mtime": 1788343665.94692,
+    "ast_hash": "6d3dd4a935d3ebd9b41d6962b3542d82",
     "semantic_hash": ""
   },
   "tests/stress_report.py": {
@@ -210,9 +210,9 @@
     "semantic_hash": "367c4218bd54d3878c59fb06713d53b1"
   },
   "stress_corpus/README.md": {
-    "mtime": 1785929109.4314127,
-    "ast_hash": "bbe4d23689b97d6b7ad44f3ef23f70a1",
-    "semantic_hash": "bbe4d23689b97d6b7ad44f3ef23f70a1"
+    "mtime": 1788343767.9769988,
+    "ast_hash": "c2e08f328677ac86f30a7b9e39f4a91b",
+    "semantic_hash": ""
   },
   "stress_corpus/doc01_community_mh_letter.txt": {
     "mtime": 1785928702.5635529,
@@ -987,6 +987,31 @@
   "stress_corpus/doc15_risk_assessment_grid.txt": {
     "mtime": 1788342554.775143,
     "ast_hash": "b1bd89a98b80cffbe8bc2ae88016b5d5",
+    "semantic_hash": ""
+  },
+  "stress_corpus/doc16_out_of_area_transfer.txt": {
+    "mtime": 1788343635.5217297,
+    "ast_hash": "8a2da0c70ff646fe9842dad0a7d263df",
+    "semantic_hash": ""
+  },
+  "stress_corpus/doc17_email_correspondence_thread.txt": {
+    "mtime": 1788343639.330098,
+    "ast_hash": "d75a0a8fb637cc5f9291cc3cd31ee9e7",
+    "semantic_hash": ""
+  },
+  "stress_corpus/doc18_court_report.txt": {
+    "mtime": 1788343643.1448727,
+    "ast_hash": "69141f3be12e8504e409122061c76993",
+    "semantic_hash": ""
+  },
+  "stress_corpus/doc19_pharmacy_medication_review.txt": {
+    "mtime": 1788343648.05151,
+    "ast_hash": "9c293d13c4b4d85dd9449f83cfcc9eb6",
+    "semantic_hash": ""
+  },
+  "stress_corpus/doc20_telephone_triage_log.txt": {
+    "mtime": 1788343650.8170745,
+    "ast_hash": "2d42a470ea44afbc16c4d0d3718c809f",
     "semantic_hash": ""
   }
 }

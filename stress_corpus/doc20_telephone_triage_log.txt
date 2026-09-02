@@ -1,0 +1,19 @@
+CRISIS TELEPHONE TRIAGE LOG
+Shipley, West Yorkshire
+
+Patient: Deborah Nakato
+NHS No: 782 445 1109
+
+09:14 - call from Mrs J. Okafor (07700 900112) re: medication query,
+        advised to continue current dose pending GP review.
+11:02 - call from the patient re: increased anxiety, safety plan
+        reviewed, no change in risk.
+14:32 - call from Mrs J. Okafor (07700 900112) re: side effects,
+        reassurance given, GP to be informed.
+16:50 - call from the patient re: confirming appointment time, advised
+        to attend as planned.
+
+Current medication: Sertraline 100mg once daily, Diazepam 2mg as
+required. GAD-7 was 14 at last contact. Low immediate risk.
+
+Logged by K. Osei.

@@ -289,6 +289,89 @@
         "HoNOS", "U&E", "CRP was 6", "Overall risk rating: Medium",
         "Consultant Psychiatrist"
       ]
+    },
+    {
+      "file": "doc16_out_of_area_transfer.txt",
+      "covers": ["dual trust IDs for the same patient", "two letterhead address/phone blocks"],
+      "must_redact": [
+        "Thandiwe Marsh", "11 January 1977", "831 220 4471",
+        "5541092", "6602817",
+        "14 Vicarage Court", "HG4 2LN", "01632 960 501",
+        "22 Harbour Road", "YO12 4TX", "01632 960 602",
+        "F. Adeyemi", "R. Ellis"
+      ],
+      "must_preserve": [
+        "Sertraline 150mg", "Zopiclone 7.5mg", "once daily", "nocte", "as required",
+        "T3/T4", "S. aureus",
+        "HoNOS score at the last review was 9", "16 at referral",
+        "Section 117", "the CPA review is due in four months"
+      ]
+    },
+    {
+      "file": "doc17_email_correspondence_thread.txt",
+      "covers": ["email thread headers", "identifiers repeated across quoted reply chain"],
+      "must_redact": [
+        "Wilfred Openshaw", "Amara Chukwu", "Grace Fenwick",
+        "a.chukwu@example.co.uk", "g.fenwick77@example.co.uk",
+        "512 664 9930", "A. Chukwu", "G. Fenwick"
+      ],
+      "must_preserve": [
+        "Sertraline 100mg", "150mg", "once daily",
+        "low mood", "adherence", "Section 117",
+        "his next CPA review is scheduled for October",
+        "update the care plan"
+      ]
+    },
+    {
+      "file": "doc18_court_report.txt",
+      "covers": ["solicitor name and firm", "court case reference number", "DOB spelled out in prose"],
+      "must_redact": [
+        "Beatrice Holloway", "T20260458",
+        "17 Cavendish Terrace", "LS6 3RN",
+        "Miriam Okwuosa", "Fentiman Bright Solicitors",
+        "4 Chancery Row", "LS1 4BT", "01632 960 214",
+        "the fourteenth of July, nineteen eighty-five"
+      ],
+      "must_preserve": [
+        "anxiety", "Sertraline 100mg", "once daily",
+        "two-year history", "no history of substance misuse",
+        "supervised contact", "final hearing"
+      ]
+    },
+    {
+      "file": "doc19_pharmacy_medication_review.txt",
+      "covers": ["dense medication table", "a different prescriber per row, each redacted independently"],
+      "must_redact": [
+        "Denis Okoro", "671 220 4488", "2 May 1958",
+        "S. Ibrahim", "GMC 7712340",
+        "N. Fairweather", "GMC 6650218",
+        "O. Adeyemi", "GMC 6031177",
+        "J. Braithwaite", "NMC 5567012",
+        "S. Osei", "GPhC 2109456"
+      ],
+      "must_preserve": [
+        "Atorvastatin", "20mg", "Ramipril", "5mg", "Metformin", "500mg",
+        "Warfarin", "3mg", "Salbutamol", "100mcg",
+        "normal U&E and eGFR", "INR was within target range at 2.3",
+        "HbA1c was 52", "continue current regimen and review again in\nthree months"
+      ]
+    },
+    {
+      "file": "doc20_telephone_triage_log.txt",
+      "covers": ["timestamped call log", "informal shorthand instead of clinical prose", "Ofcom mobile drama-range number"],
+      "must_redact": [
+        "Deborah Nakato", "782 445 1109",
+        "J. Okafor", "07700 900112",
+        "09:14", "11:02", "14:32", "16:50",
+        "K. Osei"
+      ],
+      "must_preserve": [
+        "medication query", "advised to continue current dose pending GP review",
+        "increased anxiety", "safety plan", "no change in risk",
+        "side effects", "reassurance given",
+        "Sertraline 100mg", "Diazepam 2mg", "once daily", "as required",
+        "GAD-7 was 14", "Low immediate risk"
+      ]
     }
   ]
 }
