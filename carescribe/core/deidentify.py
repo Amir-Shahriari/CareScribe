@@ -631,6 +631,60 @@ PROSE_DATE = re.compile(
     re.IGNORECASE,
 )
 
+# A day-of-month written as a word ("the fourteenth") rather than a digit, used
+# by the spelled-out-year pattern below. PROSE_DATE already covers a numeric
+# day; this list exists only to let the same pattern recognise a fully spelled
+# day too ("the fourteenth of July, nineteen eighty-five" has no digits at
+# all).
+_ORDINAL_WORDS = (
+    "first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|"
+    "eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|"
+    "eighteenth|nineteenth|twentieth|twenty-first|twenty-second|twenty-third|"
+    "twenty-fourth|twenty-fifth|twenty-sixth|twenty-seventh|twenty-eighth|"
+    "twenty-ninth|thirtieth|thirty-first"
+)
+
+# Number words used to spell out a year ("nineteen eighty-five", "two thousand
+# and twenty-six"). Not a general-purpose number parser — just enough
+# vocabulary to recognise the shape of a spelled year so it can be swallowed
+# whole, without needing to compute the value it names.
+#
+# The trailing \b matters: alternation tries options left to right and takes
+# the first that matches at all, not the longest, so "eight" alone would
+# satisfy the group against "eighty-five" and leave "y-five" as unmatched
+# prose. The boundary forces a backtrack past "eight" (no boundary between
+# "t" and "y") until an alternative — "eighty" — actually ends the word.
+_YEAR_WORD = (
+    r"(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|"
+    r"thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|"
+    r"thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|oh|and)\b"
+)
+
+# A full "day of Month, spelled-out year" birth date, entirely in prose — a
+# court report wrote a client's DOB as "born on the fourteenth of July,
+# nineteen eighty-five" with no digits anywhere in it. Neither NUMERIC_DATE
+# nor PROSE_DATE fires (both need a digit day, and PROSE_DATE's optional year
+# is numeric-only), so spaCy's NER was the only layer that saw this phrase at
+# all — and it split it: "the fourteenth of July" came back as one DATE
+# entity, leaving ", nineteen eighty-five" as ordinary trailing prose that
+# survived redaction with the birth year sitting in the clear.
+#
+# Rather than patch spaCy's span after the fact (nothing merges an NER span
+# with a regex match today, and doing so would still depend on spaCy choosing
+# to tag the day+month at all), this pattern captures the whole phrase
+# deterministically, day through year, exactly the way NUMERIC_DATE and
+# PROSE_DATE already do. merge_spans() resolves overlaps longest-match-wins
+# with ties going to the regex layer, so this span always wins over whatever
+# partial span NER produced underneath it. The day may be written as a digit
+# ("14th") or a word ("fourteenth"); only a genuinely spelled-out year
+# following it changes anything here, so ordinary numeric dates are
+# untouched.
+WORD_DATE = re.compile(
+    rf"\b(?:the\s+)?(?:\d{{1,2}}(?:st|nd|rd|th)?|{_ORDINAL_WORDS})\s+of\s+"
+    rf"(?:{_MONTHS})\s*,?\s+(?:{_YEAR_WORD}[-\s]*){{2,6}}",
+    re.IGNORECASE,
+)
+
 # Guards against dosages and lab values being read as dates.
 _UNIT_AFTER = re.compile(
     r"^\s*(?:mg|mcg|ug|ml|l|g|kg|mmol|mol|%|bpm|units?|iu|/kg)\b", re.IGNORECASE
@@ -943,7 +997,7 @@ def structured_spans(text: str) -> list[Span]:
         # what NER returns and variant expansion regenerates every title form.
         spans.append(Span(match.start(1), match.end(1), "PROVIDER_NAME"))
 
-    for pattern in (NUMERIC_DATE, PROSE_DATE):
+    for pattern in (NUMERIC_DATE, PROSE_DATE, WORD_DATE):
         for match in pattern.finditer(text):
             if not date_span_wanted(text, match.start(), match.end()):
                 continue

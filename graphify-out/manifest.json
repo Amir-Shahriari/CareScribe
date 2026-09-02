@@ -25,8 +25,8 @@
     "semantic_hash": ""
   },
   "carescribe/core/deidentify.py": {
-    "mtime": 1788343691.495818,
-    "ast_hash": "84e8c4cccb084ec63c3c427e14593c6b",
+    "mtime": 1788352293.8115056,
+    "ast_hash": "007eecb91f8b3cb4c146e938ddc20870",
     "semantic_hash": ""
   },
   "carescribe/core/ingest.py": {
@@ -135,8 +135,8 @@
     "semantic_hash": "86dea7acc9859f805171b10038c618f8"
   },
   "stress_corpus/answer_key.json": {
-    "mtime": 1788343665.94692,
-    "ast_hash": "6d3dd4a935d3ebd9b41d6962b3542d82",
+    "mtime": 1788352356.1233473,
+    "ast_hash": "b3184f5f14399ba5cde5688c4a0cd310",
     "semantic_hash": ""
   },
   "tests/stress_report.py": {
@@ -1000,8 +1000,8 @@
     "semantic_hash": ""
   },
   "stress_corpus/doc18_court_report.txt": {
-    "mtime": 1788343643.1448727,
-    "ast_hash": "69141f3be12e8504e409122061c76993",
+    "mtime": 1788352340.2543826,
+    "ast_hash": "67e734c0f44efebe19da6863a16602ba",
     "semantic_hash": ""
   },
   "stress_corpus/doc19_pharmacy_medication_review.txt": {

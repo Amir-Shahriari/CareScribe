@@ -1,16 +1,16 @@
 # Graph Report - medgpt  (2026-09-02)
 
 ## Corpus Check
-- 167 files · ~137,087 words
+- 167 files · ~137,501 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2292 nodes · 4424 edges · 153 communities (125 shown, 28 thin omitted)
+- 2292 nodes · 4424 edges · 151 communities (124 shown, 27 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 95 edges (avg confidence: 0.61)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c9b7edf5`
+- Built from commit: `940629fa`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -50,7 +50,7 @@
 - Architecture
 - test_stress_corpus.py
 - combine_sources
-- test_batch.py
+- load_documents
 - build_messages
 - CareScribe — design system
 - make_icon.py
@@ -122,7 +122,7 @@
 - Per-field retrieval planner — design
 - components/__init__.py
 - build_dataset.py
-- list_folder
+- test_batch.py
 - Evaluation report
 - blocking_reason
 - refine_document
@@ -130,9 +130,9 @@
 - AGENTS.md — rules for automated coding agents in this repo
 - Task board
 - Global Constraints
-- Cardiology Discharge Summary (doc02)
-- finetune/
 - stress_corpus/README.md
+- finetune/
+- Cardiology Discharge Summary (doc02)
 - load_protected_terms
 - reference_library.py
 - conftest.py
@@ -149,21 +149,19 @@
 - app.py
 - eval/__init__.py
 - is_model_present
-- ._no_identifier_shapes
+- Initials-only patient reference (e.g. M.A.R.)
 - assemble/__init__.py
 - get_analyzer
 - _run
-- HFCompleter
+- ._no_identifier_shapes
 - wipe_phi
-- Stress corpus
+- HFCompleter
 - stress_report.py
 - _RecordingBackend
 - _fresh_generation_status_cache
 - test_an_html_error_page_is_rejected
-- answer_key.json
-- test_the_draft_state_and_backend_state_are_not_confused
 - test_the_local_model_stays_pinned_at_temperature_zero
-- test_the_corpus_and_its_answer_key_agree
+- test_the_draft_state_and_backend_state_are_not_confused
 
 ## God Nodes (most connected - your core abstractions)
 1. `deidentify()` - 69 edges
@@ -200,7 +198,7 @@
 - **Fictional patients sharing the same reused NHS number across documents** — stress_corpus_doc01_mohammed_al_rashid, stress_corpus_doc02_margaret_elizabeth_chen, stress_corpus_doc05_elspeth_mackenzie_ford, stress_corpus_doc06_priya_venkataraman, stress_corpus_doc09_tomasz_wisniewski, stress_corpus_shared_nhs_number [INFERRED 0.85]
 - **Documents sharing the recurring fictional staff roster (e.g. A. Whitfield, R. Patel)** — stress_corpus_doc01_community_mh_letter, stress_corpus_doc02_cardiology_discharge, stress_corpus_doc04_ward_handover, stress_corpus_doc07_cmht_family_review, stress_corpus_doc10_mha_assessment, stress_corpus_recurring_staff_roster [INFERRED 0.75]
 
-## Communities (153 total, 28 thin omitted)
+## Communities (151 total, 27 thin omitted)
 
 ### Community 0 - "candidate_residuals"
 Cohesion: 0.12
@@ -219,8 +217,8 @@ Cohesion: 0.09
 Nodes (40): BaseModel, build_target(), The ideal filled form for ``facts`` — deterministic, fact-placed only.…, _blank_for(), expand(), Random, Turn vignettes into `EncounterFacts` instances with a seeded RNG. `expand`…, Yield ``n`` `EncounterFacts`, deterministic for a given ``seed``. (+32 more)
 
 ### Community 4 - "batch.py"
-Cohesion: 0.13
-Nodes (21): approved_docx_path(), approved_path(), _default_output_dir(), Path, Batch input and approved-output handling. The single module in CareScribe that…, Reduce a filename to a safe output stem — no paths, no surprises., Where the approved de-identified text for ``name`` will be written., The raw bytes behind an upload or a path, without copying it to disk. (+13 more)
+Cohesion: 0.11
+Nodes (27): approved_docx_path(), approved_path(), BatchError, _default_output_dir(), Path, RuntimeError, Batch input and approved-output handling. The single module in CareScribe that…, Reduce a filename to a safe output stem — no paths, no surprises. (+19 more)
 
 ### Community 5 - "Reference: verified template structure"
 Cohesion: 0.10
@@ -231,8 +229,8 @@ Cohesion: 0.13
 Nodes (30): ClinicalFormError, RuntimeError, Raised when a clinical form can't be built or filled., slugify(), delete_template(), _find_grids(), _infer_header(), _is_blank_row() (+22 more)
 
 ### Community 7 - "test_docx_roundtrip.py"
-Cohesion: 0.08
-Nodes (35): approved_map(), document_has_text_boxes(), The reviewer-approved ``{literal: placeholder}`` map for the Word pass. This is…, Redact the original .docx into the output folder, structure preserved. The same…, True if a .docx holds text this redaction pass cannot reach., write_approved_docx(), extract_text(), Flatten a docx to text (body + tables + headers/footers) for a residual scan. (+27 more)
+Cohesion: 0.09
+Nodes (30): approved_map(), document_has_text_boxes(), The reviewer-approved ``{literal: placeholder}`` map for the Word pass. This is…, True if a .docx holds text this redaction pass cannot reach., extract_text(), Flatten a docx to text (body + tables + headers/footers) for a residual scan., _build(), fixture (+22 more)
 
 ### Community 8 - "test_app.py"
 Cohesion: 0.10
@@ -335,16 +333,16 @@ Cohesion: 0.13
 Nodes (14): 1. Template assets, 2. Form spec extraction, 3. Header fields (practitioner-entered), 4. Multi-document source combination, 5. Generation, 6. Review, 7. Export, 8. UI (`app.py`, Step 5) (+6 more)
 
 ### Community 33 - "test_stress_corpus.py"
-Cohesion: 0.21
-Nodes (12): _entities(), _normalise(), parametrize, Corpus-driven regression net. Every document in ``stress_corpus/`` is run…, Confidence tiering must never make the reviewer's job LESS safe. An "auto"…, Whatever the sweep still flags must not be a structured identifier. A surviving…, Collapse every whitespace run to one space, so line breaks stop mattering., _redacted() (+4 more)
+Cohesion: 0.18
+Nodes (14): _entities(), _normalise(), parametrize, Corpus-driven regression net. Every document in ``stress_corpus/`` is run…, Confidence tiering must never make the reviewer's job LESS safe. An "auto"…, Whatever the sweep still flags must not be a structured identifier. A surviving…, Collapse every whitespace run to one space, so line breaks stop mattering., A document listed in the key but missing on disk would silently pass. (+6 more)
 
 ### Community 34 - "combine_sources"
 Cohesion: 0.21
 Nodes (13): combine_sources(), Concatenate several documents' de-identified text into one source. ``sources``…, Regression test for Finding 3: raw filename must not leak into model-facing…, Regression test for Finding 1: cap at 26 documents (A-Z)., Regression test for Finding 1: prefixed placeholders must match PLACEHOLDER_RE.…, Regression test for Finding 2: text and map rewrites must be consistent. A…, test_combine_sources_no_filename_in_output(), test_combine_sources_non_standard_placeholder_consistency() (+5 more)
 
-### Community 35 - "test_batch.py"
-Cohesion: 0.10
-Nodes (30): analyze_document(), load_documents(), Extract text from uploads or paths. Returns ``(documents, errors)``. One…, Run the de-identification layers over one document, in place., Write approved de-identified text to the output folder. Re-runs the safety…, write_approved(), FakeUpload, Batch loading and the approved-write path. The privacy invariant under test:… (+22 more)
+### Community 35 - "load_documents"
+Cohesion: 0.13
+Nodes (21): analyze_document(), load_documents(), Extract text from uploads or paths. Returns ``(documents, errors)``. One…, Run the de-identification layers over one document, in place., Write approved de-identified text to the output folder. Re-runs the safety…, write_approved(), test_a_dismissed_finding_lets_the_write_through(), test_analyze_document_populates_state() (+13 more)
 
 ### Community 36 - "build_messages"
 Cohesion: 0.16
@@ -383,8 +381,8 @@ Cohesion: 0.24
 Nodes (10): build_info(), Build information for CareScribe., Return standard HTTP User-Agent string., Return application identity and version., user_agent(), Tests for buildinfo module., Test that user_agent returns correct format., Test that build_info returns correct name and version. (+2 more)
 
 ### Community 45 - "residual_scan"
-Cohesion: 0.13
-Nodes (16): Findings from the safety sweep, minus the ones the reviewer has cleared. A…, sweep(), Re-scan ALREADY-REDACTED text for anything that still looks identifying. Runs…, residual_scan(), Existing _as_docx() nothing-touches-disk precedent, 'Nothing touches disk' in-memory fill pattern, Privacy invariants table, "What this is, and is not" section (+8 more)
+Cohesion: 0.14
+Nodes (15): Findings from the safety sweep, minus the ones the reviewer has cleared. A…, sweep(), Re-scan ALREADY-REDACTED text for anything that still looks identifying. Runs…, residual_scan(), Existing _as_docx() nothing-touches-disk precedent, 'Nothing touches disk' in-memory fill pattern, Privacy invariants table, "What this is, and is not" section (+7 more)
 
 ### Community 46 - "highlight_review"
 Cohesion: 0.24
@@ -566,9 +564,9 @@ Nodes (11): `app.py`, Architecture, `core/reference_library.py`, `core/retrieval
 Cohesion: 0.12
 Nodes (28): build(), _fallback_inject(), _load_datagen_config(), main(), Path, End-to-end: sampled encounters -> validated SFT pairs + manifest. python -m…, Return ``{"pairs": [...], "kept": k, "dropped": d, "reasons": {...}}``.…, Fill ``[[TOKEN]]`` slots with simple fake values. Used only until… (+20 more)
 
-### Community 109 - "list_folder"
-Cohesion: 0.25
-Nodes (8): BatchError, list_folder(), RuntimeError, Return the supported documents in ``folder``, sorted by name. Non-recursive on…, Raised for input-folder and output-write problems., test_list_folder_finds_documents(), test_list_folder_rejects_a_missing_path(), test_list_folder_rejects_an_empty_folder()
+### Community 109 - "test_batch.py"
+Cohesion: 0.13
+Nodes (17): list_folder(), Return the supported documents in ``folder``, sorted by name. Non-recursive on…, FakeUpload, parametrize, Batch loading and the approved-write path. The privacy invariant under test:…, The guarantee must not depend on the UI having run the sweep first., The signature is the guarantee: there is nowhere to pass PHI in. `acknowledged`…, Stands in for a Streamlit UploadedFile. (+9 more)
 
 ### Community 111 - "blocking_reason"
 Cohesion: 0.17
@@ -594,17 +592,17 @@ Nodes (17): App bug the user hit (2026-09-01) — FIXED in `e9bcc3b`, Fine-tune 
 Cohesion: 0.18
 Nodes (10): Global Constraints, LLM Backend Flexibility + Realistic Test Corpus Implementation Plan, Task 1: Settings persistence module, Task 2: `select_backend()` explicit model/temperature overrides + Ollama temperature fix, Task 3: Settings panel UI + wiring generation call sites through it, Task 4: Stress corpus expansion — batch 1 (5 documents), Task 5: Stress corpus expansion — batch 2 (5 documents), Task 6: Sample documents expansion (full-pipeline generation exercise) (+2 more)
 
-### Community 117 - "Cardiology Discharge Summary (doc02)"
-Cohesion: 0.22
-Nodes (10): Community MH Discharge Letter (doc01), Mohammed Al-Rashid ('Mo'), Cardiology Discharge Summary (doc02), Mariam Aisha Rahman, Mental Health Act Assessment Record (doc10), Facility short forms, In-prose vs anchored dates, Initials-only patient reference (e.g. M.A.R.) (+2 more)
+### Community 117 - "stress_corpus/README.md"
+Cohesion: 0.18
+Nodes (10): answer_key.json, CMHT Family Review Letter (doc07), Wei Chen, must_preserve (answer key field), must_redact (answer key field), No real patient documents policy, Running it, Stress corpus (+2 more)
 
 ### Community 118 - "finetune/"
 Cohesion: 0.40
 Nodes (4): Environment, finetune/, Layout, Milestones
 
-### Community 119 - "stress_corpus/README.md"
-Cohesion: 0.22
-Nodes (9): Margaret Elizabeth Chen ('Peggy'), Priya Venkataraman, Psychological Medicine Clinic Letter (doc06), CMHT Family Review Letter (doc07), Wei Chen, Crisis Team Contact Log (doc09), Tomasz Wisniewski, No real patient documents policy (+1 more)
+### Community 119 - "Cardiology Discharge Summary (doc02)"
+Cohesion: 0.20
+Nodes (10): Cardiology Discharge Summary (doc02), Margaret Elizabeth Chen ('Peggy'), Priya Venkataraman, Psychological Medicine Clinic Letter (doc06), Crisis Team Contact Log (doc09), Tomasz Wisniewski, Facility short forms, In-prose vs anchored dates (+2 more)
 
 ### Community 120 - "load_protected_terms"
 Cohesion: 0.29
@@ -654,9 +652,9 @@ Nodes (20): current(), documents(), ingest_sources(), main(), _pipeline_step(), 
 Cohesion: 0.50
 Nodes (4): is_model_present(), True if a usable model file is already on this computer. This is the marker…, Setup is one-time because the file itself is the state., test_model_presence_is_the_persisted_marker()
 
-### Community 138 - "._no_identifier_shapes"
+### Community 138 - "Initials-only patient reference (e.g. M.A.R.)"
 Cohesion: 0.40
-Nodes (3): field_validator, _looks_like_identifier(), Return a reason string if ``value`` looks like a leaked identifier.
+Nodes (6): Community MH Discharge Letter (doc01), Mohammed Al-Rashid ('Mo'), Mariam Aisha Rahman, Mental Health Act Assessment Record (doc10), Initials-only patient reference (e.g. M.A.R.), Permanent regression net for document #2 leaks
 
 ### Community 140 - "get_analyzer"
 Cohesion: 0.20
@@ -666,13 +664,13 @@ Nodes (11): cache_resource, load_detection_engine(), Load the NER model once per
 Cohesion: 0.60
 Nodes (4): AppTest, _run(), test_saving_settings_persists_and_survives_reload(), test_settings_expander_renders_without_error()
 
+### Community 142 - "._no_identifier_shapes"
+Cohesion: 0.40
+Nodes (3): field_validator, _looks_like_identifier(), Return a reason string if ``value`` looks like a leaked identifier.
+
 ### Community 143 - "wipe_phi"
 Cohesion: 0.67
 Nodes (4): PHI_KEYS (session-state PHI registry), Drop every document, identifier table, and identity map from memory., wipe_phi(), Bug: form_drafts never registered with PHI_KEYS/wipe_phi
-
-### Community 144 - "Stress corpus"
-Cohesion: 0.50
-Nodes (4): Running it, Stress corpus, The answer key, What each document covers
 
 ### Community 145 - "stress_report.py"
 Cohesion: 0.67
@@ -681,10 +679,6 @@ Nodes (3): main(), normalise(), Per-document pass/fail report for the stress cor
 ### Community 147 - "_fresh_generation_status_cache"
 Cohesion: 0.50
 Nodes (4): _cloud_off(), _fresh_generation_status_cache(), fixture, generation_status() is now @st.cache_data(ttl=5) — a process-global cache keyed…
-
-### Community 149 - "answer_key.json"
-Cohesion: 0.67
-Nodes (3): answer_key.json, must_preserve (answer key field), must_redact (answer key field)
 
 ## Ambiguous Edges - Review These
 - `stress_corpus/README.md` → `Psychological Medicine Clinic Letter (doc06)`  [AMBIGUOUS]
@@ -701,7 +695,7 @@ Nodes (3): answer_key.json, must_preserve (answer key field), must_redact (answe
 ## Knowledge Gaps
 - **222 isolated node(s):** `medgpt-finetune`, `merge_and_convert.sh script`, `build_dmg.sh script`, `build_macos.sh script`, `Worker capability ceiling on the fine-tune workstream (2026-09-01)` (+217 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **28 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **27 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -718,5 +712,5 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
 - **Why does `FormType` connect `FormType` to `test_assemble_pipeline.py`, `schema.py`, `build_messages`, `EncounterFacts`, `EncounterType`, `build_dataset.py`, `HFCompleter`, `test_train_and_grammar.py`, `run_eval.py`, `GgufCompleter`?**
   _High betweenness centrality (0.039) - this node is a cross-community bridge._
-- **Why does `deidentify()` connect `deidentify` to `test_generation_setup.py`, `test_stress_corpus.py`, `test_batch.py`, `analyze`, `rebuild`, `test_app.py`, `mapping.py`, `residual_scan`, `deidentify.py`, `stress_report.py`, `run_eval.py`, `test_deid_pipeline.py`, `test_round2_regressions.py`, `conftest.py`, `NoEgress`, `extract_text`?**
+- **Why does `deidentify()` connect `deidentify` to `test_generation_setup.py`, `test_stress_corpus.py`, `load_documents`, `analyze`, `rebuild`, `test_app.py`, `mapping.py`, `residual_scan`, `deidentify.py`, `test_batch.py`, `stress_report.py`, `run_eval.py`, `test_deid_pipeline.py`, `test_round2_regressions.py`, `conftest.py`, `NoEgress`, `extract_text`?**
   _High betweenness centrality (0.037) - this node is a cross-community bridge._
