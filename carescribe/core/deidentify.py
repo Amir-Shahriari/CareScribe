@@ -419,7 +419,7 @@ _MRN_LABELS = (
     r"Chart\s*(?:No|Number)|Patient\s*(?:No|Number)|Unit\s*(?:No|Number)|"
     r"Patient\s*ID|Hosp\s*No|NHS\s*Trust\s*No|Trust\s*(?:No|Number|ID)|"
     r"GMC\s*(?:No|Number)?|NMC\s*(?:No|Number|PIN)?|HCPC\s*(?:No|Number|Registration)?|"
-    r"GPhC\s*(?:No|Number|Registration)?"
+    r"GPhC\s*(?:No|Number|Registration)?|Medicare(?:\s*Card)?\s*(?:No|Number)?"
 )
 
 MRN_CONTEXT = re.compile(
