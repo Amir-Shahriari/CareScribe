@@ -17,6 +17,22 @@ class IngestError(RuntimeError):
     """Raised when a document can't be read or contains no extractable text."""
 
 
+def normalise_line_endings(text: str) -> str:
+    """Collapse CRLF and bare CR to LF.
+
+    De-identify relies on several \\n-anchored patterns (letterhead lines,
+    footer sign-offs) to find identifiers on their own line, and NER
+    tokenisation is sensitive to stray \\r too. A document read with its
+    original Windows CRLF (or classic Mac CR) line endings intact — routine
+    for a Windows-authored .txt or a .docx produced by non-Word tooling —
+    can make those checks silently fail, which is a leak, not a cosmetic
+    issue. Every caller that hands text to the de-identification pipeline,
+    directly or via a residual safety-net scan, must pass it through this
+    first.
+    """
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def _read_bytes(file: Any) -> tuple[str, bytes]:
     """Normalise a Streamlit UploadedFile (or a path string) to (name, bytes)."""
     if isinstance(file, (str, bytes)) and not isinstance(file, bytes):
@@ -140,10 +156,4 @@ def extract_text(file: Any) -> str:
             "layer — OCR it first (CareScribe does not run OCR)."
         )
 
-    # De-identify relies on several \n-anchored patterns (letterhead lines,
-    # footer sign-offs) to find identifiers on their own line. A raw \r left
-    # in front of one of those anchors — routine in a Windows-authored .txt
-    # file — makes the match silently fail, which is a leak, not a cosmetic
-    # issue. Normalise every line ending to \n once, here, so nothing
-    # downstream has to know a document ever had \r\n or bare \r in it.
-    return text.replace("\r\n", "\n").replace("\r", "\n")
+    return normalise_line_endings(text)

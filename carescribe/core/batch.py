@@ -389,8 +389,14 @@ def write_approved_docx(
         raise BatchError(f"The document could not be redacted: {exc}") from exc
 
     # Scan the finished document the same way it was read in, so the sweep sees
-    # a details table as "label: value" exactly as detection did.
-    residual = sweep(ingest._extract_docx(staged.getvalue()), acknowledged)
+    # a details table as "label: value" exactly as detection did. Normalise
+    # line endings the same way extract_text() does — this is a direct call
+    # to the extractor, not extract_text() itself, so it does not get that
+    # normalisation for free; without it, a raw \r left in a run's text (real
+    # XML content, not a paragraph break) can hide an identifier from the
+    # \n-anchored patterns this scan relies on.
+    scan_text = ingest.normalise_line_endings(ingest._extract_docx(staged.getvalue()))
+    residual = sweep(scan_text, acknowledged)
     if residual:
         raise BatchError(
             "Refusing to write the Word file: it still contains what look "

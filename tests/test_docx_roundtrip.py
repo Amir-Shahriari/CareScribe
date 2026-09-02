@@ -208,6 +208,47 @@ def test_write_approved_docx_refuses_when_the_map_misses_an_identifier(
     assert not batch.approved_docx_path("referral.docx").exists()
 
 
+def test_write_approved_docx_refuses_when_a_raw_cr_hides_an_identifier(
+    tmp_path, monkeypatch
+):
+    """The residual safety-net scan must not be foolable by a stray \\r.
+
+    A run's text can carry a literal CR (0x0D) in its XML — a real character,
+    not a paragraph break, and something non-Word tooling can produce. Word
+    itself normalises this on open, but python-docx (and this app's own
+    reader) will happily read it back verbatim. Before ingest.py's
+    normalisation was threaded through this call site too, a letterhead-style
+    "Town, County" line sitting right after such a CR was invisible to the
+    residual scan's \\n-anchored HEADER_LOCATION pattern — the exact
+    under-redaction this test exists to catch before it ever reaches disk.
+    """
+    from docx.oxml import parse_xml
+
+    monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path / "out")
+    source_path = _build(tmp_path / "referral.docx")
+
+    doc = DocxDocument(str(source_path))
+    paragraph = doc.add_paragraph()
+    run_xml = (
+        '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+        '<w:t xml:space="preserve">Wetherby, West Yorkshire&#13;'
+        "an unrelated closing line</w:t></w:r>"
+    )
+    paragraph._p.append(parse_xml(run_xml))
+    doc.save(str(source_path))
+
+    # "Wetherby, West Yorkshire" is deliberately absent from the approved map
+    # — a value the reviewer's map did not cover, same shape as the sibling
+    # test above — so it is left untouched by redaction and must be caught by
+    # the residual scan, CR or not.
+    with pytest.raises(batch.BatchError) as excinfo:
+        batch.write_approved_docx(
+            "referral.docx", source_path.read_bytes(), APPROVED_MAP
+        )
+    assert "Refusing to write" in str(excinfo.value)
+    assert not batch.approved_docx_path("referral.docx").exists()
+
+
 def test_the_original_document_is_never_written_to_disk(tmp_path, monkeypatch):
     """Redaction happens in memory — the un-redacted file must not be staged.
 
