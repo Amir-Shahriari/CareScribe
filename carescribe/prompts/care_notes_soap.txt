@@ -1,6 +1,11 @@
 Write a SOAP-structured care note from the source text below.
 
-Use exactly these four headings, in this order:
+Start with a "Patient details" line (as placeholders only): any case number,
+hospital/record number, ward, or similar administrative identifier the source
+gives. These do not belong under Subjective/Objective/Assessment/Plan — put
+them here instead of dropping them because none of the four headings fits.
+
+Then use exactly these four headings, in this order:
 
 S - Subjective
     What the patient reported: presenting complaint, history, symptoms in their

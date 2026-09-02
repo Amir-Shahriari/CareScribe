@@ -229,6 +229,24 @@ def test_an_unknown_template_is_refused():
         carenotes.render_prompt(DEIDENTIFIED, "Interpretive dance", "")
 
 
+def test_the_soap_template_asks_for_administrative_identifiers():
+    """A case/hospital number has no home in Subjective/Objective/Assessment/Plan.
+
+    The strict four-heading SOAP structure gave the model nowhere to put an
+    administrative identifier that isn't a clinical fact — a real generation
+    run against a document with "Case Number: [MRN]" produced a SOAP note
+    that never mentioned [MRN] anywhere, so it silently dropped out of the
+    re-identified draft entirely. discharge_summary.txt already avoids this
+    with a "Patient details (as placeholders only)" heading; the SOAP
+    template needs the same kind of home for identifiers that don't fit its
+    four clinical headings.
+    """
+    prompt = carenotes.render_prompt(DEIDENTIFIED, "SOAP care note", "")
+    lowered = prompt.casefold()
+    assert "patient details" in lowered or "administrative" in lowered
+    assert "case" in lowered or "record" in lowered or "reference number" in lowered
+
+
 def test_the_system_prompt_carries_the_load_bearing_rules():
     system = carenotes.system_prompt()
     assert "[not documented]" in system
