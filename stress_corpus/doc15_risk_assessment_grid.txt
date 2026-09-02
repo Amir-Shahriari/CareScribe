@@ -1,0 +1,23 @@
+RISK ASSESSMENT GRID
+Thirsk, North Yorkshire
+
+Patient:    Yusuf Adebayo Coker
+NHS No:     512 998 4471
+DOB:        3 June 1979
+
+Risk Category         | Rating  | NHS No           | Notes
+Self-harm              | Low     | 512 998 4471     | No current ideation reported
+Falls                   | Medium  | 512 998 4471     | Unsteady gait post stroke
+Self-neglect             | Low     | 512 998 4471     | Managing with support from family
+Absconding               | Low     | 512 998 4471     | No history of leaving the unit
+Aggression to others      | Medium  | 512 998 4471     | One incident six months ago, de-escalated
+
+Overall risk rating: Medium
+
+Bloods showed a normal U&E and CRP was 6. HoNOS score was 14 at last
+review.
+
+Assessed and signed off by:
+Dr Adaeze Chukwuemeka, Consultant Psychiatrist
+GMC No: 7234561
+Direct dial: 01632 960 733

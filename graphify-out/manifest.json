@@ -5,8 +5,8 @@
     "semantic_hash": "533e72a4166008742fe4d6516435cf00"
   },
   "carescribe/app.py": {
-    "mtime": 1788274364.6314018,
-    "ast_hash": "f5f09313b8ef13efd0fe84ae4416f04e",
+    "mtime": 1788339727.5597856,
+    "ast_hash": "f13e8c14ddd85f01c8ebed79a30ca89e",
     "semantic_hash": ""
   },
   "carescribe/core/__init__.py": {
@@ -20,13 +20,13 @@
     "semantic_hash": ""
   },
   "carescribe/core/carenotes.py": {
-    "mtime": 1788274127.155266,
-    "ast_hash": "9e2c88dae78d1dccd2c79591e922ccec",
+    "mtime": 1788339068.3283086,
+    "ast_hash": "3ae40c512a31d1f2e47bd5242d1a4530",
     "semantic_hash": ""
   },
   "carescribe/core/deidentify.py": {
-    "mtime": 1787316848.989034,
-    "ast_hash": "2eb8f9cad99e0fb90a7caad10ece2f3f",
+    "mtime": 1788340929.1665773,
+    "ast_hash": "7252430d07e5abd6ce9429270ca56df1",
     "semantic_hash": ""
   },
   "carescribe/core/ingest.py": {
@@ -135,9 +135,9 @@
     "semantic_hash": "86dea7acc9859f805171b10038c618f8"
   },
   "stress_corpus/answer_key.json": {
-    "mtime": 1785931424.0126896,
-    "ast_hash": "dfcb4af52fe17105e5bf461c85af9e65",
-    "semantic_hash": "dfcb4af52fe17105e5bf461c85af9e65"
+    "mtime": 1788340934.4408891,
+    "ast_hash": "db5d1c552d68704cc15dab56d56e5b04",
+    "semantic_hash": ""
   },
   "tests/stress_report.py": {
     "mtime": 1785929077.7381942,
@@ -175,9 +175,9 @@
     "semantic_hash": ""
   },
   "carescribe/core/protected_terms.txt": {
-    "mtime": 1785930543.567379,
-    "ast_hash": "7ec4c22ffd00886fd26dee39677af0f5",
-    "semantic_hash": "7ec4c22ffd00886fd26dee39677af0f5"
+    "mtime": 1788340905.7757335,
+    "ast_hash": "2a39cae7075c39462306a87d5ae35dc6",
+    "semantic_hash": ""
   },
   "carescribe/prompts/care_notes_soap.txt": {
     "mtime": 1785988801.7151167,
@@ -270,8 +270,8 @@
     "semantic_hash": "3a9e5548d6bea338fa51daa7955ec8e6"
   },
   "carescribe/core/backends.py": {
-    "mtime": 1788273902.270537,
-    "ast_hash": "9468996f547579a89ec2555819f9a230",
+    "mtime": 1788339075.7507858,
+    "ast_hash": "dc148da5253cea9b05bd0268b9004d57",
     "semantic_hash": ""
   },
   "carescribe/core/desktop.py": {
@@ -932,6 +932,61 @@
   "DESIGN.md": {
     "mtime": 1788275061.9662962,
     "ast_hash": "5be7bcdd550d459f788cc4d697051746",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-09-02-llm-flexibility-and-realistic-corpus-design.md": {
+    "mtime": 1788338138.176605,
+    "ast_hash": "eec03632bcdd7ad0885f50e8280a6a0f",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-09-02-llm-flexibility-and-realistic-corpus.md": {
+    "mtime": 1788340881.8268523,
+    "ast_hash": "8e821f4fb7069f2ff0811ad06d8d45d9",
+    "semantic_hash": ""
+  },
+  "carescribe/core/settings.py": {
+    "mtime": 1788338877.0979016,
+    "ast_hash": "9092ea02ba8b462065bc7d775b1f42b6",
+    "semantic_hash": ""
+  },
+  "tests/test_settings.py": {
+    "mtime": 1788338863.8952432,
+    "ast_hash": "44223eafb0db604cdd20aa18397ec6d2",
+    "semantic_hash": ""
+  },
+  "tests/test_backend_overrides.py": {
+    "mtime": 1788339061.2666576,
+    "ast_hash": "0b1bbeb761cb61ac13dbcc1416179615",
+    "semantic_hash": ""
+  },
+  "tests/test_settings_panel_screen.py": {
+    "mtime": 1788339742.772937,
+    "ast_hash": "8beed3c6cd756747eaf362d90602de2f",
+    "semantic_hash": ""
+  },
+  "stress_corpus/doc11_multi_identifier_cpn_review.txt": {
+    "mtime": 1788340752.9272864,
+    "ast_hash": "3a5aabcf2368b55d99d5c32c30bc952f",
+    "semantic_hash": ""
+  },
+  "stress_corpus/doc12_safeguarding_referral.txt": {
+    "mtime": 1788340757.1643302,
+    "ast_hash": "b22a74653f45d47a34f9224903894fdd",
+    "semantic_hash": ""
+  },
+  "stress_corpus/doc13_ocr_style_discharge_summary.txt": {
+    "mtime": 1788340760.9823263,
+    "ast_hash": "fe587101bd21fc4ced7a83f5565f7b2d",
+    "semantic_hash": ""
+  },
+  "stress_corpus/doc14_family_therapy_notes.txt": {
+    "mtime": 1788340765.9165754,
+    "ast_hash": "010015232413fa1109317f5198c88114",
+    "semantic_hash": ""
+  },
+  "stress_corpus/doc15_risk_assessment_grid.txt": {
+    "mtime": 1788340769.1136408,
+    "ast_hash": "3325ec2f1f8dc07cab10e75e9d138878",
     "semantic_hash": ""
   }
 }

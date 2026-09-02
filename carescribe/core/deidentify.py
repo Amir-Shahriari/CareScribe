@@ -402,10 +402,19 @@ _STRUCTURED_COMPILED = {
 # what document #2 used, and the old pattern stopped dead at the bracket), and
 # the value may be grouped with spaces or hyphens ("33-201-45"). Both are
 # separator noise around the same thing: a labelled 5-10 digit identifier.
+#
+# "Trust ID"/"Trust No" is a UK trust's own local patient identifier, distinct
+# from the national NHS number — document #11's corpus sibling used "Local
+# Trust ID: TR-2026-00458" and the old label list had no entry for it at all,
+# so a letter-prefixed local ID sailed through untouched. GMC/NMC/HCPC numbers
+# are a different identifier again: not the patient's, but the treating
+# clinician's public professional-register number, which is at least as
+# identifying as their name and was likewise never anchored.
 _MRN_LABELS = (
     r"MRN|Hospital\s*(?:No|Number)|Record\s*(?:No|Number)|Case\s*(?:No|Number)|"
     r"Chart\s*(?:No|Number)|Patient\s*(?:No|Number)|Unit\s*(?:No|Number)|"
-    r"Patient\s*ID|Hosp\s*No|NHS\s*Trust\s*No"
+    r"Patient\s*ID|Hosp\s*No|NHS\s*Trust\s*No|Trust\s*(?:No|Number|ID)|"
+    r"GMC\s*(?:No|Number)?|NMC\s*(?:No|Number|PIN)?|HCPC\s*(?:No|Number|Registration)?"
 )
 
 MRN_CONTEXT = re.compile(
@@ -518,6 +527,22 @@ _PLACE_PHRASE = r"[A-Z][\w'’\-]*(?:[ \t]+[A-Z][\w'’\-]*){0,3}"
 
 HEADER_LOCATION = re.compile(
     rf"^[ \t]*({_PLACE_PHRASE},[ \t]*{_PLACE_PHRASE})[ \t]*$"
+)
+
+# A clinician sign-off in a footer ("Dr Adaeze Chukwuemeka, Consultant
+# Psychiatrist") has exactly the same two-phrases-joined-by-a-comma shape as a
+# letterhead town/county line, and it sits in the same footer zone. Document
+# #15's corpus sibling caught this: the whole sign-off line — name and role
+# both — was swallowed as one LOCATION, when the name belongs to
+# PERSON_TITLE_PATTERN and the role ("Consultant Psychiatrist") is clinical
+# content that must survive. A line opening with a personal/clinical title, or
+# whose second phrase is a known clinical role, is a person, never a place.
+_HEADER_LOCATION_PERSON_GUARD = re.compile(
+    r"^(?:Dr|Doctor|Mr|Mrs|Ms|Miss|Mx|Prof|Professor|Sister|Nurse|Matron|Sr)\b"
+    r"|,[ \t]*(?:Consultant|Registrar|SHO|SpR|FY1|FY2|GP|Nurse|Sister|Matron|"
+    r"CPN|OT|SALT|Physio(?:therapist)?|Pharmacist|Surgeon|Anaesthetist|"
+    r"Psychologist|Psychiatrist|Social\s+worker|Care\s*co-?ordinator|Specialist)\b",
+    re.IGNORECASE,
 )
 
 
@@ -859,6 +884,10 @@ def structured_spans(text: str) -> list[Span]:
             # A letterhead line naming the organisation is a FACILITY, and the
             # facility pattern below has the better span for it.
             if FACILITY_PATTERN.search(value):
+                continue
+            # A clinician sign-off ("Dr X, Consultant Psychiatrist") is a
+            # person, not a place — see _HEADER_LOCATION_PERSON_GUARD above.
+            if _HEADER_LOCATION_PERSON_GUARD.search(value):
                 continue
             offset = zone_start + line.start() + match.start(1)
             spans.append(Span(offset, offset + len(value), "LOCATION"))

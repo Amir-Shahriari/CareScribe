@@ -192,6 +192,102 @@
         "HoNOS", "PHQ-9", "GAD-7", "EUPD", "PTSD", "ECG", "eGFR",
         "Lorazepam 1mg", "Promethazine 25mg", "place of safety"
       ]
+    },
+    {
+      "file": "doc11_multi_identifier_cpn_review.txt",
+      "covers": ["four identifiers in one document", "mixed date formats", "plain-text medication table"],
+      "must_redact": [
+        "Grace Adaeze Nwosu", "Grace",
+        "9 April 1988", "681 249 3357", "5512340",
+        "15/03/2026", "15-Mar-2026", "15th March 2026",
+        "Daniel Nwosu", "01632 960 271",
+        "Femi Okonjo", "01632 960 384",
+        "J. Adeyemi-Barrow", "01632 960 512",
+        "Wetherby, West Yorkshire"
+      ],
+      "must_preserve": [
+        "T3/T4", "S. aureus", "PHQ-9 was", "GAD-7 was",
+        "Sertraline | 100mg | Once daily | Started 03/2026",
+        "Mirtazapine | 15mg | Nocte | Reviewed 03/2026",
+        "Section 117", "twice weekly",
+        "NEXT OF KIN", "Next review:", "Date typed:", "Visit date:"
+      ]
+    },
+    {
+      "file": "doc12_safeguarding_referral.txt",
+      "covers": ["dense letterhead block", "abbreviated name references resolve to one identity", "bracketed non-identifier text preserved"],
+      "must_redact": [
+        "James Aloysius Smith", "Mr Smith", "J. Smith", "Jas. Smith",
+        "6 November 1958", "774 552 1980",
+        "9 Silkstone Row", "WF2 7HL",
+        "18 March 2026", "12 March 2026",
+        "S. Mensah",
+        "22 Peel Street", "WF1 3AN", "01632 960 118", "01632 960 119",
+        "L. Fitzgerald"
+      ],
+      "must_preserve": [
+        "COPD", "Salbutamol 100mcg", "Mental Capacity Act",
+        "U&E", "eGFR",
+        "[interpreter arranged]",
+        "financial abuse", "self-neglect", "Safeguarding Lead",
+        "as required"
+      ]
+    },
+    {
+      "file": "doc13_ocr_style_discharge_summary.txt",
+      "covers": ["OCR-style hyphen-broken words", "three identifier number formats for one person", "mixed ISO and DD/MM/YY dates"],
+      "must_redact": [
+        "Beatrice Olamide Kalu",
+        "1985-07-22", "4488213", "512 774 3390", "TR-2026-00458",
+        "2026-03-10", "15/03/26",
+        "K. Osei", "S. Nowak",
+        "Pontefract, West Yorkshire",
+        "St. Wilfrid's"
+      ],
+      "must_preserve": [
+        "CRP of 88", "normalising to 14", "resolving consolidation",
+        "96% on room air", "Amoxicillin 500mg", "three times daily",
+        "Paracetamol 1g", "four times daily", "as required",
+        "right-sided pneumonia", "five-day history"
+      ]
+    },
+    {
+      "file": "doc14_family_therapy_notes.txt",
+      "covers": ["family members sharing a surname", "unlabelled phone number in prose", "pronoun-only references after a named mention"],
+      "must_redact": [
+        "Isla Ferreira", "Isla",
+        "2 February 2015", "661234",
+        "Carla Ferreira", "Carla",
+        "01632 960 226",
+        "Bruno Ferreira", "Bruno",
+        "Noah Ferreira", "Noah",
+        "R. Ellis", "A. Whitfield",
+        "Knaresborough, North Yorkshire"
+      ],
+      "must_preserve": [
+        "generalised anxiety", "school avoidance",
+        "fortnightly family sessions", "Session 4",
+        "the summer holidays",
+        "did not feel caught in the middle",
+        "engaged well"
+      ]
+    },
+    {
+      "file": "doc15_risk_assessment_grid.txt",
+      "covers": ["risk-assessment grid with repeated identifiers per row", "clinician sign-off with registration number and direct-dial phone"],
+      "must_redact": [
+        "Yusuf Adebayo Coker", "512 998 4471", "3 June 1979",
+        "Adaeze Chukwuemeka", "7234561", "01632 960 733",
+        "Thirsk, North Yorkshire"
+      ],
+      "must_preserve": [
+        "Self-harm", "No current ideation reported",
+        "Unsteady gait post stroke", "Self-neglect",
+        "Managing with support from family", "Absconding",
+        "Aggression to others", "de-escalated",
+        "HoNOS", "U&E", "CRP was 6", "Overall risk rating: Medium",
+        "Consultant Psychiatrist"
+      ]
     }
   ]
 }
