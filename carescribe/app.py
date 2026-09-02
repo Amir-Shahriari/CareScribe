@@ -35,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from carescribe.core import (  # noqa: E402
     applog, backends, batch, carenotes, deidentify, desktop, generation_status,
     ingest, mapping, model_setup, ollama_client, review_checklist, review_flags,
-    review_spans,
+    review_spans, settings,
 )
 from carescribe.components.highlight_review import highlight_review  # noqa: E402
 from carescribe.ui import components as ui, theme as ui_theme  # noqa: E402
@@ -289,6 +289,49 @@ def render_sidebar() -> None:
     )
 
     _render_generation_model()
+
+    st.sidebar.write("")
+    with st.sidebar.expander("⚙ Settings"):
+        cfg = settings.load_settings()
+        backend_options = ["", backends.BACKEND_OLLAMA, backends.BACKEND_LOCAL_GGUF, backends.BACKEND_CLOUD]
+        backend_labels = {
+            "": "Automatic (recommended)",
+            backends.BACKEND_OLLAMA: "Ollama",
+            backends.BACKEND_LOCAL_GGUF: "Built-in model",
+            backends.BACKEND_CLOUD: "Cloud",
+        }
+        chosen_backend = st.selectbox(
+            "Generation backend", backend_options,
+            index=backend_options.index(cfg.backend) if cfg.backend in backend_options else 0,
+            format_func=lambda k: backend_labels[k], key="settings_backend",
+        )
+        installed = ollama_client.list_models() if ollama_client.is_up() else []
+        chosen_model = ""
+        if installed:
+            model_options = [""] + installed
+            chosen_model = st.selectbox(
+                "Ollama model", model_options,
+                index=model_options.index(cfg.ollama_model) if cfg.ollama_model in model_options else 0,
+                format_func=lambda m: "Automatic" if m == "" else m, key="settings_ollama_model",
+            )
+        chosen_temperature = st.number_input(
+            "Temperature", min_value=0.0, max_value=1.0, step=0.1,
+            value=cfg.temperature, key="settings_temperature",
+        )
+        st.caption(
+            "Cloud provider settings are configured via environment variables "
+            "(see docs/deployer-cloud-note.md) — the API key is never saved here."
+        )
+        if st.button("Save settings", key="settings_save"):
+            settings.save_settings(settings.Settings(
+                backend=chosen_backend,
+                ollama_model=chosen_model,
+                temperature=float(chosen_temperature),
+                cloud_provider=cfg.cloud_provider,
+                cloud_base_url=cfg.cloud_base_url,
+                cloud_model=cfg.cloud_model,
+            ))
+            st.success("Saved.")
 
 
 # --------------------------------------------------------------------------
@@ -1343,12 +1386,28 @@ def run_ollama_pull(model: str = "llama3.1:8b") -> None:
     st.rerun()
 
 
+def _active_backend():
+    """Resolve the backend to generate with, honouring saved settings.
+
+    Centralises what used to be five separate ``backends.select_backend()``
+    call sites so a saved backend/model/temperature choice (see
+    ``core/settings.py`` and the sidebar Settings panel) actually takes
+    effect everywhere generation happens, not just in one place.
+    """
+    cfg = settings.load_settings()
+    return backends.select_backend(
+        prefer=cfg.backend or None,
+        model=cfg.ollama_model or None,
+        temperature=cfg.temperature,
+    )
+
+
 def render_test_generation() -> None:
     """A concrete "it works", rather than asking the clinician to trust a flag."""
     if st.button("Test generation", key="gen_selftest"):
         with st.spinner("Running a short test on this computer…"):
             try:
-                _, backend, label = backends.select_backend()
+                _, backend, label = _active_backend()
                 sample = "".join(
                     carenotes.generate_document(
                         "Patient: [PATIENT]\nSeen in clinic. Sertraline 50mg daily.\n",
@@ -1446,7 +1505,7 @@ def _run_generation(document, template, custom, draft_state) -> None:
     started = time.monotonic()
     try:
         with st.spinner("Generating on this computer — this can take a minute. Nothing leaves your device."):
-            _, backend, _label = backends.select_backend()
+            _, backend, _label = _active_backend()
             chunks = carenotes.generate_document(
                 document.redacted_text,
                 template,
@@ -1533,7 +1592,7 @@ def render_refinement(document: batch.Document, draft_state: dict) -> None:
                         document.redacted_text,
                         draft_state["deidentified"],
                         instruction,
-                        backends.select_backend()[1],
+                        _active_backend()[1],
                         stream=True,
                         history=draft_state["history"],
                         phi_values=list(document.phi_map.values()),
@@ -1802,7 +1861,7 @@ def _run_form_generation(docs: dict, selected_names: list[str], spec, draft: dic
     started = time.monotonic()
     try:
         with st.spinner("Generating on this computer — this can take a minute. Nothing leaves your device."):
-            _, backend, _label = backends.select_backend()
+            _, backend, _label = _active_backend()
             chunks = clinical_forms.generate_form_document(
                 combined_text, spec, backend, stream=True, phi_values=phi_values,
                 acknowledged=acknowledged, exemplars=house_style,
@@ -1873,7 +1932,7 @@ def render_form_refinement(docs: dict, selected_names: list[str], spec, draft: d
                 with st.spinner("Revising…"):
                     chunks = clinical_forms.refine_form_document(
                         draft["combined_text"], draft["deidentified"], instruction, spec,
-                        backends.select_backend()[1], stream=True,
+                        _active_backend()[1], stream=True,
                         history=draft["history"], phi_values=phi_values,
                         acknowledged=acknowledged,
                     )
