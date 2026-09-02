@@ -557,14 +557,17 @@ def build_case_conference_note(path):
     )
 
     _heading(doc, "Decisions / Actions", level=2)
-    _grid_table(doc, ["Action", "Responsible", "Timeframe"], [
-        ["Provide further review letter to enable extended Mental Health Care Plan sessions", "Dr. Susan Ng", "Within 1 week"],
-        ["Continue trauma-focused CBT with graded exposure, steps 2–6", "Dr. Amelia Ferro", "Ongoing, weekly"],
-        ["Complete functional capacity review ahead of floor-duty increase", "Grace Tan", "2 weeks"],
-        ["Approve extension of funded psychology sessions under claim", "Marcus Delaney", "Within 5 business days"],
-        ["Roster supervised floor-exposure sessions with familiar colleague", "Helen Okafor / Adrian Cross", "From next roster cycle"],
-        ["Schedule follow-up case conference to review progress", "Dr. Amelia Ferro", "8 weeks (mid-May 2026)"],
-    ])
+    doc.add_paragraph(
+        "It was agreed that Dr Susan Ng would provide a further review letter to enable extended "
+        "Mental Health Care Plan sessions within 1 week, and that Dr Amelia Ferro would continue "
+        "trauma-focused CBT with graded exposure through steps 2–6 on an ongoing weekly basis. "
+        "Grace Tan will complete a functional capacity review ahead of any increase in floor-duty "
+        "hours within 2 weeks, and Marcus Delaney will approve the extension of funded psychology "
+        "sessions under the claim within 5 business days. Helen Okafor and Adrian Cross will roster "
+        "supervised floor-exposure sessions with a familiar colleague from the next roster cycle. "
+        "A follow-up case conference will be scheduled by Dr Amelia Ferro in 8 weeks (mid-May 2026) "
+        "to review progress against these actions."
+    )
     doc.add_paragraph()
 
     _heading(doc, "Next Case Conference", level=2)
