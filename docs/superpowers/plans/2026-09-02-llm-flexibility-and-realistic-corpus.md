@@ -849,3 +849,53 @@ Run: `graphify update .` (the plan touched several core modules and app.py acros
 git add tests/test_full_pipeline_sample_documents.py
 git commit -m "test(pipeline): full ingest->deidentify->combine->generate run across every sample document"
 ```
+
+---
+
+### Task 8: Real generation pass — findings report + dedicated fix pass
+
+> Added mid-execution at the user's explicit request: a real (non-stub) backend
+> generation run across the full sample-document corpus, with one agent
+> producing findings and a separate agent fixing whatever those findings
+> surface. Confirmed in this environment: `backends.describe_backends()`
+> reports `local.available = True` with a bundled fine-tuned model at
+> `models/carescribe-clinical-phi35-v1.Q4_K_M.gguf` — Ollama is reachable but
+> has zero models pulled, so `select_backend()` will pick the local GGUF
+> backend by default here. This task is genuinely non-deterministic (LLM
+> output), so it produces a **findings report**, not a pass/fail pytest gate
+> — Task 7 already owns the deterministic plumbing gate.
+
+**Files:**
+- Create: `.superpowers/sdd/2026-09-02-llm-flexibility-and-realistic-corpus/task-8-findings.md` (the findings report; not part of the shipped codebase, workspace-scoped like the rest of this plan's SDD artifacts)
+- Modify: whatever the findings report identifies as a real code bug (the fix-pass agent's job; files unknown until the findings exist)
+
+**Interfaces:**
+- Consumes: `backends.select_backend()` (Task 2), the full `sample_documents/*.docx` set (Task 6), `ingest.extract_text`, `deidentify.deidentify`, `clinical_forms.available_forms`/`get_form_spec`/`generate_form_document` — all confirmed real signatures, see Task 7.
+- Produces: nothing later tasks depend on — this is the plan's terminal quality pass.
+
+- [ ] **Step 1: Dispatch a findings agent to run the real pipeline**
+
+For every document in `sample_documents/*.docx`, and then for the combined text of all of them together (matching the README's documented "01+02 combine for the richest Biopsychosocial test" pattern), run: ingest → de-identify → residual-scan (must be empty of structured identifiers, same bar as `tests/test_stress_corpus.py`) → for each of the 3 form types (`clinical_forms.available_forms()`), generate a full draft using a real backend obtained from `backends.select_backend()` (no `prefer` override — let it pick whatever's actually available in this environment; report which one it picked).
+
+For each generated draft, the agent must record in its findings report:
+- Whether generation completed without raising (a crash here is a Critical finding)
+- Whether the output is non-empty and structurally plausible (looks like a filled-in form, not garbage/repeated tokens/truncated mid-field)
+- Any content in the draft that appears to be invented/hallucinated — a specific clinical detail (a medication, a diagnosis, a date, a measure score) that does **not** appear anywhere in the combined source text. This is the exact failure mode the Task 2 temperature fix (0.2 → 0.0) targeted, so this run is also that fix's real-world verification.
+- Any placeholder token (`[PATIENT]`-style bracket text) that survived into the final output unfilled where the source clearly had an answer available
+- Wall-clock time per generation (informational — the bundled model is CPU-bound and this flags if something is pathologically slow)
+
+Findings report format: one section per (document combination, form type) pair, each stating PASS or the specific problem, with the offending excerpt quoted.
+
+- [ ] **Step 2: Controller reviews the findings report**
+
+Read the findings report yourself (the controller, not a subagent) before deciding what happens next — this is a judgment call about what's a real bug worth a fix dispatch versus an inherent LLM quality limitation not worth chasing (e.g. a small 3B-class quantised model occasionally producing an awkward sentence is not a bug; a crash, an empty draft, or a fabricated medication name is).
+
+- [ ] **Step 3: Dispatch a fix agent for real, code-level findings only**
+
+If the findings report contains any Critical items (crashes, empty output, structural failures) or clear hallucination patterns traceable to a prompt/grammar issue (not just "the small model sometimes phrases things oddly"), dispatch one fix agent with the complete findings report and the specific files it implicates (likely candidates: `carescribe/core/clinical_forms.py`'s `build_prompt`/`_form_grammar`, `carescribe/core/carenotes.py`'s `generate_document`, or the grammar compiler in `carescribe/core/grammar.py`). The fix agent re-runs the specific failing case(s) from the findings report to confirm the fix, then the full test suite (`python -m pytest tests -q`), then commits.
+
+If the findings report is clean (no Critical/Important-equivalent issues, only inherent small-model quality variance), skip this step — there is nothing to dispatch a fix for, and note that in your final report to the user.
+
+- [ ] **Step 4: Report to the user**
+
+Regardless of outcome, summarize for the user: which backend/model actually ran, how many (document-combo × form-type) cases were exercised, how many were clean, and — if a fix was dispatched — what was fixed and what the re-verification showed. This is the "did the app actually work end to end on real documents" answer the user asked for, and it doesn't reduce to a single pytest pass/fail line, so state it in prose.
