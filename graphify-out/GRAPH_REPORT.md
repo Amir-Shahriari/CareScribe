@@ -1,16 +1,16 @@
 # Graph Report - medgpt  (2026-09-02)
 
 ## Corpus Check
-- 167 files · ~137,501 words
+- 167 files · ~137,601 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2292 nodes · 4424 edges · 151 communities (124 shown, 27 thin omitted)
+- 2292 nodes · 4424 edges · 153 communities (125 shown, 28 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 95 edges (avg confidence: 0.61)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `940629fa`
+- Built from commit: `362ce244`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -135,7 +135,7 @@
 - Cardiology Discharge Summary (doc02)
 - load_protected_terms
 - reference_library.py
-- conftest.py
+- ner_spans
 - GP Referral Letter (doc05)
 - finetune/__init__.py
 - integrate/__init__.py
@@ -153,15 +153,17 @@
 - assemble/__init__.py
 - get_analyzer
 - _run
-- ._no_identifier_shapes
+- theme.py
 - wipe_phi
+- ._no_identifier_shapes
 - HFCompleter
 - stress_report.py
-- _RecordingBackend
 - _fresh_generation_status_cache
 - test_an_html_error_page_is_rejected
-- test_the_local_model_stays_pinned_at_temperature_zero
+- _RecordingBackend
 - test_the_draft_state_and_backend_state_are_not_confused
+- test_the_local_model_stays_pinned_at_temperature_zero
+- test_the_corpus_and_its_answer_key_agree
 
 ## God Nodes (most connected - your core abstractions)
 1. `deidentify()` - 69 edges
@@ -198,7 +200,7 @@
 - **Fictional patients sharing the same reused NHS number across documents** — stress_corpus_doc01_mohammed_al_rashid, stress_corpus_doc02_margaret_elizabeth_chen, stress_corpus_doc05_elspeth_mackenzie_ford, stress_corpus_doc06_priya_venkataraman, stress_corpus_doc09_tomasz_wisniewski, stress_corpus_shared_nhs_number [INFERRED 0.85]
 - **Documents sharing the recurring fictional staff roster (e.g. A. Whitfield, R. Patel)** — stress_corpus_doc01_community_mh_letter, stress_corpus_doc02_cardiology_discharge, stress_corpus_doc04_ward_handover, stress_corpus_doc07_cmht_family_review, stress_corpus_doc10_mha_assessment, stress_corpus_recurring_staff_roster [INFERRED 0.75]
 
-## Communities (151 total, 27 thin omitted)
+## Communities (153 total, 28 thin omitted)
 
 ### Community 0 - "candidate_residuals"
 Cohesion: 0.12
@@ -257,8 +259,8 @@ Cohesion: 0.09
 Nodes (30): cache_data, _draft_state(), _form_draft_state(), _model_card_path(), Path, Which backend will be used, and the fix if none is available., Shown instead of an empty panel when no model is available yet. An empty…, Option A. The only outbound request the app makes, on an explicit click. (+22 more)
 
 ### Community 14 - "deidentify.py"
-Cohesion: 0.07
-Nodes (46): available_models(), classify_person(), _collapse_facility_subsets(), _collapse_person_subsets(), date_span_wanted(), _has_contact_anchor(), _has_identity_anchor(), _is_acronym() (+38 more)
+Cohesion: 0.08
+Nodes (36): available_models(), classify_person(), date_span_wanted(), _has_contact_anchor(), _has_identity_anchor(), _is_acronym(), _is_clinical_measurement(), _is_isolated_table_cell() (+28 more)
 
 ### Community 15 - "test_app_screens.py"
 Cohesion: 0.18
@@ -333,8 +335,8 @@ Cohesion: 0.13
 Nodes (14): 1. Template assets, 2. Form spec extraction, 3. Header fields (practitioner-entered), 4. Multi-document source combination, 5. Generation, 6. Review, 7. Export, 8. UI (`app.py`, Step 5) (+6 more)
 
 ### Community 33 - "test_stress_corpus.py"
-Cohesion: 0.18
-Nodes (14): _entities(), _normalise(), parametrize, Corpus-driven regression net. Every document in ``stress_corpus/`` is run…, Confidence tiering must never make the reviewer's job LESS safe. An "auto"…, Whatever the sweep still flags must not be a structured identifier. A surviving…, Collapse every whitespace run to one space, so line breaks stop mattering., A document listed in the key but missing on disk would silently pass. (+6 more)
+Cohesion: 0.21
+Nodes (12): _entities(), _normalise(), parametrize, Corpus-driven regression net. Every document in ``stress_corpus/`` is run…, Confidence tiering must never make the reviewer's job LESS safe. An "auto"…, Whatever the sweep still flags must not be a structured identifier. A surviving…, Collapse every whitespace run to one space, so line breaks stop mattering., _redacted() (+4 more)
 
 ### Community 34 - "combine_sources"
 Cohesion: 0.21
@@ -429,8 +431,8 @@ Cohesion: 0.40
 Nodes (5): Ngozi Okafor, Outpatient Respiratory Clinic Letter (doc03), Attendee list pattern, Header town + county pattern, Record-number label shapes (three variants)
 
 ### Community 57 - "structured_spans"
-Cohesion: 0.11
-Nodes (18): _header_footer_bounds(), _plausible_surname(), Character ranges of the document's opening and closing lines., True if the trailing token of an initial+surname reads like a real name.…, Layer 1: deterministic regex detections over ``text``., REDACT_INPROSE_DATES flag, structured_spans(), expand_org_variants (Layer 4 — variant expansion) (+10 more)
+Cohesion: 0.17
+Nodes (12): _header_footer_bounds(), _plausible_surname(), Character ranges of the document's opening and closing lines., True if the trailing token of an initial+surname reads like a real name.…, Layer 1: deterministic regex detections over ``text``., structured_spans(), A two-part capitalised phrase mid-document is not a letterhead., M.E.C.\\nFollow-up" must not become the name "M.E.C. Follow". (+4 more)
 
 ### Community 58 - "Reference: verified against the real codebase"
 Cohesion: 0.15
@@ -541,8 +543,8 @@ Cohesion: 0.29
 Nodes (6): Acceptance criteria, Do NOT touch, Files in scope, Goal, <id> — <title>, Notes
 
 ### Community 102 - "analyze"
-Cohesion: 0.18
-Nodes (13): analyze(), _crosses_paragraph_break(), flatten_lines(), gliner_spans(), ner_spans(), Layer 2: Presidio/spaCy detections, mapped onto CareScribe entity types.…, Layer 3: GLiNER detections, or an empty list when it isn't installed., Run every enabled layer over ``text`` and return reviewable entities. Each… (+5 more)
+Cohesion: 0.10
+Nodes (22): analyze(), _collapse_facility_subsets(), _collapse_person_subsets(), _crosses_paragraph_break(), flatten_lines(), get_gliner(), gliner_spans(), merge_spans() (+14 more)
 
 ### Community 103 - "rebuild"
 Cohesion: 0.09
@@ -612,9 +614,9 @@ Nodes (8): _build_protected_pattern(), load_protected_terms(), Path, Pattern, Re
 Cohesion: 0.18
 Nodes (15): Add clinic reference files (formulary, pathways, protocols) to a local library.…, _render_reference_uploader(), Core logic: Ollama access, ingestion, de-identification, care notes, PHI…, _all_chunks(), _bounded(), Chunk, _dir(), _files() (+7 more)
 
-### Community 122 - "conftest.py"
-Cohesion: 0.31
-Nodes (8): deid(), ner_available(), fixture, Shared pytest fixtures. The spaCy model load costs several seconds, so the…, The full pipeline's output for the fixture document., True when a spaCy model loaded — layer 2 tests skip without one., raw_text(), redacted()
+### Community 122 - "ner_spans"
+Cohesion: 0.22
+Nodes (9): ner_spans(), Layer 2: Presidio/spaCy detections, mapped onto CareScribe entity types.…, REDACT_INPROSE_DATES flag, expand_org_variants (Layer 4 — variant expansion), Protected terms list (never redacted), In-prose date redaction policy, Layered de-identification pipeline, GLiNER (optional Layer 3 NER) (+1 more)
 
 ### Community 123 - "GP Referral Letter (doc05)"
 Cohesion: 0.25
@@ -645,8 +647,8 @@ Cohesion: 0.15
 Nodes (15): assert_no_residual_identifiers(), CareNoteError, load_prompt(), RuntimeError, Care note generation — local, on approved de-identified text only. The contract…, Build the user prompt for one template with the source text embedded., Refuse to send text the residual sweep still flags. :func:`assert_deidentified`…, Raised when care note generation can't proceed. (+7 more)
 
 ### Community 135 - "app.py"
-Cohesion: 0.13
-Nodes (20): current(), documents(), ingest_sources(), main(), _pipeline_step(), _privacy_state(), CareScribe — local, privacy-preserving de-identification and review. Run with:…, A missing model must stop loudly, never fall back to fetching one. (+12 more)
+Cohesion: 0.20
+Nodes (16): current(), documents(), ingest_sources(), main(), _pipeline_step(), _privacy_state(), CareScribe — local, privacy-preserving de-identification and review. Run with:…, A missing model must stop loudly, never fall back to fetching one. (+8 more)
 
 ### Community 137 - "is_model_present"
 Cohesion: 0.50
@@ -657,22 +659,26 @@ Cohesion: 0.40
 Nodes (6): Community MH Discharge Letter (doc01), Mohammed Al-Rashid ('Mo'), Mariam Aisha Rahman, Mental Health Act Assessment Record (doc10), Initials-only patient reference (e.g. M.A.R.), Permanent regression net for document #2 leaks
 
 ### Community 140 - "get_analyzer"
-Cohesion: 0.20
-Nodes (11): cache_resource, load_detection_engine(), Load the NER model once per session, not once per rerun. Streamlit re-runs the…, engine_status(), get_analyzer(), get_gliner(), Return the shared Presidio analyzer, or ``None`` if it can't be built. First…, Return the shared GLiNER model, or ``None`` if it isn't available. Guarded end… (+3 more)
+Cohesion: 0.14
+Nodes (17): cache_resource, load_detection_engine(), Load the NER model once per session, not once per rerun. Streamlit re-runs the…, engine_status(), get_analyzer(), Return the shared Presidio analyzer, or ``None`` if it can't be built. First…, Report which layers are live, for the sidebar. Loads nothing by itself., Load every enabled engine now, so the first document isn't the slow one. (+9 more)
 
 ### Community 141 - "_run"
 Cohesion: 0.60
 Nodes (4): AppTest, _run(), test_saving_settings_persists_and_survives_reload(), test_settings_expander_renders_without_error()
 
-### Community 142 - "._no_identifier_shapes"
-Cohesion: 0.40
-Nodes (3): field_validator, _looks_like_identifier(), Return a reason string if ``value`` looks like a leaked identifier.
+### Community 142 - "theme.py"
+Cohesion: 0.33
+Nodes (4): CareScribe UI layer — the visual identity, applied over Streamlit. `theme.CSS`…, inject(), CareScribe visual identity — one stylesheet, injected once per rerun. DIRECTION…, Apply the stylesheet. Import Streamlit lazily so the module stays cheap.
 
 ### Community 143 - "wipe_phi"
 Cohesion: 0.67
 Nodes (4): PHI_KEYS (session-state PHI registry), Drop every document, identifier table, and identity map from memory., wipe_phi(), Bug: form_drafts never registered with PHI_KEYS/wipe_phi
 
-### Community 145 - "stress_report.py"
+### Community 144 - "._no_identifier_shapes"
+Cohesion: 0.40
+Nodes (3): field_validator, _looks_like_identifier(), Return a reason string if ``value`` looks like a leaked identifier.
+
+### Community 146 - "stress_report.py"
 Cohesion: 0.67
 Nodes (3): main(), normalise(), Per-document pass/fail report for the stress corpus. python…
 
@@ -695,7 +701,7 @@ Nodes (4): _cloud_off(), _fresh_generation_status_cache(), fixture, generation_s
 ## Knowledge Gaps
 - **222 isolated node(s):** `medgpt-finetune`, `merge_and_convert.sh script`, `build_dmg.sh script`, `build_macos.sh script`, `Worker capability ceiling on the fine-tune workstream (2026-09-01)` (+217 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **27 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **28 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -712,5 +718,5 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
 - **Why does `FormType` connect `FormType` to `test_assemble_pipeline.py`, `schema.py`, `build_messages`, `EncounterFacts`, `EncounterType`, `build_dataset.py`, `HFCompleter`, `test_train_and_grammar.py`, `run_eval.py`, `GgufCompleter`?**
   _High betweenness centrality (0.039) - this node is a cross-community bridge._
-- **Why does `deidentify()` connect `deidentify` to `test_generation_setup.py`, `test_stress_corpus.py`, `load_documents`, `analyze`, `rebuild`, `test_app.py`, `mapping.py`, `residual_scan`, `deidentify.py`, `test_batch.py`, `stress_report.py`, `run_eval.py`, `test_deid_pipeline.py`, `test_round2_regressions.py`, `conftest.py`, `NoEgress`, `extract_text`?**
+- **Why does `deidentify()` connect `deidentify` to `test_generation_setup.py`, `test_stress_corpus.py`, `load_documents`, `analyze`, `rebuild`, `test_app.py`, `mapping.py`, `get_analyzer`, `residual_scan`, `deidentify.py`, `test_batch.py`, `stress_report.py`, `run_eval.py`, `test_deid_pipeline.py`, `test_round2_regressions.py`, `NoEgress`, `extract_text`?**
   _High betweenness centrality (0.037) - this node is a cross-community bridge._

@@ -644,21 +644,33 @@ _ORDINAL_WORDS = (
     "twenty-ninth|thirtieth|thirty-first"
 )
 
-# Number words used to spell out a year ("nineteen eighty-five", "two thousand
-# and twenty-six"). Not a general-purpose number parser — just enough
-# vocabulary to recognise the shape of a spelled year so it can be swallowed
-# whole, without needing to compute the value it names.
+# A spelled-out year in "nineteen eighty-five" / "twenty twenty-six" style,
+# restricted to the shape a real spoken year takes rather than an open
+# vocabulary of number words.
 #
-# The trailing \b matters: alternation tries options left to right and takes
-# the first that matches at all, not the longest, so "eight" alone would
-# satisfy the group against "eighty-five" and leave "y-five" as unmatched
-# prose. The boundary forces a backtrack past "eight" (no boundary between
-# "t" and "y") until an alternative — "eighty" — actually ends the word.
-_YEAR_WORD = (
-    r"(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|"
-    r"thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|"
-    r"thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|oh|and)\b"
+# An earlier version matched 2-6 repetitions of a general one/two/.../hundred/
+# thousand word list, which had no upper bound and no plausible-year shape —
+# it happily swallowed unrelated trailing quantities after any anchored date
+# ("the third of April, four hundred forms were filed" lost "four hundred
+# forms" entirely; "twenty two patients" after an anchored date lost "two
+# patients"). A real spoken year in this corpus (clinical/legal documents,
+# 1900-2099) is structurally distinct from an arbitrary quantity: it is a
+# decade word ("nineteen" or "twenty") followed by a SPACE and then a
+# tens-or-teens remainder, where any tens+ones pair is joined by a HYPHEN, not
+# a space ("nineteen eighty-five", "twenty twenty-six") — exactly the
+# shape spoken years take and ordinary space-separated quantities ("sixty
+# five forms", "twenty two patients") do not. "hundred"/"thousand" are not
+# valid remainders here at all: they were the direct cause of the false
+# match on "four hundred", and a decade word never precedes them in this
+# style anyway.
+_YEAR_TEEN = (
+    "ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|"
+    "nineteen"
 )
+_YEAR_TENS = "twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety"
+_YEAR_ONES = "one|two|three|four|five|six|seven|eight|nine"
+_YEAR_REMAINDER = rf"(?:{_YEAR_TEEN}|(?:{_YEAR_TENS})(?:-(?:{_YEAR_ONES}))?|oh-(?:{_YEAR_ONES}))"
+_SPOKEN_YEAR = rf"\b(?:nineteen|twenty)\s+{_YEAR_REMAINDER}\b"
 
 # A full "day of Month, spelled-out year" birth date, entirely in prose — a
 # court report wrote a client's DOB as "born on the fourteenth of July,
@@ -681,7 +693,7 @@ _YEAR_WORD = (
 # untouched.
 WORD_DATE = re.compile(
     rf"\b(?:the\s+)?(?:\d{{1,2}}(?:st|nd|rd|th)?|{_ORDINAL_WORDS})\s+of\s+"
-    rf"(?:{_MONTHS})\s*,?\s+(?:{_YEAR_WORD}[-\s]*){{2,6}}",
+    rf"(?:{_MONTHS})\s*,?\s+{_SPOKEN_YEAR}",
     re.IGNORECASE,
 )
 
