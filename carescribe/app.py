@@ -330,9 +330,6 @@ def render_sidebar() -> None:
                     backend=chosen_backend,
                     ollama_model=chosen_model,
                     temperature=float(chosen_temperature),
-                    cloud_provider=cfg.cloud_provider,
-                    cloud_base_url=cfg.cloud_base_url,
-                    cloud_model=cfg.cloud_model,
                 ))
                 st.success("Saved.")
 

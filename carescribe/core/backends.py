@@ -176,30 +176,36 @@ class LocalGGUFBackend:
                 kwargs["grammar"] = compiled
         try:
             completion = model.create_chat_completion(**kwargs)
+
+            if not stream:
+                choice = completion["choices"][0]
+                if choice.get("finish_reason") == "length":
+                    raise _truncation_error()
+                yield choice["message"]["content"]
+                return
+
+            # llama-cpp-python's chat-completion stream carries
+            # "finish_reason": None on every chunk except the last, where it
+            # is "stop" (natural completion) or "length" (cut off by the
+            # token budget / remaining context). That final chunk's delta is
+            # empty, so it never yields text — only the reason is read from
+            # it. The stream is lazy: create_chat_completion() itself never
+            # touches the model, so a prompt that overflows n_ctx only
+            # raises once this loop pulls the first chunk — which is why the
+            # loop has to stay inside this try, not just the call above it.
+            finish_reason = None
+            for chunk in completion:
+                choice = chunk.get("choices", [{}])[0]
+                piece = choice.get("delta", {}).get("content")
+                if piece:
+                    yield piece
+                reason = choice.get("finish_reason")
+                if reason is not None:
+                    finish_reason = reason
+        except BackendError:
+            raise
         except Exception as exc:  # noqa: BLE001
             raise BackendError(f"Local generation failed: {exc}") from exc
-
-        if not stream:
-            choice = completion["choices"][0]
-            if choice.get("finish_reason") == "length":
-                raise _truncation_error()
-            yield choice["message"]["content"]
-            return
-
-        # llama-cpp-python's chat-completion stream carries "finish_reason":
-        # None on every chunk except the last, where it is "stop" (natural
-        # completion) or "length" (cut off by the token budget / remaining
-        # context). That final chunk's delta is empty, so it never yields
-        # text — only the reason is read from it.
-        finish_reason = None
-        for chunk in completion:
-            choice = chunk.get("choices", [{}])[0]
-            piece = choice.get("delta", {}).get("content")
-            if piece:
-                yield piece
-            reason = choice.get("finish_reason")
-            if reason is not None:
-                finish_reason = reason
 
         if finish_reason == "length":
             raise _truncation_error()

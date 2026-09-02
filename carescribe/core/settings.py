@@ -10,7 +10,9 @@ persist in plain JSON.
 
 from __future__ import annotations
 
+import dataclasses
 import json
+import typing
 from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 
@@ -29,9 +31,6 @@ class Settings:
     # back to the guess rather than erroring.
     ollama_model: str = ""
     temperature: float = 0.0
-    cloud_provider: str = ""
-    cloud_base_url: str = ""
-    cloud_model: str = ""
 
 
 _FIELD_NAMES = {f.name for f in fields(Settings)}
@@ -50,8 +49,24 @@ def load_settings() -> Settings:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return Settings()
+    if not isinstance(data, dict):
+        return Settings()
     filtered = {k: v for k, v in data.items() if k in _FIELD_NAMES}
-    return Settings(**filtered)
+    defaults = Settings()
+    # ``from __future__ import annotations`` turns dataclass field types into
+    # strings, so resolve them via get_type_hints() rather than trusting
+    # field.type (which would be the literal text "str"/"float").
+    hints = typing.get_type_hints(Settings)
+    coerced: dict = {}
+    for field in dataclasses.fields(Settings):
+        if field.name not in filtered:
+            continue
+        raw = filtered[field.name]
+        try:
+            coerced[field.name] = hints[field.name](raw)
+        except (TypeError, ValueError):
+            coerced[field.name] = getattr(defaults, field.name)
+    return Settings(**coerced)
 
 
 def save_settings(settings: Settings) -> None:

@@ -38,3 +38,30 @@ def test_save_settings_creates_app_data_dir_if_missing(tmp_path, monkeypatch):
     monkeypatch.setattr(settings.desktop, "app_data_dir", lambda: target)
     settings.save_settings(settings.Settings(backend="local"))
     assert (target / "settings.json").exists()
+
+
+def test_load_settings_survives_non_dict_json(tmp_path, monkeypatch):
+    monkeypatch.setattr(settings.desktop, "app_data_dir", lambda: tmp_path)
+    (tmp_path / "settings.json").write_text("[1, 2, 3]", encoding="utf-8")
+    assert settings.load_settings() == settings.Settings()
+
+
+def test_load_settings_coerces_stringy_temperature(tmp_path, monkeypatch):
+    monkeypatch.setattr(settings.desktop, "app_data_dir", lambda: tmp_path)
+    (tmp_path / "settings.json").write_text(
+        '{"backend": "local", "temperature": "0.5"}', encoding="utf-8"
+    )
+    loaded = settings.load_settings()
+    assert loaded.backend == "local"
+    assert loaded.temperature == 0.5
+    assert isinstance(loaded.temperature, float)
+
+
+def test_load_settings_falls_back_to_default_on_bad_coercion(tmp_path, monkeypatch):
+    monkeypatch.setattr(settings.desktop, "app_data_dir", lambda: tmp_path)
+    (tmp_path / "settings.json").write_text(
+        '{"backend": "local", "temperature": "not-a-number"}', encoding="utf-8"
+    )
+    loaded = settings.load_settings()
+    assert loaded.backend == "local"
+    assert loaded.temperature == 0.0

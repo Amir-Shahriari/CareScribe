@@ -142,3 +142,20 @@ def test_local_gguf_streaming_completes_on_natural_stop(monkeypatch):
     backend = _backend_with_fake_model(monkeypatch, iter(chunks))
     collected = list(backend.generate("system", "prompt", stream=True))
     assert "".join(collected) == "<<FIELD:a>> done"
+
+
+def _raising_stream():
+    """Mimics llama-cpp-python: create_chat_completion() returns a lazy
+    generator, and a prompt that overflows n_ctx only raises once the first
+    chunk is actually pulled — not when the generator object is created."""
+    yield {"choices": [{"delta": {"role": "assistant"}, "finish_reason": None}]}
+    raise ValueError("Requested tokens exceed context window")
+
+
+def test_local_gguf_streaming_wraps_context_overflow_as_backend_error(monkeypatch):
+    """A prompt that doesn't fit n_ctx raises a raw ValueError from inside
+    llama-cpp-python's lazy stream generator, not from create_chat_completion
+    itself — that must still surface as a BackendError, not crash the app."""
+    backend = _backend_with_fake_model(monkeypatch, _raising_stream())
+    with pytest.raises(backends.BackendError, match="Local generation failed"):
+        list(backend.generate("system", "prompt", stream=True))
