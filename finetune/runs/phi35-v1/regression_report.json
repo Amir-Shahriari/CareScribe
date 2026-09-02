@@ -1,0 +1,15 @@
+{
+  "base": {
+    "format": 1.0,
+    "placeholder_integrity": 1.0,
+    "residual_clean": 0.7,
+    "n": 10
+  },
+  "tuned": {
+    "format": 1.0,
+    "placeholder_integrity": 1.0,
+    "residual_clean": 0.9,
+    "n": 10
+  },
+  "regressions": []
+}

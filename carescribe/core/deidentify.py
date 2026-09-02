@@ -402,10 +402,24 @@ _STRUCTURED_COMPILED = {
 # what document #2 used, and the old pattern stopped dead at the bracket), and
 # the value may be grouped with spaces or hyphens ("33-201-45"). Both are
 # separator noise around the same thing: a labelled 5-10 digit identifier.
+#
+# "Trust ID"/"Trust No" is a UK trust's own local patient identifier, distinct
+# from the national NHS number — document #11's corpus sibling used "Local
+# Trust ID: TR-2026-00458" and the old label list had no entry for it at all,
+# so a letter-prefixed local ID sailed through untouched. GMC/NMC/HCPC/GPhC
+# numbers are a different identifier again: not the patient's, but the
+# treating clinician's public professional-register number, which is at least
+# as identifying as their name and was likewise never anchored. GPhC (General
+# Pharmaceutical Council) is the pharmacist's register, the same shape of gap
+# as the other three when a pharmacy medication review names the prescriber —
+# corpus document #19's registration number sailed through untouched before
+# this label was added.
 _MRN_LABELS = (
     r"MRN|Hospital\s*(?:No|Number)|Record\s*(?:No|Number)|Case\s*(?:No|Number)|"
     r"Chart\s*(?:No|Number)|Patient\s*(?:No|Number)|Unit\s*(?:No|Number)|"
-    r"Patient\s*ID|Hosp\s*No|NHS\s*Trust\s*No"
+    r"Patient\s*ID|Hosp\s*No|NHS\s*Trust\s*No|Trust\s*(?:No|Number|ID)|"
+    r"GMC\s*(?:No|Number)?|NMC\s*(?:No|Number|PIN)?|HCPC\s*(?:No|Number|Registration)?|"
+    r"GPhC\s*(?:No|Number|Registration)?"
 )
 
 MRN_CONTEXT = re.compile(
@@ -520,6 +534,22 @@ HEADER_LOCATION = re.compile(
     rf"^[ \t]*({_PLACE_PHRASE},[ \t]*{_PLACE_PHRASE})[ \t]*$"
 )
 
+# A clinician sign-off in a footer ("Dr Adaeze Chukwuemeka, Consultant
+# Psychiatrist") has exactly the same two-phrases-joined-by-a-comma shape as a
+# letterhead town/county line, and it sits in the same footer zone. Document
+# #15's corpus sibling caught this: the whole sign-off line — name and role
+# both — was swallowed as one LOCATION, when the name belongs to
+# PERSON_TITLE_PATTERN and the role ("Consultant Psychiatrist") is clinical
+# content that must survive. A line opening with a personal/clinical title, or
+# whose second phrase is a known clinical role, is a person, never a place.
+_HEADER_LOCATION_PERSON_GUARD = re.compile(
+    r"^(?:Dr|Doctor|Mr|Mrs|Ms|Miss|Mx|Prof|Professor|Sister|Nurse|Matron|Sr)\b"
+    r"|,[ \t]*(?:Consultant|Registrar|SHO|SpR|FY1|FY2|GP|Nurse|Sister|Matron|"
+    r"CPN|OT|SALT|Physio(?:therapist)?|Pharmacist|Surgeon|Anaesthetist|"
+    r"Psychologist|Psychiatrist|Social\s+worker|Care\s*co-?ordinator|Specialist)\b",
+    re.IGNORECASE,
+)
+
 
 def _header_footer_bounds(text: str) -> list[tuple[int, int]]:
     """Character ranges of the document's opening and closing lines."""
@@ -598,6 +628,72 @@ NUMERIC_DATE = re.compile(r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b")
 
 PROSE_DATE = re.compile(
     rf"\b\d{{1,2}}(?:st|nd|rd|th)?(?:\s+of)?\s+(?:{_MONTHS})\b(?:\s+\d{{4}})?",
+    re.IGNORECASE,
+)
+
+# A day-of-month written as a word ("the fourteenth") rather than a digit, used
+# by the spelled-out-year pattern below. PROSE_DATE already covers a numeric
+# day; this list exists only to let the same pattern recognise a fully spelled
+# day too ("the fourteenth of July, nineteen eighty-five" has no digits at
+# all).
+_ORDINAL_WORDS = (
+    "first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|"
+    "eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|"
+    "eighteenth|nineteenth|twentieth|twenty-first|twenty-second|twenty-third|"
+    "twenty-fourth|twenty-fifth|twenty-sixth|twenty-seventh|twenty-eighth|"
+    "twenty-ninth|thirtieth|thirty-first"
+)
+
+# A spelled-out year in "nineteen eighty-five" / "twenty twenty-six" style,
+# restricted to the shape a real spoken year takes rather than an open
+# vocabulary of number words.
+#
+# An earlier version matched 2-6 repetitions of a general one/two/.../hundred/
+# thousand word list, which had no upper bound and no plausible-year shape —
+# it happily swallowed unrelated trailing quantities after any anchored date
+# ("the third of April, four hundred forms were filed" lost "four hundred
+# forms" entirely; "twenty two patients" after an anchored date lost "two
+# patients"). A real spoken year in this corpus (clinical/legal documents,
+# 1900-2099) is structurally distinct from an arbitrary quantity: it is a
+# decade word ("nineteen" or "twenty") followed by a SPACE and then a
+# tens-or-teens remainder, where any tens+ones pair is joined by a HYPHEN, not
+# a space ("nineteen eighty-five", "twenty twenty-six") — exactly the
+# shape spoken years take and ordinary space-separated quantities ("sixty
+# five forms", "twenty two patients") do not. "hundred"/"thousand" are not
+# valid remainders here at all: they were the direct cause of the false
+# match on "four hundred", and a decade word never precedes them in this
+# style anyway.
+_YEAR_TEEN = (
+    "ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|"
+    "nineteen"
+)
+_YEAR_TENS = "twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety"
+_YEAR_ONES = "one|two|three|four|five|six|seven|eight|nine"
+_YEAR_REMAINDER = rf"(?:{_YEAR_TEEN}|(?:{_YEAR_TENS})(?:-(?:{_YEAR_ONES}))?|oh-(?:{_YEAR_ONES}))"
+_SPOKEN_YEAR = rf"\b(?:nineteen|twenty)\s+{_YEAR_REMAINDER}\b"
+
+# A full "day of Month, spelled-out year" birth date, entirely in prose — a
+# court report wrote a client's DOB as "born on the fourteenth of July,
+# nineteen eighty-five" with no digits anywhere in it. Neither NUMERIC_DATE
+# nor PROSE_DATE fires (both need a digit day, and PROSE_DATE's optional year
+# is numeric-only), so spaCy's NER was the only layer that saw this phrase at
+# all — and it split it: "the fourteenth of July" came back as one DATE
+# entity, leaving ", nineteen eighty-five" as ordinary trailing prose that
+# survived redaction with the birth year sitting in the clear.
+#
+# Rather than patch spaCy's span after the fact (nothing merges an NER span
+# with a regex match today, and doing so would still depend on spaCy choosing
+# to tag the day+month at all), this pattern captures the whole phrase
+# deterministically, day through year, exactly the way NUMERIC_DATE and
+# PROSE_DATE already do. merge_spans() resolves overlaps longest-match-wins
+# with ties going to the regex layer, so this span always wins over whatever
+# partial span NER produced underneath it. The day may be written as a digit
+# ("14th") or a word ("fourteenth"); only a genuinely spelled-out year
+# following it changes anything here, so ordinary numeric dates are
+# untouched.
+WORD_DATE = re.compile(
+    rf"\b(?:the\s+)?(?:\d{{1,2}}(?:st|nd|rd|th)?|{_ORDINAL_WORDS})\s+of\s+"
+    rf"(?:{_MONTHS})\s*,?\s+{_SPOKEN_YEAR}",
     re.IGNORECASE,
 )
 
@@ -788,6 +884,28 @@ def flatten_lines(text: str) -> tuple[str, list[int]]:
     return "".join(flat), index_map
 
 
+# A blank line — two or more newlines with only spaces/tabs between them — is
+# a paragraph or section boundary. flatten_lines() (above) collapses it to a
+# single space like any other line break, on purpose: it exists to reconnect
+# a name split by ONE line wrap ("Oluwaseun\nAdeyinka"), and that flattened
+# copy is exactly what the "wrapped" detection pass in analyze() runs NER
+# over. A wrapped name never has a blank paragraph in the middle of it, so a
+# wrapped-pass span whose original-text range crosses one is never a genuine
+# reconnection — corpus document #15 caught this exact shape: "Overall risk
+# rating: Medium" was immediately followed by a blank line and then an
+# unrelated paragraph ("Bloods showed..."), and the flattened copy joined
+# them into what read as a two-word name, later trimmed down to "Medium"
+# alone. _crosses_paragraph_break lets analyze() reject that class of
+# cross-section artefact without touching flatten_lines() itself, which
+# other, genuine same-paragraph wraps still depend on.
+_BLANK_LINE = re.compile(r"\n[ \t]*\r?\n")
+
+
+def _crosses_paragraph_break(text: str, start: int, end: int) -> bool:
+    """True if the ORIGINAL-text span ``text[start:end]`` contains a blank line."""
+    return bool(_BLANK_LINE.search(text[start:end]))
+
+
 def _is_staff_context(text: str, start: int, end: int) -> bool:
     """True if an initial+surname sits somewhere that vouches for it being staff.
 
@@ -860,6 +978,10 @@ def structured_spans(text: str) -> list[Span]:
             # facility pattern below has the better span for it.
             if FACILITY_PATTERN.search(value):
                 continue
+            # A clinician sign-off ("Dr X, Consultant Psychiatrist") is a
+            # person, not a place — see _HEADER_LOCATION_PERSON_GUARD above.
+            if _HEADER_LOCATION_PERSON_GUARD.search(value):
+                continue
             offset = zone_start + line.start() + match.start(1)
             spans.append(Span(offset, offset + len(value), "LOCATION"))
 
@@ -887,7 +1009,7 @@ def structured_spans(text: str) -> list[Span]:
         # what NER returns and variant expansion regenerates every title form.
         spans.append(Span(match.start(1), match.end(1), "PROVIDER_NAME"))
 
-    for pattern in (NUMERIC_DATE, PROSE_DATE):
+    for pattern in (NUMERIC_DATE, PROSE_DATE, WORD_DATE):
         for match in pattern.finditer(text):
             if not date_span_wanted(text, match.start(), match.end()):
                 continue
@@ -946,11 +1068,22 @@ _NOT_A_NAME = frozenset(
     after before both either neither also however therefore because since although
     angiography angiogram echocardiogram procedure operation theatre recovery
     outpatient inpatient community district safeguarding capacity mobility
-    continence nutrition hydration skin pressure falls risk care plan handover
+    continence nutrition hydration skin pressure risk care plan handover
     level levels value values range ranges count counts score scores reading
     readings dose doses units unit result baseline target trend
     """.split()
 )
+# "falls" was deliberately dropped from the list above: it is an attested
+# English surname, and this set trims the TRAILING token off any detected
+# PERSON span unconditionally — a genuine clinician or patient named "Falls"
+# ("Dr Sarah Falls") had their surname silently stripped down to the given
+# name alone, in every context, not just the nursing-assessment-heading case
+# this word was added for. The risk-grid false positive that motivated
+# adding it in the first place ("Falls" standing alone as a table-cell risk
+# category) is handled separately and more precisely by
+# _RISK_GRID_WORDS/_is_isolated_table_cell below, which only fires when the
+# word is the entire content of an isolated pipe-table cell — so removing it
+# here costs no coverage.
 
 # Street descriptors that make a place name part of an address rather than a
 # bare mention of a town.
@@ -1108,6 +1241,42 @@ def _location_is_address(text: str, start: int, end: int) -> bool:
     return bool(ADDRESS_LINE.match(text[line_start:line_end]))
 
 
+# Bare risk-rating and risk-category words ("Low", "Medium", "High", "Falls",
+# "Absconding") that a risk-assessment grid renders as plain-text pipe-table
+# cells. spaCy reliably mislabels them as PERSON/ORGANIZATION there — corpus
+# document #15 caught "Falls" (raw NER) and "Absconding" (the line-flattened
+# pass merging a table row into its neighbour) becoming a facility.
+#
+# This is deliberately NOT a global allow-list entry (protected_terms.txt):
+# "Low" and "Falls" are both attested English surnames, so exempting them
+# everywhere would silently under-redact a real patient or clinician who
+# happens to be named one. Scoping the exemption to "this exact word, AND it
+# is the entire trimmed content of an isolated pipe-table cell" keeps every
+# other occurrence — free prose, a labelled field, a name that merely shares
+# a line with a "|" — fully subject to ordinary detection.
+_RISK_GRID_WORDS = frozenset({"low", "medium", "high", "falls", "absconding"})
+
+
+def _is_isolated_table_cell(text: str, start: int, end: int) -> bool:
+    """True if ``text[start:end]`` is one whole pipe-table cell's content.
+
+    The line must contain a "|" at all — ordinary prose never qualifies —
+    and the span must be bounded by a "|" (or the line's own start/end) on
+    both sides, with nothing but whitespace filling the gap. A name that
+    merely sits somewhere on a line with a pipe character, or that runs into
+    other text before reaching the next "|", does not qualify.
+    """
+    line_start, line_end = _line_bounds(text, start)
+    line = text[line_start:line_end]
+    if "|" not in line:
+        return False
+    before = text[line_start:start]
+    after = text[end:line_end]
+    before_ok = before.strip(" \t") == "" or before.rstrip(" \t").endswith("|")
+    after_ok = after.strip(" \t") == "" or after.lstrip(" \t").startswith("|")
+    return before_ok and after_ok
+
+
 def _span_is_plausible(text: str, span: Span) -> bool:
     """Reject the false positives NER reliably produces on clinical documents."""
     value = text[span.start : span.end].strip()
@@ -1122,6 +1291,14 @@ def _span_is_plausible(text: str, span: Span) -> bool:
         span.entity_type == "ADDRESS" and span.source != "regex"
     ):
         if _is_acronym(value) or _looks_clinical(value):
+            return False
+        # A risk-grid rating/category word standing alone as a whole
+        # pipe-table cell — see _RISK_GRID_WORDS above. Scoped to that exact
+        # shape, so the same word in free prose is unaffected.
+        if (
+            value.casefold() in _RISK_GRID_WORDS
+            and _is_isolated_table_cell(text, span.start, span.end)
+        ):
             return False
         # "Aspirin 75mg" — a capitalised token followed by a dose is a drug.
         if _DOSE_AFTER.match(text[span.end : span.end + 16]):
@@ -1724,7 +1901,10 @@ def analyze(text: str) -> list[dict]:
         if USE_GLINER:
             wrapped.extend(gliner_spans(flattened))
         # Only the span types a line wrap can hide are taken from this pass;
-        # anything line-anchored keeps the first pass's answer.
+        # anything line-anchored keeps the first pass's answer. A span whose
+        # original-text range crosses a blank line is a cross-paragraph
+        # artefact of the flattening, not a genuine wrapped name or
+        # organisation — see _crosses_paragraph_break.
         layers.append([
             Span(
                 index_map[span.start],
@@ -1737,6 +1917,9 @@ def analyze(text: str) -> list[dict]:
             if (span.entity_type in mapping.PERSON_TYPES
                 or span.entity_type in mapping.FACILITY_TYPES)
             and 0 <= span.start < span.end <= len(index_map)
+            and not _crosses_paragraph_break(
+                text, index_map[span.start], index_map[span.end - 1] + 1
+            )
         ])
 
     known_as = mapping.find_known_as(text)

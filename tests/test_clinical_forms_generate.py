@@ -13,7 +13,7 @@ class RecordingBackend:
         self.system = ""
         self.prompt = ""
 
-    def generate(self, system, prompt, stream=True):
+    def generate(self, system, prompt, stream=True, *, grammar=None):
         self.system = system
         self.prompt = prompt
         yield self.reply

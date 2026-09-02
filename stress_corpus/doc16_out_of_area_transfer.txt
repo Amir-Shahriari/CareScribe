@@ -1,0 +1,38 @@
+OUT OF AREA TRANSFER LETTER
+
+Sending trust:       Northdale NHS Foundation Trust
+Address:             14 Vicarage Court, Ripon, HG4 2LN
+Tel:                 01632 960 501
+
+Receiving trust:     Southmoor NHS Foundation Trust
+Address:             22 Harbour Road, Scarborough, YO12 4TX
+Tel:                 01632 960 602
+
+Patient:             Thandiwe Marsh
+Date of Birth:       11 January 1977
+NHS No:              831 220 4471
+Sending Trust ID:    5541092
+Receiving Trust ID:  6602817
+
+Dear colleagues,
+
+Thandiwe Marsh is relocating out of area and transferring into your
+service with immediate effect. Thandiwe has been under our community
+mental health team since March 2025 and has remained stable on current
+medication for the past six months.
+
+MEDICATION
+  Sertraline 150mg once daily
+  Zopiclone 7.5mg nocte as required
+
+Bloods showed normal T3/T4 and no growth of S. aureus on culture. HoNOS
+score at the last review was 9, an improvement from 16 at referral.
+Thandiwe remains subject to Section 117 aftercare and the CPA review is
+due in four months.
+
+Our own file is held under the sending trust ID given above; please
+quote the receiving trust ID in all further correspondence with this
+service.
+
+Reviewed by Dr F. Adeyemi.
+Typed by R. Ellis.

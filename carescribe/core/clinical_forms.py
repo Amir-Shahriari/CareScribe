@@ -87,7 +87,10 @@ def _paragraph_texts(cell) -> list[str]:
     return [p.text for p in cell.paragraphs]
 
 
-def _walk_table(table, table_index: int, start_row: int, header_seed: str = "") -> list[FormField]:
+def _walk_table(
+    table, table_index: int, start_row: int, header_seed: str = "",
+    end_row: int | None = None,
+) -> list[FormField]:
     fields: list[FormField] = []
     current_header = header_seed
     pending: tuple[int, str] | None = None  # (row_index, label_text)
@@ -95,7 +98,8 @@ def _walk_table(table, table_index: int, start_row: int, header_seed: str = "") 
     def make_key(label: str) -> str:
         return f"{slugify(current_header)}.{slugify(label)}" if current_header else slugify(label)
 
-    for row_index in range(start_row, len(table.rows)):
+    stop = len(table.rows) if end_row is None else min(end_row, len(table.rows))
+    for row_index in range(start_row, stop):
         cells = _dedupe_row(table.rows[row_index])
         texts = [c.text.strip() for c in cells]
         full_blank = all(t == "" for t in texts)
@@ -238,16 +242,27 @@ _FORM_SPEC_BUILDERS["biopsychosocial_assessment"] = _biopsychosocial_spec
 
 @lru_cache(maxsize=None)
 def get_form_spec(form_id: str) -> FormSpec:
-    try:
-        builder = _FORM_SPEC_BUILDERS[form_id]
-    except KeyError:
-        raise ClinicalFormError(f"Unknown clinical form '{form_id}'.") from None
-    return builder()
+    builder = _FORM_SPEC_BUILDERS.get(form_id)
+    if builder is not None:
+        return builder()
+    from . import template_ingest  # lazy — template_ingest imports this module
+
+    spec = template_ingest.load_user_spec(form_id)
+    if spec is None:
+        raise ClinicalFormError(f"Unknown clinical form '{form_id}'.")
+    return spec
 
 
 def available_forms() -> list[tuple[str, str]]:
-    """(form_id, title) pairs, in registration order — for the UI's selector."""
-    return [(form_id, builder().title) for form_id, builder in _FORM_SPEC_BUILDERS.items()]
+    """(form_id, title) pairs — bundled forms first, then clinic-uploaded ones."""
+    forms = [(form_id, builder().title) for form_id, builder in _FORM_SPEC_BUILDERS.items()]
+    try:
+        from . import template_ingest
+
+        forms += template_ingest.user_form_options()
+    except Exception:  # noqa: BLE001 — a broken user template must not hide the bundled forms
+        pass
+    return forms
 
 
 def _clear_cell(cell) -> None:
@@ -362,6 +377,10 @@ then the field's content, then move to the next field. If the source has \
 no information for a field, write exactly "Not documented" for that field \
 rather than guessing or leaving it blank.
 6. Do not add commentary, a greeting, or a sign-off. Output only the fields.
+7. Some fields carry one or more "house-style example" lines. Match their \
+tone, length, and structure. They are from other de-identified notes — take \
+STYLE from them only, never facts. Every clinical fact must come from the \
+source text above.
 
 FIELDS TO COMPLETE, IN THIS EXACT ORDER — reproduce each marker exactly:
 
@@ -379,9 +398,25 @@ under its own <<FIELD:key>> marker, in the exact order given.
 """
 
 
-def build_prompt(form_spec: FormSpec, deidentified_text: str) -> tuple[str, str]:
-    field_list = "\n".join(f"<<FIELD:{f.key}>> — {f.label}" for f in form_spec.fields)
-    system = _SYSTEM_PREAMBLE.format(field_list=field_list)
+def build_prompt(
+    form_spec: FormSpec,
+    deidentified_text: str,
+    exemplars: dict[str, list[str]] | None = None,
+) -> tuple[str, str]:
+    """Build the (system, user) prompt pair.
+
+    ``exemplars`` maps a field key to house-style example values (de-identified
+    text from this clinic's own past drafts); each is rendered as an indented
+    line under its field so the model matches style without borrowing facts.
+    """
+    exemplars = exemplars or {}
+    lines: list[str] = []
+    for field in form_spec.fields:
+        lines.append(f"<<FIELD:{field.key}>> — {field.label}")
+        for example in exemplars.get(field.key, []):
+            flat = " ".join(str(example).split())
+            lines.append(f"    house-style example: {flat}")
+    system = _SYSTEM_PREAMBLE.format(field_list="\n".join(lines))
     user = _USER_TEMPLATE.format(document=deidentified_text)
     return system, user
 
@@ -457,6 +492,18 @@ from typing import Iterable, Iterator
 from . import carenotes
 
 
+_PLACEHOLDER_TOKEN_RE = re.compile(r"\[[A-Z][A-Z0-9_]*\]")
+
+
+def _form_grammar(form_spec: FormSpec, combined_text: str) -> str | None:
+    """A GBNF grammar that requires every ``<<FIELD:key>>`` marker in order and
+    forbids a bracket token that is not one of this document's placeholders."""
+    from . import grammar as _grammar
+
+    placeholders = sorted(set(_PLACEHOLDER_TOKEN_RE.findall(combined_text or "")))
+    return _grammar.field_grammar([f.key for f in form_spec.fields], placeholders)
+
+
 def generate_form_document(
     combined_text: str,
     form_spec: FormSpec,
@@ -464,11 +511,15 @@ def generate_form_document(
     stream: bool = True,
     *,
     phi_values: Iterable[str] | None = None,
+    acknowledged: Iterable[str] = (),
+    exemplars: dict[str, list[str]] | None = None,
 ) -> Iterator[str]:
-    system, user = build_prompt(form_spec, combined_text)
+    system, user = build_prompt(form_spec, combined_text, exemplars)
     return carenotes.generate_document(
         combined_text, form_spec.form_id, backend, stream,
-        phi_values=phi_values, system=system, user_prompt=user,
+        phi_values=phi_values, acknowledged=acknowledged,
+        system=system, user_prompt=user,
+        grammar=_form_grammar(form_spec, combined_text),
     )
 
 
@@ -482,11 +533,13 @@ def refine_form_document(
     *,
     history: list[tuple[str, str]] | None = None,
     phi_values: Iterable[str] | None = None,
+    acknowledged: Iterable[str] = (),
+    exemplars: dict[str, list[str]] | None = None,
 ) -> Iterator[str]:
-    system, _ = build_prompt(form_spec, combined_text)
+    system, _ = build_prompt(form_spec, combined_text, exemplars)
     return carenotes.refine_document(
         combined_text, draft_marker_text, instruction, backend, stream,
-        history=history, phi_values=phi_values,
+        history=history, phi_values=phi_values, acknowledged=acknowledged,
         system=system, refine_prompt_name="refine_form.txt",
     )
 

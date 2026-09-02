@@ -42,6 +42,10 @@ This tool is a drafting aid, not a compliance control. Specifically:
 
 ---
 
+## Download
+
+For Windows and macOS, see [Installation Guide](docs/download-and-install.md).
+
 ## Privacy invariants
 
 These are the properties the code is structured to make checkable, not just to claim:
@@ -471,15 +475,40 @@ The mapping is never written to disk at any point, in either version.
 
 ## What is still not built
 
-Generation is wired up and local. Two things are deliberately out of scope:
+Generation is wired up and local by default. One thing is deliberately out of
+scope:
 
-- **No cloud provider.** `core/carenotes.py` defines a one-method `Backend`
-  Protocol and an `OllamaBackend`. A `CloudBackend` would implement the same
-  Protocol and receive exactly what the local one receives — de-identified text
-  with placeholders. The seam exists; nothing is built behind it.
 - **No storage of the identity mapping.** There is no "resume this document
   tomorrow" feature, because that would mean persisting the mapping. Closing the
   session drops it, by design.
+
+The optional **cloud generation** path now has a real transport
+(`core/cloud_client.py` — Anthropic Messages API, or the OpenAI-compatible shape
+for Azure / private / self-hosted endpoints), but it stays **off unless a
+deployer sets both `CARESCRIBE_CLOUD_PROVIDER` and `CARESCRIBE_CLOUD_API_KEY`**,
+it is last in the backend ladder, and it receives only approved de-identified
+text. See `docs/deployer-cloud-note.md`.
+
+Clinical-form generation can learn a clinic's **house style**: saving a
+de-identified draft as an exemplar (`core/exemplars.py`) adds it to a local
+BM25 index, and future drafts of that form retrieve the closest past
+field-values as style examples in the prompt. Storage is placeholder text only,
+guarded by `residual_scan`; retrieval is local and opens no socket. Semantic
+(embedding) retrieval is a documented follow-up.
+
+A clinic **reference library** (`core/reference_library.py`) indexes `.txt` /
+`.md` formularies, care pathways, and protocols. Relevant passages are shown
+**verbatim, with their source, to the clinician** in the draft review view —
+they are deliberately *not* fed to the model, because a paraphrased dose or
+referral criterion is a safety defect. A test enforces that `reference_library`
+is not imported by the generation path.
+
+A **retrieval planner** (`core/retrieval_planner.py`) decides, per template
+field, whether exemplars and reference material are worth fetching, at what
+chunk granularity (`sentence` for a dose, `section` for a formulation), and
+with what query. The shipped `RuleBasedPlanner` is a keyword taxonomy over
+field labels — deterministic, no model; an LLM planner would implement the same
+`RetrievalPlanner` protocol. It too is kept out of generation.
 
 `ollama` stays commented out in `requirements.txt`: the client uses the standard
 library, so the package being absent is a checkable property rather than a

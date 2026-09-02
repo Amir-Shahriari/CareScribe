@@ -35,13 +35,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from carescribe.core import (  # noqa: E402
     applog, backends, batch, carenotes, deidentify, desktop, generation_status,
     ingest, mapping, model_setup, ollama_client, review_checklist, review_flags,
-    review_spans,
+    review_spans, settings,
 )
 from carescribe.components.highlight_review import highlight_review  # noqa: E402
+from carescribe.ui import components as ui, theme as ui_theme  # noqa: E402
 
 st.set_page_config(page_title="CareScribe", page_icon="🩺", layout="wide")
 
-TABLE_COLUMNS = ["value", "type", "placeholder", "action"]
+TABLE_COLUMNS = ["value", "type", "placeholder", "action", "confidence"]
 
 
 # --------------------------------------------------------------------------
@@ -88,11 +89,12 @@ def wipe_phi() -> None:
     # (f"hdr_{draft_key}_{header.key}"), so they can't be listed statically
     # in PHI_KEYS — each one holds real, typed PHI (client name, DOB, ...).
     for key in list(st.session_state.keys()):
-        if key.startswith("hdr_"):
+        if key.startswith(("hdr_", "attest_", "textbox_ack_")):
             del st.session_state[key]
     # Not PHI themselves, but stale UI state after a wipe.
     st.session_state.pop("form_type", None)
     st.session_state.pop("form_sources", None)
+    st.session_state.pop("_batch_approve_summary", None)
     # Force the uploader to forget its files by rotating its widget key.
     st.session_state.uploader_nonce = st.session_state.get("uploader_nonce", 0) + 1
 
@@ -183,54 +185,153 @@ def refresh(document: batch.Document, entities: list[dict]) -> None:
 # Sidebar
 # --------------------------------------------------------------------------
 
+@st.dialog("Model card", width="large")
+def _model_card_dialog(text: str) -> None:
+    st.markdown(text)
+
+
+def _model_card_path() -> Path | None:
+    model_path = desktop.find_local_model()
+    if model_path is None:
+        return None
+    stem = model_path.name.split(".", 1)[0]
+    for candidate in (
+        model_path.parent / f"{stem}.MODEL_CARD.md",
+        model_path.parent / "MODEL_CARD.md",
+    ):
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def _render_generation_model() -> None:
+    """Name the generation model with a readable label; the card opens in a
+    dialog rather than dumping a whole markdown doc into the narrow sidebar."""
+    model_path = desktop.find_local_model()
+    if model_path is None:
+        return
+    title, note = ui.model_label(model_path.stem)
+    st.sidebar.markdown(
+        f'<div class="cs-model">{ui.icon("cpu")}'
+        f'<span><b>{title}</b><small>{note}</small></span></div>',
+        unsafe_allow_html=True,
+    )
+    card = _model_card_path()
+    if card is not None:
+        if st.sidebar.button("View model card", key="open_model_card",
+                             use_container_width=True):
+            _model_card_dialog(card.read_text(encoding="utf-8"))
+
+
 def render_sidebar() -> None:
-    st.sidebar.title("🩺 CareScribe")
-    with st.sidebar:
-        privacy_indicator()
-
-    st.sidebar.subheader("Detection layers")
-    status = deidentify.engine_status()
-
-    st.sidebar.markdown("✅ **1. Structured regex** — always on")
-
-    if status["ner"]:
-        st.sidebar.markdown(f"✅ **2. Presidio + spaCy** — `{status['ner_model']}`")
-    elif status["ner_error"]:
-        st.sidebar.markdown("⚠️ **2. Presidio + spaCy** — unavailable")
-        st.sidebar.caption(status["ner_error"])
-    else:
-        st.sidebar.markdown("⏳ **2. Presidio + spaCy** — loads on first document")
-
-    if status["gliner"]:
-        st.sidebar.markdown("✅ **3. GLiNER** — loaded")
-    else:
-        st.sidebar.markdown("➖ **3. GLiNER** — not installed (optional)")
-
-    st.sidebar.caption(
-        "In-prose dates: "
-        + ("redacted" if status["inprose_dates"] else "kept unless identity-anchored")
+    st.sidebar.markdown(
+        f'<div class="cs-brand"><span>{ui.icon("shield")}</span>CareScribe</div>',
+        unsafe_allow_html=True,
     )
 
-    st.sidebar.divider()
-
+    # 1. What am I working on — the most useful thing at a glance.
     st.sidebar.subheader("Session")
     docs = documents()
     approved = sum(1 for doc in docs.values() if doc.approved)
     identifiers = sum(len(doc.entities) for doc in docs.values())
-    st.sidebar.caption(
-        f"In memory: {len(docs)} documents, {identifiers} identifiers, "
-        f"{approved} approved."
+    st.sidebar.markdown(
+        ui.stat_strip([
+            ("Documents in memory", len(docs)),
+            ("Identifiers detected", identifiers),
+            ("Approved", f"{approved} / {len(docs)}" if docs else "0"),
+        ]),
+        unsafe_allow_html=True,
     )
+    st.sidebar.write("")
 
-    if st.sidebar.button("🧹 Clear session / wipe PHI", type="primary", use_container_width=True):
+    if st.sidebar.button(
+        "Clear session — wipe PHI", type="primary",
+        use_container_width=True, key="wipe_phi_btn",
+    ):
         wipe_phi()
         st.rerun()
 
     st.sidebar.caption(
-        "Wipe drops every document, identifier table, and identity map from "
-        "memory. None of it was ever written to disk. Approved de-identified "
-        "files already on disk are left alone."
+        "Drops every document, identifier table and identity map from memory. "
+        "None of it was ever on disk; approved files already written are left "
+        "alone."
     )
+
+    # 2. Is my data safe — critical, but the reassuring state can be quiet.
+    st.sidebar.subheader("Privacy")
+    with st.sidebar:
+        privacy_indicator()
+
+    # 3. How it is configured — reference, so it sits last and stays quiet.
+    st.sidebar.subheader("Setup")
+    status = deidentify.engine_status()
+
+    layers = [ui.detection_layer("on", "Structured regex")]
+    if status["ner"]:
+        layers.append(ui.detection_layer("on", "Presidio + spaCy", status["ner_model"]))
+    elif status["ner_error"]:
+        layers.append(ui.detection_layer("warn", "Presidio + spaCy", "unavailable"))
+    else:
+        layers.append(ui.detection_layer("wait", "Presidio + spaCy", "loads on first use"))
+    layers.append(
+        ui.detection_layer("on", "GLiNER") if status["gliner"]
+        else ui.detection_layer("off", "GLiNER", "optional, not installed")
+    )
+    st.sidebar.markdown(
+        '<div class="cs-setup-label">Detection</div>' + "".join(layers),
+        unsafe_allow_html=True,
+    )
+    if status["ner_error"]:
+        st.sidebar.caption(status["ner_error"])
+    st.sidebar.caption(
+        "In-prose dates "
+        + ("redacted" if status["inprose_dates"] else "kept unless identity-anchored")
+    )
+
+    _render_generation_model()
+
+    st.sidebar.write("")
+    if st.sidebar.button("⚙ Settings", key="settings_toggle"):
+        st.session_state["show_settings"] = not st.session_state.get("show_settings", False)
+    if st.session_state.get("show_settings"):
+        with st.sidebar.expander("⚙ Settings", expanded=True):
+            cfg = settings.load_settings()
+            backend_options = ["", backends.BACKEND_OLLAMA, backends.BACKEND_LOCAL_GGUF, backends.BACKEND_CLOUD]
+            backend_labels = {
+                "": "Automatic (recommended)",
+                backends.BACKEND_OLLAMA: "Ollama",
+                backends.BACKEND_LOCAL_GGUF: "Built-in model",
+                backends.BACKEND_CLOUD: "Cloud",
+            }
+            chosen_backend = st.selectbox(
+                "Generation backend", backend_options,
+                index=backend_options.index(cfg.backend) if cfg.backend in backend_options else 0,
+                format_func=lambda k: backend_labels[k], key="settings_backend",
+            )
+            installed = ollama_client.list_models() if ollama_client.is_up() else []
+            chosen_model = ""
+            if installed:
+                model_options = [""] + installed
+                chosen_model = st.selectbox(
+                    "Ollama model", model_options,
+                    index=model_options.index(cfg.ollama_model) if cfg.ollama_model in model_options else 0,
+                    format_func=lambda m: "Automatic" if m == "" else m, key="settings_ollama_model",
+                )
+            chosen_temperature = st.number_input(
+                "Temperature", min_value=0.0, max_value=1.0, step=0.1,
+                value=cfg.temperature, key="settings_temperature",
+            )
+            st.caption(
+                "Cloud provider settings are configured via environment variables "
+                "(see docs/deployer-cloud-note.md) — the API key is never saved here."
+            )
+            if st.button("Save settings", key="settings_save"):
+                settings.save_settings(settings.Settings(
+                    backend=chosen_backend,
+                    ollama_model=chosen_model,
+                    temperature=float(chosen_temperature),
+                ))
+                st.success("Saved.")
 
 
 # --------------------------------------------------------------------------
@@ -312,7 +413,6 @@ def section_process() -> None:
     if not docs:
         return
 
-    st.divider()
     st.subheader("2. De-identify")
 
     pending = [name for name in order if not docs[name].analyzed]
@@ -355,10 +455,18 @@ def entity_frame(document: batch.Document) -> pd.DataFrame:
             "type": entity.get("type", "OTHER_ID"),
             "placeholder": entity.get("placeholder", ""),
             "action": mapping.normalise_action(entity.get("action")),
+            "confidence": str(entity.get("confidence") or "review"),
         }
         for entity in document.entities
     ]
-    return pd.DataFrame(rows, columns=TABLE_COLUMNS)
+    frame = pd.DataFrame(rows, columns=TABLE_COLUMNS)
+    # Single-detector ("review") rows first: those are the ones most worth a
+    # human's eye, in either direction. Stable, so order is otherwise unchanged.
+    if not frame.empty:
+        frame = frame.sort_values(
+            by="confidence", key=lambda col: col.ne("review"), kind="stable"
+        ).reset_index(drop=True)
+    return frame
 
 
 def render_entity_table(document: batch.Document) -> None:
@@ -367,6 +475,21 @@ def render_entity_table(document: batch.Document) -> None:
         "Fix a type, correct a value, delete a false positive, or switch an "
         "action to **Keep** to leave that string in the document."
     )
+
+    redacted = [
+        entity for entity in document.entities
+        if mapping.normalise_action(entity.get("action")) == mapping.REDACT
+    ]
+    single_layer = sum(
+        1 for entity in redacted
+        if str(entity.get("confidence") or "review") == "review"
+    )
+    if single_layer:
+        st.caption(
+            f"⚠️ {single_layer} of {len(redacted)} redaction(s) were flagged by "
+            "a single detector — the likeliest to be wrong either way. They are "
+            "listed first here and highlighted in the preview above."
+        )
 
     edited = st.data_editor(
         entity_frame(document),
@@ -392,34 +515,45 @@ def render_entity_table(document: batch.Document) -> None:
                 help="Keep leaves the text in place — use it for a false positive "
                      "you would rather not delete from the table.",
             ),
+            "confidence": st.column_config.TextColumn(
+                "Found by", disabled=True, width="small",
+                help="'auto' — corroborated by more than one layer, or a "
+                     "structured format. 'review' — a single detector, so worth "
+                     "a second look.",
+            ),
         },
     )
 
     if st.button("Apply table edits", use_container_width=True, key=f"apply_{document.name}"):
-        refresh(document, edited.fillna("").to_dict("records"))
+        # 'confidence' is display-only; drop it so rebuild re-derives tiering.
+        records = [
+            {key: value for key, value in row.items() if key != "confidence"}
+            for row in edited.fillna("").to_dict("records")
+        ]
+        refresh(document, records)
         st.rerun()
 
 
 def render_add_missed(document: batch.Document) -> None:
-    st.markdown("#### Add a missed identifier")
-    st.caption(
-        "Anything the layers missed. It is variant-expanded like a detected "
-        "value, so a full name also covers the title+surname and initials forms."
-    )
+    with st.expander("Add a missed identifier", expanded=False):
+        st.caption(
+            "Anything the layers missed. It is variant-expanded like a detected "
+            "value, so a full name also covers the title+surname and initials forms."
+        )
 
-    value_column, type_column, button_column = st.columns([3, 2, 1])
-    with value_column:
-        value = st.text_input(
-            "Value", key=f"missed_value_{document.name}", label_visibility="collapsed",
-            placeholder="Paste the exact text as it appears in the document",
-        )
-    with type_column:
-        entity_type = st.selectbox(
-            "Type", list(mapping.ENTITY_TYPES), key=f"missed_type_{document.name}",
-            label_visibility="collapsed",
-        )
-    with button_column:
-        add = st.button("Add", use_container_width=True, key=f"missed_add_{document.name}")
+        value_column, type_column, button_column = st.columns([3, 2, 1])
+        with value_column:
+            value = st.text_input(
+                "Value", key=f"missed_value_{document.name}", label_visibility="collapsed",
+                placeholder="Paste the exact text as it appears in the document",
+            )
+        with type_column:
+            entity_type = st.selectbox(
+                "Type", list(mapping.ENTITY_TYPES), key=f"missed_type_{document.name}",
+                label_visibility="collapsed",
+            )
+        with button_column:
+            add = st.button("Add", use_container_width=True, key=f"missed_add_{document.name}")
 
     if add:
         try:
@@ -577,11 +711,11 @@ def _render_review_html(document: batch.Document, spans: list) -> str:
     return "".join(parts)
 
 
-def render_review(document: batch.Document) -> int:
-    """The single primary review surface: highlighted text, click to decide.
+def render_review(document: batch.Document) -> list:
+    """The primary review surface: the redacted text, second-look items marked.
 
-    Returns how many spans are still outstanding, so the caller can drive
-    the Approve gate without recomputing this list a second time.
+    Returns the span list so the caller can drive the bulk actions and the
+    Approve gate without recomputing it.
     """
     spans = review_spans.review_spans(
         document.redacted_text, document.entities,
@@ -589,13 +723,11 @@ def render_review(document: batch.Document) -> int:
     )
 
     st.markdown("#### Redacted preview")
-    st.caption("This exact text is what approval writes to disk.")
-    if spans:
-        st.caption(
-            f"{len(spans)} span(s) need a decision — click a highlighted word below."
-        )
-    else:
-        st.caption("Nothing needs a second look in this document.")
+    st.caption(
+        "This is exactly what approval writes to disk. Highlighted words are "
+        "optional second-look items — click one to act on it on its own, or use "
+        "the bulk buttons below."
+    )
 
     clicked = highlight_review(
         _render_review_html(document, spans), key=f"hl_{document.name}"
@@ -603,19 +735,87 @@ def render_review(document: batch.Document) -> int:
     _render_span_action(document, spans, clicked)
 
     # The interactive view above is the working copy; this is the plain,
-    # authoritative, copy-pasteable text — the same role the old
-    # render_highlighted_preview's second st.text_area played, kept
-    # unstyled and disabled on purpose so it's never mistaken for editable.
-    st.text_area(
-        "Redacted", document.redacted_text, height=200,
-        label_visibility="collapsed", disabled=True,
-        key=f"preview_exact_{document.name}",
-    )
+    # authoritative, copy-pasteable text — kept unstyled and disabled on
+    # purpose so it's never mistaken for editable.
+    with st.expander("Plain text — exactly what gets written"):
+        st.text_area(
+            "Redacted", document.redacted_text, height=220,
+            label_visibility="collapsed", disabled=True,
+            key=f"preview_exact_{document.name}",
+        )
 
-    with st.expander("Show full detected-identifier table"):
+    with st.expander("Full detected-identifier table"):
         render_entity_table(document)
 
-    return len(spans)
+    return spans
+
+
+def render_bulk_actions(document: batch.Document, spans: list) -> None:
+    """Clear each class of second-look item in one click.
+
+    Low-confidence entity spans are already redacted, so "Confirm all" only
+    records that the reviewer accepts the placeholders. "Redact all flagged"
+    over-redacts every permissive residual candidate — the safe direction.
+    Either is optional: neither gates Approve.
+    """
+    entity_keys: list[str] = []
+    residual_spans: list = []
+    seen_e: set[str] = set()
+    seen_r: set[str] = set()
+    for span in spans:
+        key = span.id.split(":", 1)[1]
+        if span.kind == review_spans.KIND_ENTITY:
+            if key not in seen_e:
+                seen_e.add(key)
+                entity_keys.append(key)
+        elif key not in seen_r:
+            seen_r.add(key)
+            residual_spans.append(span)
+
+    n_e, n_r = len(entity_keys), len(residual_spans)
+    if not n_e and not n_r:
+        st.caption("Nothing needs a second look in this document.")
+        return
+
+    bits = []
+    if n_e:
+        bits.append(f"**{n_e}** low-confidence redaction(s) already in place")
+    if n_r:
+        bits.append(f"**{n_r}** item(s) flagged by the safety sweep")
+    st.markdown(" · ".join(bits))
+
+    left, right = st.columns(2)
+    with left:
+        if n_e and st.button(
+            f"Confirm all {n_e} redaction(s)",
+            key=f"confirm_all_{document.name}", use_container_width=True,
+        ):
+            entity_confirmed(document).update(entity_keys)
+            st.rerun()
+    with right:
+        if n_r and st.button(
+            f"Redact all {n_r} flagged item(s)",
+            key=f"redact_all_{document.name}", use_container_width=True,
+        ):
+            added = 0
+            for span in residual_spans:
+                try:
+                    result = deidentify.add_manual_entity(
+                        document.raw_text, document.entities, span.text
+                    )
+                except deidentify.DeidentificationError:
+                    continue
+                document.entities = result.entities
+                document.redacted_text = result.redacted_text
+                document.phi_map = result.phi_map
+                added += 1
+            if added:
+                document.approved = False
+                document.residual = []
+                st.session_state.flag_redacted[document.name] = (
+                    st.session_state.flag_redacted.get(document.name, 0) + added
+                )
+            st.rerun()
 
 
 def _render_span_action(document: batch.Document, spans: list, clicked_id: str | None) -> None:
@@ -678,12 +878,14 @@ def _render_span_action(document: batch.Document, spans: list, clicked_id: str |
                 st.rerun()
 
 
-def render_approval(document: batch.Document, outstanding: int) -> None:
+def render_approval(document: batch.Document, spans: list) -> None:
     st.divider()
     st.warning(
         "**Human review required.** Automated de-identification is not a "
-        "guarantee. Read the preview in full before approving."
+        "guarantee. Read the redacted preview above before approving."
     )
+
+    n_advisory = len({s.id for s in spans})
 
     if document.residual:
         st.error(
@@ -731,9 +933,31 @@ def render_approval(document: batch.Document, outstanding: int) -> None:
             key=f"textbox_ack_{document.name}",
         )
 
-    reason = review_checklist.blocking_reason(document.residual, outstanding)
+    # An explicit, recorded attestation that a human read the redacted text.
+    # Automated de-identification has no way to know whether the preview was
+    # actually looked at; this is the one place the reviewer says so, and it is
+    # written (as a bool) into the audit sidecar. It gates Approve, below.
+    if not document.approved:
+        document.attested = st.checkbox(
+            "I have read the redacted preview above and confirm it is safe to release.",
+            value=document.attested,
+            key=f"attest_{document.name}",
+        )
+
+    # Only the authoritative sweep blocks. Advisory spans (already-redacted
+    # low-confidence entities, permissive residual flags) never gate the write —
+    # batch.write_approved re-runs the sweep and refuses regardless.
+    reason = review_checklist.blocking_reason(document.residual)
     if not reason and document.has_text_boxes and not document.text_boxes_acknowledged:
         reason = "Confirm the text-box check above first."
+    if not reason and not document.attested:
+        reason = "Tick the read-and-confirmed box above."
+
+    if not reason and n_advisory:
+        st.caption(
+            f"{n_advisory} optional second-look item(s) not actioned — the "
+            "safety sweep runs on approve and will refuse any real identifier."
+        )
 
     if st.button(
         "✅ Run safety sweep and approve",
@@ -761,6 +985,7 @@ def render_approval(document: batch.Document, outstanding: int) -> None:
                     flags_shown=len(document_flags(document)),
                     flags_redacted=st.session_state.flag_redacted.get(document.name, 0),
                     flags_dismissed=len(flag_dismissals(document)),
+                    attested=document.attested,
                 )
         st.rerun()
 
@@ -783,7 +1008,6 @@ def section_review() -> None:
     if not ready:
         return
 
-    st.divider()
     st.subheader("3. Review & approve")
 
     if st.session_state.selected not in ready:
@@ -811,7 +1035,8 @@ def section_review() -> None:
         f"{len(document.raw_text):,} characters, {len(document.entities)} identifiers detected."
     )
 
-    outstanding = render_review(document)
+    spans = render_review(document)
+    render_bulk_actions(document, spans)
     render_add_missed(document)
     render_coverage(document)
 
@@ -822,7 +1047,91 @@ def section_review() -> None:
             key=f"raw_{document.name}",
         )
 
-    render_approval(document, outstanding)
+    render_approval(document, spans)
+    render_batch_approve(docs, ready)
+
+
+def render_batch_approve(docs: dict, ready: list) -> None:
+    """One click to approve every document that comes back clean.
+
+    Each is re-run through the blocking safety sweep; only the clean ones are
+    written. Anything with sweep findings or an unchecked text-box warning is
+    left for the reviewer to open individually.
+    """
+    pending = [docs[name] for name in ready if not docs[name].approved]
+
+    # Show the outcome of the last batch run even if that run cleared enough
+    # documents that the button below no longer renders.
+    summary = st.session_state.pop("_batch_approve_summary", None)
+    if summary and (summary["approved"] or summary["blocked"]):
+        st.divider()
+        st.markdown("#### Batch approval")
+        if summary["approved"]:
+            st.success(
+                f"Approved {len(summary['approved'])}: "
+                + ", ".join(f"`{n}`" for n in summary["approved"])
+            )
+        if summary["blocked"]:
+            st.warning(
+                "Open these individually — the safety sweep still has findings, "
+                "the read-and-confirmed box isn't ticked, or a text-box check "
+                "is outstanding:\n"
+                + "\n".join(f"- `{n}`" for n in summary["blocked"])
+            )
+
+    if len(pending) < 2:
+        return
+
+    if not (summary and (summary["approved"] or summary["blocked"])):
+        st.divider()
+    st.markdown("#### Approve the whole batch")
+
+    st.caption(
+        f"{len(pending)} document(s) not yet approved. Each is re-checked by the "
+        "safety sweep; only the ones that come back clean, with the "
+        "read-and-confirmed box ticked, are written to disk."
+    )
+    if st.button(
+        f"✅ Approve all {len(pending)} that pass the safety sweep",
+        type="primary", key="approve_batch",
+    ):
+        approved: list[str] = []
+        blocked: list[str] = []
+        for doc in pending:
+            if not doc.attested:
+                blocked.append(doc.name)
+                continue
+            if doc.has_text_boxes and not doc.text_boxes_acknowledged:
+                blocked.append(doc.name)
+                continue
+            doc.residual = batch.sweep(doc.redacted_text, doc.dismissed)
+            if doc.residual:
+                doc.approved = False
+                blocked.append(doc.name)
+                continue
+            try:
+                path = batch.write_approved(
+                    doc.name, doc.redacted_text, acknowledged=doc.dismissed
+                )
+            except batch.BatchError:
+                blocked.append(doc.name)
+                continue
+            doc.approved = True
+            doc.approved_path = str(path)
+            write_approved_word(doc)
+            batch.write_review_record(
+                doc.name,
+                entities=doc.entities,
+                flags_shown=len(document_flags(doc)),
+                flags_redacted=st.session_state.flag_redacted.get(doc.name, 0),
+                flags_dismissed=len(flag_dismissals(doc)),
+                attested=doc.attested,
+            )
+            approved.append(doc.name)
+        st.session_state["_batch_approve_summary"] = {
+            "approved": approved, "blocked": blocked,
+        }
+        st.rerun()
 
 
 # --------------------------------------------------------------------------
@@ -835,33 +1144,39 @@ def section_batch_status() -> None:
     if not docs:
         return
 
-    st.divider()
     st.subheader("4. Batch status")
 
-    rows = []
+    def _kind(doc: batch.Document) -> str:
+        if doc.error:
+            return "failed"
+        if doc.approved:
+            return "approved"
+        if doc.residual:
+            return "blocked"
+        if doc.analyzed:
+            return "review"
+        return "pending"
+
+    body = []
     for position, name in enumerate(order, start=1):
         doc = docs[name]
-        if doc.error:
-            state = "❌ Failed"
-        elif doc.approved:
-            state = "✅ Approved"
-        elif doc.residual:
-            state = "⛔ Blocked by safety sweep"
-        elif doc.analyzed:
-            state = "🔍 Awaiting review"
-        else:
-            state = "⏳ Not yet processed"
-        rows.append(
-            {
-                "#": position,
-                "Document": name,
-                "Status": state,
-                "Identifiers": len(doc.entities),
-                "Approved output": doc.approved_path or "—",
-            }
+        out = html.escape(doc.approved_path) if doc.approved_path else "&mdash;"
+        body.append(
+            "<tr>"
+            f'<td>{position}</td>'
+            f'<td><span class="cs-mono">{html.escape(name)}</span></td>'
+            f'<td>{ui.status_chip(_kind(doc))}</td>'
+            f'<td>{len(doc.entities)}</td>'
+            f'<td><span class="cs-mono">{out}</span></td>'
+            "</tr>"
         )
-
-    st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+    st.markdown(
+        '<div class="cs-table-wrap"><table class="cs-table"><thead><tr>'
+        "<th>#</th><th>Document</th><th>Status</th>"
+        "<th>Identifiers</th><th>Approved output</th>"
+        f'</tr></thead><tbody>{"".join(body)}</tbody></table></div>',
+        unsafe_allow_html=True,
+    )
 
     approved = sum(1 for doc in docs.values() if doc.approved)
     st.caption(f"{approved} of {len(order)} approved.")
@@ -922,22 +1237,17 @@ def privacy_indicator() -> None:
             "only, never real identifiers — is sent to "
             f"{backends.cloud_provider()}. Generation still requires your "
             "approval and a clean safety sweep first.",
-            icon="☁",
+            icon=":material/cloud:",
         )
     elif st.session_state.get("downloading_model"):
         st.info(
             "**Downloading the AI model onto this computer.** Weights are "
             "coming *in*; no patient data is going out. Nothing about any "
             "document is part of this request.",
-            icon="⬇",
+            icon=":material/download:",
         )
     else:
-        st.success(
-            "**Running fully offline — no data leaves this computer.** "
-            "Documents are read into memory, de-identified, reviewed and "
-            "drafted here. Nothing is uploaded.",
-            icon="🔒",
-        )
+        st.markdown(ui.privacy_line(), unsafe_allow_html=True)
 
 
 def render_generation_status() -> dict:
@@ -1076,12 +1386,28 @@ def run_ollama_pull(model: str = "llama3.1:8b") -> None:
     st.rerun()
 
 
+def _active_backend():
+    """Resolve the backend to generate with, honouring saved settings.
+
+    Centralises what used to be five separate ``backends.select_backend()``
+    call sites so a saved backend/model/temperature choice (see
+    ``core/settings.py`` and the sidebar Settings panel) actually takes
+    effect everywhere generation happens, not just in one place.
+    """
+    cfg = settings.load_settings()
+    return backends.select_backend(
+        prefer=cfg.backend or None,
+        model=cfg.ollama_model or None,
+        temperature=cfg.temperature,
+    )
+
+
 def render_test_generation() -> None:
     """A concrete "it works", rather than asking the clinician to trust a flag."""
     if st.button("Test generation", key="gen_selftest"):
         with st.spinner("Running a short test on this computer…"):
             try:
-                _, backend, label = backends.select_backend()
+                _, backend, label = _active_backend()
                 sample = "".join(
                     carenotes.generate_document(
                         "Patient: [PATIENT]\nSeen in clinic. Sertraline 50mg daily.\n",
@@ -1114,9 +1440,13 @@ def render_generation_panel(document: batch.Document) -> None:
     # without approved text is a bug elsewhere, but a clinician must get a
     # sentence rather than a traceback.
     if not document.approved or not (document.redacted_text or "").strip():
-        st.info(
-            "This document hasn't been approved for generation yet — approve "
-            "it in step 3 first."
+        st.markdown(
+            ui.empty_state(
+                "stamp", "Not approved yet",
+                "Approve this document in step 3, then a draft can be generated "
+                "from its de-identified text.",
+            ),
+            unsafe_allow_html=True,
         )
         return
 
@@ -1175,7 +1505,7 @@ def _run_generation(document, template, custom, draft_state) -> None:
     started = time.monotonic()
     try:
         with st.spinner("Generating on this computer — this can take a minute. Nothing leaves your device."):
-            _, backend, _label = backends.select_backend()
+            _, backend, _label = _active_backend()
             chunks = carenotes.generate_document(
                 document.redacted_text,
                 template,
@@ -1184,6 +1514,9 @@ def _run_generation(document, template, custom, draft_state) -> None:
                 custom_instruction=custom,
                 # Passed only so generation can assert these are absent.
                 phi_values=list(document.phi_map.values()),
+                # Sweep findings the reviewer cleared at approval — so the
+                # pre-generation re-scan doesn't trip on them.
+                acknowledged=document.dismissed,
             )
             draft = _stream_into(placeholder, chunks, started)
     except (carenotes.CareNoteError, backends.BackendError) as exc:
@@ -1259,10 +1592,11 @@ def render_refinement(document: batch.Document, draft_state: dict) -> None:
                         document.redacted_text,
                         draft_state["deidentified"],
                         instruction,
-                        backends.select_backend()[1],
+                        _active_backend()[1],
                         stream=True,
                         history=draft_state["history"],
                         phi_values=list(document.phi_map.values()),
+                        acknowledged=document.dismissed,
                     )
                     revised = _stream_into(placeholder, chunks, started)
             except (carenotes.CareNoteError, backends.BackendError) as exc:
@@ -1336,13 +1670,127 @@ def render_reidentification(document: batch.Document, draft_state: dict) -> None
             )
 
 
+def _render_template_uploader() -> None:
+    """Let a clinic add its own table-based .docx form to the selector.
+
+    Parsing and storage are local (`template_ingest`); nothing is sent
+    anywhere. A blank template carries no PHI, so it is safe to persist.
+    """
+    from carescribe.core import clinical_forms, template_ingest
+
+    with st.expander("➕ Add your clinic's own template (.docx)"):
+        st.caption(
+            "A table-based Word form — label cells with blank cells beside them. "
+            "CareScribe reads its structure on this computer; nothing leaves the device."
+        )
+        upload = st.file_uploader("Template file", type=["docx"], key="clinical_form_template_upload")
+        if upload is None:
+            return
+        try:
+            preview = template_ingest.parse_template_bytes(upload.getvalue(), form_id="__preview__")
+        except clinical_forms.ClinicalFormError as exc:
+            st.error(str(exc))
+            return
+        sections = len({f.key.split(".")[0] for f in preview.fields})
+        st.success(
+            f"Detected **{len(preview.fields)}** fields across **{sections}** section(s), "
+            f"plus {len(preview.header_fields)} header field(s)."
+        )
+        st.write([f.label for f in preview.fields])
+        if st.button("Save this template", key="clinical_form_template_save"):
+            template_ingest.save_template(upload.getvalue(), upload.name)
+            st.success(f"Saved “{preview.title}”. Choose it from the Form list below.")
+            st.rerun()
+
+
+def _render_reference_uploader() -> None:
+    """Add clinic reference files (formulary, pathways, protocols) to a local
+    library. They are shown to the clinician during review — never sent to the
+    model — so a dose or a referral criterion is never paraphrased."""
+    from carescribe.core import reference_library
+
+    loaded = reference_library.sources()
+    label = "📚 Reference material" + (f" ({len(loaded)} file(s))" if loaded else "")
+    with st.expander(label):
+        st.caption(
+            "Formularies, care pathways, local protocols (.txt or .md, no patient "
+            "data). Retrieved verbatim into the review view as an aid — not fed to "
+            "the model."
+        )
+        for name, chunk_count in loaded:
+            cols = st.columns([4, 1])
+            cols[0].markdown(f"- **{name}** · {chunk_count} passage(s)")
+            if cols[1].button("Remove", key=f"ref_rm_{name}"):
+                reference_library.remove_file(name)
+                st.rerun()
+        upload = st.file_uploader(
+            "Add a reference file", type=["txt", "md"], key="reference_upload"
+        )
+        if upload is not None and st.button("Add to library", key="reference_add"):
+            try:
+                reference_library.add_file(upload.name, upload.getvalue())
+                st.success("Added.")
+            except reference_library.ReferenceError as exc:
+                st.error(str(exc))
+            st.rerun()
+
+
+def _render_reference_panel(spec, query: str) -> None:
+    """Verbatim reference passages, retrieved per field at the granularity the
+    planner chose for it. Read-only — never sent to the model."""
+    from carescribe.core import reference_library, retrieval_planner
+
+    if reference_library.is_empty() or not (query or "").strip():
+        return
+
+    plans = retrieval_planner.plan(spec, query)
+    groups: list[tuple[str, list]] = []
+    seen: set[tuple[str, str]] = set()
+    for field_plan in plans.values():
+        if not field_plan.want_reference:
+            continue
+        hits = reference_library.search(
+            field_plan.query, k=3, granularity=field_plan.granularity
+        )
+        fresh = [h for h in hits if (h.source, h.text) not in seen]
+        for h in fresh:
+            seen.add((h.source, h.text))
+        if fresh:
+            groups.append((field_plan.field_label, fresh))
+    if not groups:
+        return
+
+    total = sum(len(hits) for _label, hits in groups)
+    with st.expander(f"📚 Relevant reference material ({total})"):
+        st.caption(
+            "Verbatim passages matched per field. Not sent to the model — for "
+            "your judgement while reviewing."
+        )
+        for label, hits in groups:
+            st.markdown(f"##### {label}")
+            for hit in hits:
+                source = f"**{hit.source}**" + (f" — {hit.heading}" if hit.heading else "")
+                st.markdown(source)
+                st.markdown(f"> {hit.text}")
+
+
 def render_clinical_form_panel(docs: dict) -> None:
     from carescribe.core import clinical_forms
 
     approved = [doc for doc in docs.values() if doc.approved]
     if not approved:
-        st.info("Approve at least one document in step 3 to generate a clinical form.")
+        st.markdown(
+            ui.empty_state(
+                "stamp", "Nothing approved yet",
+                "Approve a document in step 3, then pick a clinical form to "
+                "fill from its de-identified text.",
+            ),
+            unsafe_allow_html=True,
+        )
         return
+
+    _render_template_uploader()
+    _render_reference_uploader()
 
     form_options = clinical_forms.available_forms()
     form_id = st.selectbox(
@@ -1391,21 +1839,32 @@ def render_clinical_form_panel(docs: dict) -> None:
 
 
 def _run_form_generation(docs: dict, selected_names: list[str], spec, draft: dict) -> None:
-    from carescribe.core import clinical_forms
+    from carescribe.core import clinical_forms, exemplars, retrieval_planner
 
     sources = [(name, docs[name].redacted_text, docs[name].phi_map) for name in selected_names]
     phi_values = [v for name in selected_names for v in docs[name].phi_map.values()]
+    acknowledged = [v for name in selected_names for v in docs[name].dismissed]
     combined_text, merged_map = clinical_forms.combine_sources(sources)
     draft["combined_text"] = combined_text
     draft["merged_phi_map"] = merged_map
+
+    plans = retrieval_planner.plan(spec, combined_text)
+    house_style: dict[str, list[str]] = {}
+    for key, field_plan in plans.items():
+        if not field_plan.want_exemplars:
+            continue
+        hits = exemplars.retrieve(spec.form_id, key, field_plan.query)
+        if hits:
+            house_style[key] = hits
 
     placeholder = st.empty()
     started = time.monotonic()
     try:
         with st.spinner("Generating on this computer — this can take a minute. Nothing leaves your device."):
-            _, backend, _label = backends.select_backend()
+            _, backend, _label = _active_backend()
             chunks = clinical_forms.generate_form_document(
                 combined_text, spec, backend, stream=True, phi_values=phi_values,
+                acknowledged=acknowledged, exemplars=house_style,
             )
             raw = _stream_into(placeholder, chunks, started)
     except (carenotes.CareNoteError, backends.BackendError) as exc:
@@ -1422,11 +1881,28 @@ def _run_form_generation(docs: dict, selected_names: list[str], spec, draft: dic
 
 
 def render_form_draft(docs: dict, selected_names: list[str], spec, draft: dict) -> None:
-    from carescribe.core import clinical_forms
+    from carescribe.core import clinical_forms, exemplars
 
     st.markdown("#### Draft (de-identified)")
     st.caption("Still contains placeholders — safe to display, share, and save.")
     st.markdown(clinical_forms.render_preview(spec, draft["field_values"]))
+
+    saved = exemplars.count(spec.form_id)
+    cols = st.columns([3, 2])
+    with cols[0]:
+        if st.button("★ Save as house-style example", key=f"form_exemplar_{id(draft)}"):
+            try:
+                exemplars.add_exemplar(spec.form_id, draft["field_values"])
+                st.success("Saved. Future drafts of this form will match its style.")
+            except exemplars.ExemplarError as exc:
+                st.warning(str(exc))
+            st.rerun()
+    with cols[1]:
+        if saved:
+            st.caption(f"{saved} house-style example{'s' if saved != 1 else ''} on file — "
+                       "used to steer generation.")
+
+    _render_reference_panel(spec, draft.get("combined_text", ""))
 
     render_form_refinement(docs, selected_names, spec, draft)
     render_form_reidentification(spec, draft)
@@ -1444,6 +1920,7 @@ def render_form_refinement(docs: dict, selected_names: list[str], spec, draft: d
             placeholder="e.g. expand the risk assessment section",
         )
         phi_values = [v for name in selected_names for v in docs[name].phi_map.values()]
+        acknowledged = [v for name in selected_names for v in docs[name].dismissed]
         status = ollama_client.status()
         if st.button(
             "Apply", key=f"form_refine_go_{id(draft)}",
@@ -1455,8 +1932,9 @@ def render_form_refinement(docs: dict, selected_names: list[str], spec, draft: d
                 with st.spinner("Revising…"):
                     chunks = clinical_forms.refine_form_document(
                         draft["combined_text"], draft["deidentified"], instruction, spec,
-                        backends.select_backend()[1], stream=True,
+                        _active_backend()[1], stream=True,
                         history=draft["history"], phi_values=phi_values,
+                        acknowledged=acknowledged,
                     )
                     revised = _stream_into(placeholder, chunks, started)
             except (carenotes.CareNoteError, backends.BackendError) as exc:
@@ -1533,7 +2011,6 @@ def _as_docx(text: str) -> bytes:
 
 def section_handoff() -> None:
     docs = documents()
-    st.divider()
     st.subheader("5. Generate report")
 
     mode = st.radio(
@@ -1551,7 +2028,10 @@ def section_handoff() -> None:
             "Generate report", disabled=True,
             help=carenotes.DISABLED_MESSAGE, use_container_width=False,
         )
-        st.info(carenotes.DISABLED_MESSAGE)
+        st.markdown(
+            ui.empty_state("pen", "Draft generation", carenotes.DISABLED_MESSAGE),
+            unsafe_allow_html=True,
+        )
         st.caption(
             "Generation runs only on approved text. The model receives the "
             "de-identified document and nothing else — the identity mapping "
@@ -1579,13 +2059,40 @@ def section_handoff() -> None:
 # Main
 # --------------------------------------------------------------------------
 
+def _pipeline_step(docs: dict) -> int:
+    """The 0-based step the reviewer stands on, for components.step_tracker()."""
+    if not docs:
+        return 0
+    values = list(docs.values())
+    if not all(d.analyzed or d.error for d in values):
+        return 1
+    if not any(d.approved for d in values):
+        return 2
+    if not all(d.approved or d.error for d in values):
+        return 3
+    return 4
+
+
+def _privacy_state() -> str:
+    if backends.cloud_enabled():
+        return "cloud"
+    if st.session_state.get("downloading_model"):
+        return "downloading"
+    return "offline"
+
+
 def main() -> None:
+    ui_theme.inject()
     render_sidebar()
 
-    st.title("CareScribe — de-identification & review")
-    st.caption(
-        "Load a batch, de-identify each document locally on the CPU, review and "
-        "correct what was found, then approve. Nothing leaves this machine."
+    st.markdown(
+        ui.hero(
+            "CareScribe — de-identification & review",
+            "Load a batch, de-identify each document locally on the CPU, review "
+            "and correct what was found, then approve. Nothing leaves this machine.",
+            _privacy_state(),
+        ),
+        unsafe_allow_html=True,
     )
 
     # Load the model before anything can ask for it, so the first click is
@@ -1595,11 +2102,26 @@ def main() -> None:
         render_engine_failure(engine_state)
         return
 
-    section_load()
-    section_process()
-    section_review()
-    section_batch_status()
-    section_handoff()
+    docs = documents()
+    order = st.session_state.order
+    st.markdown(ui.step_tracker(_pipeline_step(docs)), unsafe_allow_html=True)
+
+    # Each numbered step gets its own card (see ui.theme.CSS). Sections still
+    # guard themselves — the predicates here only decide whether to open a card,
+    # so a step that has nothing to show never leaves an empty box behind.
+    has_review = bool(docs) and any(
+        docs[name].analyzed and not docs[name].error for name in order
+    )
+    steps = [(section_load, True), (section_process, bool(docs)),
+             (section_review, has_review), (section_batch_status, bool(docs)),
+             (section_handoff, True)]
+    for section, show in steps:
+        if not show:
+            continue
+        with st.container(border=True):
+            # Marks this border wrapper as a step card for ui.theme.CSS; hidden.
+            st.markdown('<span class="cs-card"></span>', unsafe_allow_html=True)
+            section()
 
     st.divider()
     st.caption(

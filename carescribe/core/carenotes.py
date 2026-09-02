@@ -18,10 +18,11 @@ the seam where a provider gets swapped is one method wide.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Iterable, Iterator, Protocol
 
-from . import mapping, ollama_client
+from . import deidentify, mapping, ollama_client
 
 PROMPT_DIR = Path(__file__).resolve().parent.parent / "prompts"
 
@@ -52,20 +53,31 @@ class CareNoteError(RuntimeError):
 
 
 class Backend(Protocol):
-    """One method wide: the seam a different provider would be swapped in at."""
+    """One method wide: the seam a different provider would be swapped in at.
 
-    def generate(self, system: str, prompt: str, stream: bool = True) -> Iterator[str]:
+    ``grammar`` is an optional GBNF string (see :mod:`carescribe.core.grammar`);
+    a backend that cannot use it ignores it.
+    """
+
+    def generate(
+        self, system: str, prompt: str, stream: bool = True, *, grammar: str | None = None
+    ) -> Iterator[str]:
         ...
 
 
 class OllamaBackend:
     """Local generation through the loopback-pinned Ollama daemon."""
 
-    def __init__(self, model: str, temperature: float = 0.2) -> None:
+    def __init__(self, model: str, temperature: float = 0.0) -> None:
         self.model = model
         self.temperature = temperature
 
-    def generate(self, system: str, prompt: str, stream: bool = True) -> Iterator[str]:
+    def generate(
+        self, system: str, prompt: str, stream: bool = True, *, grammar: str | None = None
+    ) -> Iterator[str]:
+        # Ollama's HTTP API has no first-class GBNF field across the versions
+        # CareScribe supports, so the grammar is accepted and ignored here; the
+        # local GGUF backend is where constrained decoding runs.
         try:
             yield from ollama_client.generate(
                 self.model, system, prompt, stream, temperature=self.temperature
@@ -115,6 +127,21 @@ def render_prompt(
     )
 
 
+def _value_present(needle: str, haystack: str) -> bool:
+    """True only when ``needle`` occurs in ``haystack`` as a whole token run.
+
+    Both are already casefolded and whitespace-collapsed. The match must not be
+    flanked by another alphanumeric character, so a real leaked identifier —
+    which is always delimited by spaces or punctuation — is caught, while a
+    short mapping value that is merely a fragment of an ordinary word is not
+    (``"mm"`` inside ``"community"``, ``"sr"`` inside ``"disorder"``). Without
+    this, a 2–3 character mapping value (an honorific, a set of initials, a room
+    code, a token a reviewer added by hand) refuses generation on text that is
+    perfectly clean.
+    """
+    return re.search(rf"(?<![0-9a-z]){re.escape(needle)}(?![0-9a-z])", haystack) is not None
+
+
 def assert_deidentified(text: str, phi_values: Iterable[str] | None = None) -> None:
     """Refuse to send anything carrying a value from the identity mapping.
 
@@ -123,18 +150,61 @@ def assert_deidentified(text: str, phi_values: Iterable[str] | None = None) -> N
     of PHI — the review gate upstream is what does that — but it turns the one
     failure that would matter most, a mapping value reaching the model, into a
     crash rather than a silent send.
+
+    The comparison is token-bounded, not a raw substring test: a value counts as
+    present only when it appears delimited by non-alphanumeric characters, so a
+    genuine leak still crashes but a short value coinciding with a fragment of
+    an ordinary word does not.
     """
     if not phi_values:
         return
     haystack = " ".join((text or "").split()).casefold()
     for value in phi_values:
         needle = " ".join(str(value or "").split()).casefold()
-        if len(needle) >= mapping.MIN_VALUE_LENGTH and needle in haystack:
+        if len(needle) < mapping.MIN_VALUE_LENGTH:
+            continue
+        if _value_present(needle, haystack):
             raise CareNoteError(
                 "Refusing to generate: the text handed to the model still "
                 "contains a value from the identity mapping. This is a bug — "
                 "generation must only ever receive approved de-identified text."
             )
+
+
+def assert_no_residual_identifiers(text: str, acknowledged: Iterable[str] = ()) -> None:
+    """Refuse to send text the residual sweep still flags.
+
+    :func:`assert_deidentified` only catches values that are in the identity
+    mapping — something a detector found. This is the complementary check: an
+    identifier *no* layer ever detected is not in the mapping and not a
+    placeholder, so only a re-scan of the outgoing text can catch it. Runs
+    :func:`carescribe.core.deidentify.residual_scan` and raises unless every
+    finding is one the reviewer explicitly cleared at approval (``acknowledged``
+    — the document's ``dismissed`` list, e.g. a town used as a place of care).
+
+    Approval already runs this sweep; reaching here with a fresh finding means
+    the approved text and the text handed to the model have diverged, or a
+    dismissal was lost. The crash is deliberate — a leak becomes a stop, not a
+    send.
+    """
+
+    def norm(value: str) -> str:
+        return " ".join(str(value or "").split()).casefold()
+
+    cleared = {norm(value) for value in acknowledged}
+    leaked = [
+        value
+        for value in deidentify.residual_scan(text or "")
+        if norm(value) not in cleared
+    ]
+    if leaked:
+        raise CareNoteError(
+            "Refusing to generate: the text handed to the model still contains "
+            "what look like identifiers the review did not clear — "
+            + ", ".join(repr(value) for value in leaked[:10])
+            + ". Generation must only ever receive approved de-identified text; "
+            "treat this as a bug in the approval path."
+        )
 
 
 def generate_document(
@@ -145,13 +215,21 @@ def generate_document(
     *,
     custom_instruction: str = "",
     phi_values: Iterable[str] | None = None,
+    acknowledged: Iterable[str] = (),
     system: str | None = None,
     user_prompt: str | None = None,
+    grammar: str | None = None,
 ) -> Iterator[str]:
     """Stream a drafted document from approved de-identified text.
 
     ``phi_values`` is the mapping's real values, passed **only** so this
     function can assert they are absent. They are never forwarded to a backend.
+
+    ``acknowledged`` is the document's ``dismissed`` list — residual-sweep
+    findings the reviewer looked at and cleared. It carries no PHI (every
+    string in it is one the reviewer read in the de-identified text) and is
+    used only to keep :func:`assert_no_residual_identifiers` from tripping on
+    a finding approval already accepted.
 
     ``system``/``user_prompt`` let a caller (the clinical-form pipeline)
     supply a fully-built prompt instead of looking one up by ``template``
@@ -162,12 +240,16 @@ def generate_document(
         raise CareNoteError("There is no de-identified text to work from.")
 
     assert_deidentified(deidentified_text, phi_values)
+    assert_no_residual_identifiers(deidentified_text, acknowledged)
     prompt = user_prompt if user_prompt is not None else render_prompt(
         deidentified_text, template, custom_instruction
     )
     assert_deidentified(prompt, phi_values)
 
-    return backend.generate(system or system_prompt(), prompt, stream)
+    # Only pass `grammar` when there is one, so a backend (or a test stub) whose
+    # generate() predates the keyword still works for the unconstrained path.
+    extra = {"grammar": grammar} if grammar else {}
+    return backend.generate(system or system_prompt(), prompt, stream, **extra)
 
 
 def refine_document(
@@ -179,6 +261,7 @@ def refine_document(
     *,
     history: list[tuple[str, str]] | None = None,
     phi_values: Iterable[str] | None = None,
+    acknowledged: Iterable[str] = (),
     system: str | None = None,
     refine_prompt_name: str = "refine.txt",
 ) -> Iterator[str]:
@@ -201,6 +284,7 @@ def refine_document(
 
     assert_deidentified(draft, phi_values)
     assert_deidentified(instruction, phi_values)
+    assert_no_residual_identifiers(deidentified_text, acknowledged)
 
     steer = instruction.strip()
     if history:
@@ -281,6 +365,7 @@ __all__ = [
     "OllamaBackend",
     "TEMPLATES",
     "assert_deidentified",
+    "assert_no_residual_identifiers",
     "finalise",
     "generate_care_note",
     "generate_document",

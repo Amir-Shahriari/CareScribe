@@ -31,13 +31,22 @@
   // Streamlit's component postMessage protocol, hand-rolled -- no external
   // library, no CDN. Three message types out (componentReady,
   // setComponentValue, setFrameHeight), one in (render).
+  // Every message MUST carry isStreamlitMessage: true -- the Streamlit host
+  // drops postMessages without it, so the component never appears to load.
   function sendValue(value) {
-    window.parent.postMessage({ type: "streamlit:setComponentValue", value: value }, "*");
+    window.parent.postMessage(
+      { isStreamlitMessage: true, type: "streamlit:setComponentValue", value: value },
+      "*"
+    );
   }
 
   function setFrameHeight() {
     window.parent.postMessage(
-      { type: "streamlit:setFrameHeight", height: document.documentElement.scrollHeight },
+      {
+        isStreamlitMessage: true,
+        type: "streamlit:setFrameHeight",
+        height: document.documentElement.scrollHeight,
+      },
       "*"
     );
   }
@@ -63,7 +72,10 @@
     }
   });
 
-  window.parent.postMessage({ type: "streamlit:componentReady", apiVersion: 1 }, "*");
+  window.parent.postMessage(
+    { isStreamlitMessage: true, type: "streamlit:componentReady", apiVersion: 1 },
+    "*"
+  );
   setFrameHeight();
 </script>
 </body>

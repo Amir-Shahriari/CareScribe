@@ -84,6 +84,10 @@ class Document:
     source_bytes: bytes | None = None
     has_text_boxes: bool = False
     text_boxes_acknowledged: bool = False
+    # The reviewer has ticked "I have read the redacted preview and confirm it
+    # is safe to release." Gates approval; recorded (as a bool, no PHI) in the
+    # audit sidecar.
+    attested: bool = False
     approved_docx_path: str = ""
     entities: list[dict] = field(default_factory=list)
     redacted_text: str = ""
@@ -296,14 +300,16 @@ def write_review_record(
     flags_shown: int,
     flags_redacted: int,
     flags_dismissed: int,
+    attested: bool = False,
 ) -> Path:
     """Write the no-PHI audit sidecar for one approved document.
 
     Evidence that a consistent review happened, and nothing more. It records
     *counts* and *types*: how many redacted identifiers were auto-resolved by
     confidence tiering versus actually reviewed by the practitioner, how many
-    highlighted residual spans were shown and what became of them, and how
-    many placeholders of each type the document ended up with.
+    highlighted residual spans were shown and what became of them, how many
+    placeholders of each type the document ended up with, and whether the
+    reviewer ticked the read-and-confirmed attestation.
 
     It deliberately holds no identifier value, no placeholder-to-value mapping,
     and no document text. There is no parameter through which one could reach
@@ -333,6 +339,7 @@ def write_review_record(
             "dismissed": int(flags_dismissed),
         },
         "placeholders_by_type": dict(sorted(tally.items())),
+        "reviewer_attested": bool(attested),
         "contains_phi": False,
     }
 

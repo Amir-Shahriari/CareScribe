@@ -9,8 +9,7 @@ $ErrorActionPreference = "Stop"
 Set-Location (Split-Path $PSScriptRoot -Parent)
 
 Write-Host "Installing build dependencies..."
-python -m pip install --quiet pyinstaller pywebview psutil
-python -m pip install --quiet llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+python -m pip install -r packaging\requirements-build.txt --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
 
 Write-Host "Generating icon..."
 python packaging\make_icon.py
@@ -21,6 +20,10 @@ python -m PyInstaller packaging\carescribe.spec --noconfirm --clean
 $exe = "dist\CareScribe\CareScribe.exe"
 if (-not (Test-Path $exe)) { throw "Build failed: $exe not found" }
 Write-Host "Built $exe"
+
+Write-Host "Verifying the frozen app launches..."
+python packaging\verify_frozen.py dist\CareScribe
+if ($LASTEXITCODE -ne 0) { throw "Frozen app failed its launch smoke check (exit $LASTEXITCODE)" }
 
 # ---------------------------------------------------------------------------
 # Code signing. UNSIGNED BUILDS TRIGGER A SMARTSCREEN WARNING.

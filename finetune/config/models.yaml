@@ -1,0 +1,46 @@
+# Base-model candidates for the Phase-0 bake-off. Decide by the Phase-D eval on
+# the RTX 5080; default to phi35_mini if the two are within noise.
+#
+# base_model.name is what finetune.train.sft reads when --base-model is omitted.
+# Set it to the winner after the bake-off.
+
+base_model:
+  name: "microsoft/Phi-3.5-mini-instruct"   # bake-off default
+
+candidates:
+  phi35_mini:
+    hf_id: "microsoft/Phi-3.5-mini-instruct"
+    params: "3.8B"
+    licence: "MIT"
+    notes: "No attribution burden; strong format-following; 128k context."
+  granite_3b:
+    hf_id: "ibm-granite/granite-3.1-3b-a800m-instruct"
+    params: "3.2B"
+    licence: "Apache-2.0"
+    notes: "Enterprise-tuned; clean licence; bake-off fallback."
+  medgemma_4b:
+    hf_id: "google/medgemma-4b-it"
+    params: "4B"
+    licence: "Gemma / HAI-DEF (commercial OK; must pass through terms + "
+             "prohibited-use policy to end users)"
+    notes: "Medical-domain priors; needs a 'you are advising a clinician' "
+           "system framing or it adds disclaimers (matters less post-SFT)."
+  qwen25_3b:
+    hf_id: "Qwen/Qwen2.5-3B-Instruct"
+    params: "3.1B"
+    licence: "Qwen research (NOT shippable commercially)"
+    notes: "Reference only — the quality bar to beat."
+
+# Optional GPU-detected inference upgrade (not fine-tuned here; used stock or
+# LoRA'd later on rented 24 GB+). model_setup offers it as a one-time download.
+gpu_variant:
+  hf_id: "google/medgemma-27b-text-it"
+  quant: "Q4_K_M"
+  min_vram_gb: 24
+
+adapter:
+  path: ""          # set after training; empty => start from base
+
+generation:
+  temperature: 0.0  # greedy everywhere — training, eval, production
+  max_new_tokens: 900

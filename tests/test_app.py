@@ -5,6 +5,7 @@ No server of any kind is needed — the whole stage is local and offline, which
 is precisely what makes it testable this way.
 """
 
+import json
 import warnings
 from pathlib import Path
 
@@ -60,7 +61,9 @@ def text_of(*element_lists) -> str:
 
 def test_empty_app_renders():
     app = run_app()
-    assert any("CareScribe" in heading.value for heading in app.title)
+    # The masthead ships as an HTML component (components.hero), not st.title.
+    assert "CareScribe" in text_of(app.markdown)
+    assert "cs-steps" in text_of(app.markdown)  # the step tracker rendered
 
 
 def test_sidebar_reports_the_detection_layers():
@@ -96,8 +99,14 @@ def test_review_panel_appears_once_analysed():
 def test_identifier_table_has_the_review_columns():
     app = run_app(**analysed_batch(1))
     editor = data_editors(app)[0]
-    assert list(editor.value.columns) == ["value", "type", "placeholder", "action"]
+    assert list(editor.value.columns) == [
+        "value", "type", "placeholder", "action", "confidence"
+    ]
     assert (editor.value["action"] == "Redact").all()
+    # Every row carries a confidence tier, and single-detector rows sort first.
+    assert set(editor.value["confidence"]) <= {"auto", "review"}
+    tiers = list(editor.value["confidence"])
+    assert tiers == sorted(tiers, key=lambda tier: tier != "review")
 
 
 def test_preview_shows_placeholders_not_identifiers():
@@ -117,8 +126,9 @@ def test_document_counter_is_shown():
     assert "of 4" in text_of(app.caption)
 
 
-def test_a_document_with_only_auto_confidence_entities_needs_one_click():
-    """The core promise of this redesign: nothing outstanding, no ticks.
+def test_a_clean_auto_confidence_document_is_gated_only_by_the_attestation():
+    """After the read-and-confirmed tick, a clean auto-confidence document has
+    nothing else in its way: no per-span confirmations, no residual findings.
 
     Deliberately plain, lowercase prose — the real fixture text used
     elsewhere in this file trips the (entity-independent, by design)
@@ -137,9 +147,15 @@ def test_a_document_with_only_auto_confidence_entities_needs_one_click():
         analyzed=True,
     )
     state = {"docs": {document.name: document}, "order": [document.name], "selected": document.name}
+
     app = run_app(**state)
-    reason_captions = [c.value for c in app.caption if "Approve is disabled" in c.value]
-    assert reason_captions == []
+    reasons = [c.value for c in app.caption if "Approve is disabled" in c.value]
+    assert reasons == ["Approve is disabled — Tick the read-and-confirmed box above."]
+
+    document.attested = True
+    app = run_app(**state)
+    reasons = [c.value for c in app.caption if "Approve is disabled" in c.value]
+    assert reasons == []
 
 
 def test_a_batch_of_clean_documents_needs_roughly_one_click_each(tmp_path, monkeypatch):
@@ -170,20 +186,71 @@ def test_a_batch_of_clean_documents_needs_roughly_one_click_each(tmp_path, monke
         app.session_state["selected"] = name
         app.run()
         clicks += 1  # selecting the document
+        app.checkbox(key=f"attest_{name}").check().run()
+        clicks += 1  # the read-and-confirmed tick
         app.button(key=f"approve_{name}").click()
         app.run()
-        clicks += 1  # the one Approve click
+        clicks += 1  # the Approve click
         assert docs[name].approved
 
-    # 5 documents, 2 interactions each (select + approve) — no per-document
-    # checkbox ticks, no per-span decisions, since every entity is "auto"
-    # and the text is clean of anything the residual scanner would flag.
-    assert clicks == 10
+    # 5 documents, 3 interactions each (select + attest + approve) — no per-span
+    # decisions, since every entity is "auto" and the text is clean of anything
+    # the residual scanner would flag. The attestation is the one tick kept by
+    # design: a human says they read the redacted text.
+    assert clicks == 15
 
 
 def test_human_review_warning_is_shown():
     app = run_app(**analysed_batch(1))
     assert "Human review required" in text_of(app.warning)
+
+
+def _clean_auto_doc(name: str = "clean.txt") -> batch.Document:
+    return batch.Document(
+        name=name,
+        raw_text="the patient was seen today and remains well.",
+        redacted_text="[PATIENT] was seen today and remains well.",
+        entities=[{
+            "type": "PATIENT_NAME", "value": "the patient",
+            "placeholder": "[PATIENT]", "action": "Redact", "confidence": "auto",
+        }],
+        analyzed=True,
+    )
+
+
+def test_approval_is_gated_on_the_attestation(tmp_path, monkeypatch):
+    monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path / "deidentified")
+    document = _clean_auto_doc()
+    state = {"docs": {document.name: document}, "order": [document.name], "selected": document.name}
+
+    app = run_app(**state)
+    assert any("read-and-confirmed" in c.value for c in app.caption)
+    assert not document.approved
+
+    document.attested = True
+    app = run_app(**state)
+    app.button(key="approve_clean.txt").click().run()
+    assert document.approved
+    record = json.loads(
+        (tmp_path / "deidentified" / "clean.review.json").read_text(encoding="utf-8")
+    )
+    assert record["reviewer_attested"] is True
+
+
+def test_batch_approve_leaves_an_unattested_document(tmp_path, monkeypatch):
+    monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path / "deidentified")
+    docs = {name: _clean_auto_doc(name) for name in ("c1.txt", "c2.txt")}
+    docs["c1.txt"].attested = True  # only one reviewer has ticked the box
+
+    app = AppTest.from_file(APP, default_timeout=120)
+    for key, value in {"docs": docs, "order": list(docs), "selected": "c1.txt"}.items():
+        app.session_state[key] = value
+    app.run()
+    app.button(key="approve_batch").click().run()
+
+    assert docs["c1.txt"].approved
+    assert not docs["c2.txt"].approved
+    assert "c2.txt" in text_of(app.warning)
 
 
 # ==========================================================================
@@ -219,7 +286,7 @@ def test_generate_report_is_gated_on_approval():
 
     generate = [button for button in app.button if button.label == "Generate report"]
     assert generate and generate[0].disabled
-    assert "approve the document first" in text_of(app.info)
+    assert "approve the document first" in text_of(app.markdown)
 
 
 def test_generation_refuses_empty_text():

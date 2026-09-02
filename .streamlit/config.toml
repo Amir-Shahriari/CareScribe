@@ -10,6 +10,19 @@ address = "127.0.0.1"
 headless = false
 # Uploaded clinical documents can be large; 50MB is plenty and bounds memory.
 maxUploadSize = 50
+# Re-run automatically when a source file changes.
+runOnSave = true
 
 [runner]
 magicEnabled = false
+
+[theme]
+# CareScribe visual identity — a calm, minimal clinical surface modelled on the
+# medgpt1.1 reference UI. The rest of the styling is injected as CSS by app.py
+# (_inject_app_css): card layout, typography scale, component state vocabulary.
+base = "light"
+primaryColor = "#4f46e5"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f7f8fa"
+textColor = "#101828"
+font = "sans serif"

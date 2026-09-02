@@ -1,0 +1,37 @@
+# QLoRA SFT — tuned for a single 16 GB GPU (RTX 5080).
+# Read by finetune.train.sft.TrainConfig.from_yaml.
+
+method:
+  name: "qlora"          # 4-bit NF4 base + LoRA
+
+lora:
+  rank: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+optim:
+  learning_rate: 0.0001   # 1e-4
+  weight_decay: 0.0
+  scheduler: "cosine"
+  warmup_ratio: 0.03
+
+runtime:
+  devices: 1
+  batch_size: 4                       # template targets are long; keep VRAM headroom
+  gradient_accumulation_steps: 4     # effective batch 16
+  max_seq_length: 3072               # uploaded-template targets run long
+  gradient_checkpointing: true
+  optim: "paged_adamw_8bit"
+  bf16: true
+  packing: false                     # correctness: no flash-attn on Windows,
+                                     # so packing could bleed attention across
+                                     # samples. Off.
+
+epochs: 2
+
+eval:
+  steps: 200
+  save_steps: 400
+
+seed: 0

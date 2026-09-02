@@ -1,0 +1,33 @@
+[project]
+name = "medgpt-finetune"
+version = "0.1.0"
+description = "Local, CPU-only synthetic-encounter datagen + LoRA fine-tuning for the CareScribe clinical LLM. Not part of the shipping app."
+requires-python = ">=3.11"
+# Isolated dependency set — deliberately NOT pinned to exact versions, and
+# NOT installed by CI. Kept separate from the app's requirements.txt so the
+# heavy training stack (torch/peft/trl) never lands in the desktop bundle.
+dependencies = [
+    "torch",
+    "peft",
+    "trl",
+    "transformers",
+    "datasets",
+    "pydantic>=2",
+    "pyyaml",
+    "pytest",
+]
+# datagen (schema, sampler, vignettes, render_note, identifiers, the whole
+# assemble/ pipeline) is standard-library + pydantic + carescribe only, so the
+# M1 dry run and the finetune test suite need nothing above. torch/peft/trl are
+# pulled only for the train/ workstream.
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["finetune*"]
+exclude = ["finetune.tests*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

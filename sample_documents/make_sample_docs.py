@@ -344,9 +344,248 @@ def build_treatment_review_source(path):
     doc.save(path)
 
 
+# ---------------------------------------------------------------------------
+# Document 5: Hospital discharge summary
+# ---------------------------------------------------------------------------
+def build_discharge_summary(path):
+    doc = Document()
+    doc.add_heading("Discharge Summary — Merri Creek District Hospital", level=0)
+
+    _para(doc, "210 Sydney Road, Coburg VIC 3058  |  Ph: (03) 5551 7700  |  Fax: (03) 5551 7701")
+    doc.add_paragraph()
+
+    _heading(doc, "Patient Details", level=2)
+    _two_col_table(doc, [
+        ("Full name", "Jordan Elliot Whitfield"),
+        ("Date of birth", "12/04/1985"),
+        ("Medicare number", "2934 5671 0"),
+        ("UR number", "MCDH-410287"),
+        ("Address", "45 Kestrel Ave, Coburg VIC 3058"),
+        ("Admission date", "14 October 2025"),
+        ("Discharge date", "16 October 2025"),
+        ("Admitting unit", "Emergency / Orthopaedics (short-stay)"),
+        ("Treating consultant", "Dr. Farid Kassab, Orthopaedic Registrar"),
+        ("GP copied", "Dr. Susan Ng, Riverside Family Medical Practice"),
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Presenting Complaint", level=2)
+    doc.add_paragraph(
+        "Mr Whitfield presented to the Emergency Department via ambulance following a workplace "
+        "incident at Coburg Logistics Pty Ltd on 14 October 2025, where he stepped back sharply to "
+        "avoid a reversing forklift being operated by a colleague and fell against a steel shelving "
+        "unit. He sustained a closed injury to the right wrist and superficial lacerations to the "
+        "right forearm. No loss of consciousness and no head injury. He was visibly shaken in the "
+        "department and reported his heart 'racing' for over an hour afterwards, with intrusive "
+        "replaying of the near-miss."
+    )
+
+    _heading(doc, "Medications Changed on Discharge", level=2)
+    _grid_table(doc, ["Medication", "Prior dose", "New dose", "Reason"], [
+        ["Paracetamol", "Nil", "1 g PO QID PRN", "Post-fracture analgesia"],
+        ["Oxycodone IR (Endone)", "Nil", "5 mg PO 4–6 hourly PRN, max 5 days", "Short-term breakthrough pain; wean before GP review"],
+        ["Naproxen", "Nil", "Not commenced — avoided", "NSAID deferred pending orthopaedic review of fracture healing"],
+        ["Atorvastatin", "20 mg nocte", "20 mg nocte (unchanged)", "Continue usual dose — no interaction with new analgesia"],
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Discharge Diagnosis", level=2)
+    doc.add_paragraph(
+        "1. Closed, minimally displaced fracture of the right distal radius — managed conservatively "
+        "with a below-elbow backslab; orthopaedic outpatient review in 7–10 days for cast conversion "
+        "and repeat X-ray. 2. Superficial lacerations, right forearm, closed with sutures — for "
+        "removal by GP in 7 days. 3. Acute stress reaction following the precipitating workplace "
+        "incident — settled with reassurance overnight; no evidence of head injury. GP follow-up "
+        "recommended, with consideration of psychological referral if symptoms of anxiety, sleep "
+        "disturbance or intrusive memories persist beyond 2–3 weeks."
+    )
+
+    _heading(doc, "Follow-up Plan", level=2)
+    doc.add_paragraph(
+        "Discharged home with partner (Priya Whitfield) on 16 October 2025 in a stable condition, "
+        "mobilising independently, right upper limb in backslab with sling. Certified unfit for "
+        "usual warehouse duties for a minimum of 4 weeks; suitable for modified/office-based duties "
+        "once cleared by GP. Copy of this summary forwarded to Dr. Susan Ng, Riverside Family "
+        "Medical Practice, for ongoing care."
+    )
+
+    doc.save(path)
+
+
+# ---------------------------------------------------------------------------
+# Document 6: Structured risk assessment
+# ---------------------------------------------------------------------------
+def build_risk_assessment(path):
+    doc = Document()
+    doc.add_heading("Structured Risk Assessment — Northgate Psychology Clinic", level=0)
+
+    _para(doc, "8 Derby Street, Pascoe Vale VIC 3044  |  Ph: (03) 5551 3320  |  Fax: (03) 5551 3321")
+    doc.add_paragraph()
+
+    _heading(doc, "Client Details", level=2)
+    _two_col_table(doc, [
+        ("Full name", "Jordan Elliot Whitfield"),
+        ("Date of birth", "12/04/1985"),
+        ("Medicare number", "2934 5671 0"),
+        ("Assessment date", "10 February 2026"),
+        ("Assessing clinician", "Dr. Amelia Ferro, Clinical Psychologist"),
+        ("Reason for assessment", "Standard risk screen at initial consultation"),
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Risk Domain Ratings", level=2)
+    _two_col_table(doc, [
+        ("Self-harm", "Low"),
+        ("Suicide", "Low"),
+        ("Harm to others", "Nil identified"),
+        ("Self-neglect", "Low"),
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Self-Harm", level=2)
+    doc.add_paragraph(
+        "No history of self-harm at any age and no current urges or intent reported. Denies any "
+        "current or historical self-injurious behaviour. No identified means or method. Rated low "
+        "risk."
+    )
+
+    _heading(doc, "Suicide", level=2)
+    doc.add_paragraph(
+        "Reports brief passive ideation ('not wanting to wake up') during the worst week of "
+        "symptoms in early December 2025, with no plan, no intent and no access to means "
+        "identified at the time. No history of prior attempts. Ideation resolved alongside "
+        "improved sleep and has not recurred; denies any current ideation, plan or intent on "
+        "interview today. Protective factors include a stable marriage, supportive spouse, two "
+        "young children, an engaged employer, and good insight. Rated low risk."
+    )
+
+    _heading(doc, "Harm to Others", level=2)
+    doc.add_paragraph(
+        "No history of violence, aggression or threatening behaviour. Denies any current thoughts "
+        "of harming others and denies access to weapons. Some increased irritability noted by his "
+        "partner is assessed as consistent with adjustment symptoms rather than a risk indicator. "
+        "Rated nil identified risk."
+    )
+
+    _heading(doc, "Self-Neglect", level=2)
+    doc.add_paragraph(
+        "Self-care, hygiene, nutrition and household responsibilities remain at a normal level. "
+        "Continues to attend work on modified duties and manage day-to-day responsibilities. Has "
+        "paused his usual weekend football but reports this is by choice rather than inability to "
+        "function. No concerns regarding capacity for self-care. Rated low risk."
+    )
+    doc.add_paragraph()
+
+    _heading(doc, "Safety Plan", level=2)
+    _grid_table(doc, ["Element", "Detail"], [
+        ["Warning signs", "Sleep onset over 60 minutes for 3+ nights running; increased intrusive memories; withdrawing from Priya and the children"],
+        ["Internal coping strategies", "Diaphragmatic breathing (as taught in session); short walk; journalling"],
+        ["Social contacts for distraction", "Call brother-in-law; weekend football club group chat; visit parents in Bendigo"],
+        ["People who can help", "Priya Whitfield (spouse) — 0433 990 214"],
+        ["Professionals / agencies to contact", "Dr. Amelia Ferro (03) 5551 3320; Dr. Susan Ng (03) 5551 0192; Lifeline 13 11 14; Suicide Call Back Service 1300 659 467"],
+        ["Means restriction", "No firearms in the home; household medications moved to a locked cabinet at Priya's suggestion as a precaution"],
+        ["Reasons for living", "Children Kai and Mira; wanting to return to full duties and football; marriage to Priya"],
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Clinician Summary", level=2)
+    doc.add_paragraph(
+        "Overall risk is assessed as low across all domains at this time, reflecting a single "
+        "resolved episode of passive ideation in December 2025 rather than an ongoing pattern. No "
+        "changes to the current outpatient treatment plan are indicated on risk grounds. Safety "
+        "plan provided to client and reviewed collaboratively; to be revisited at each session and "
+        "immediately if any of the warning signs above recur."
+    )
+
+    doc.save(path)
+
+
+# ---------------------------------------------------------------------------
+# Document 7: MDT case conference minutes
+# ---------------------------------------------------------------------------
+def build_case_conference_note(path):
+    doc = Document()
+    doc.add_heading("MDT Case Conference — Minutes", level=0)
+
+    _para(doc, "Northgate Psychology Clinic, 8 Derby Street, Pascoe Vale VIC 3044  |  Ph: (03) 5551 3320")
+    doc.add_paragraph()
+
+    _para(doc, "24 March 2026, 2:00pm–2:45pm", bold_label="Date/Time: ")
+    _para(doc, "Return-to-work planning and continuation of psychological treatment",
+          bold_label="Purpose: ")
+    _para(doc, "Jordan Elliot Whitfield (DOB 12/04/1985, Medicare 2934 5671 0)", bold_label="Client: ")
+    doc.add_paragraph()
+
+    _heading(doc, "Attendees", level=2)
+    _grid_table(doc, ["Name", "Role", "Organisation"], [
+        ["Jordan Whitfield", "Client", "—"],
+        ["Priya Whitfield", "Support person (spouse)", "—"],
+        ["Dr. Amelia Ferro", "Clinical Psychologist (treating)", "Northgate Psychology Clinic"],
+        ["Dr. Susan Ng", "General Practitioner", "Riverside Family Medical Practice"],
+        ["Grace Tan", "Occupational Therapist", "ReturnAbility OT Services"],
+        ["Marcus Delaney", "Rehabilitation Case Manager", "VicWork Insurance"],
+        ["Helen Okafor", "Return to Work Coordinator", "Coburg Logistics Pty Ltd"],
+        ["Adrian Cross", "Team Leader, Warehouse Operations", "Coburg Logistics Pty Ltd"],
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Background", level=2)
+    doc.add_paragraph(
+        "Convened to review Mr Whitfield's progress under his current Mental Health Care Plan and "
+        "WorkCover claim following the workplace incident of 14 October 2025, and to agree a "
+        "coordinated plan for graduated return to full warehouse-floor duties. Mr Whitfield has "
+        "completed 5 of 6 funded psychology sessions of trauma-focused CBT with graded exposure, "
+        "with standardised measures (DASS-21, PCL-5) showing consistent improvement, and has "
+        "completed step 1 of a 6-step exposure hierarchy for the warehouse floor."
+    )
+
+    _heading(doc, "Discussion", level=2)
+    doc.add_paragraph(
+        "Dr Ferro summarised treatment progress, noting reduced intrusive memories (from "
+        "3–4/week to approximately 1/week) and a PCL-5 score now below the clinical cutoff. She "
+        "advised that continued graded exposure, coordinated with a supervised return to the "
+        "warehouse floor, offers the best prospect of full duties resuming within 2–3 months. "
+        "Ms Tan (OT) outlined a functional capacity assessment supporting a graded increase in "
+        "floor-based hours, beginning with short supervised periods alongside a colleague. "
+        "Mr Delaney confirmed VicWork Insurance's support for extending funded psychology sessions "
+        "beyond the current Mental Health Care Plan allocation, pending a further GP review. "
+        "Ms Okafor and Mr Cross confirmed Coburg Logistics can continue modified/office-based "
+        "duties in the interim and will roster a familiar colleague to accompany Mr Whitfield "
+        "during initial floor-exposure sessions. Mr Whitfield reported feeling supported by the "
+        "plan and reiterated his goal of returning to full supervisory duties before the end of "
+        "the current financial year."
+    )
+
+    _heading(doc, "Decisions / Actions", level=2)
+    doc.add_paragraph(
+        "It was agreed that Dr Susan Ng would provide a further review letter to enable extended "
+        "Mental Health Care Plan sessions within 1 week, and that Dr Amelia Ferro would continue "
+        "trauma-focused CBT with graded exposure through steps 2–6 on an ongoing weekly basis. "
+        "Grace Tan will complete a functional capacity review ahead of any increase in floor-duty "
+        "hours within 2 weeks, and Marcus Delaney will approve the extension of funded psychology "
+        "sessions under the claim within 5 business days. Helen Okafor and Adrian Cross will roster "
+        "supervised floor-exposure sessions with a familiar colleague from the next roster cycle. "
+        "A follow-up case conference will be scheduled by Dr Amelia Ferro in 8 weeks (mid-May 2026) "
+        "to review progress against these actions."
+    )
+    doc.add_paragraph()
+
+    _heading(doc, "Next Case Conference", level=2)
+    doc.add_paragraph(
+        "Tentatively scheduled for mid-May 2026, or earlier if a change in risk or function is "
+        "identified by any party. Minutes to be circulated to all attendees and filed in the "
+        "client's record at Northgate Psychology Clinic and Riverside Family Medical Practice."
+    )
+
+    doc.save(path)
+
+
 if __name__ == "__main__":
     build_referral_letter(os.path.join(OUT_DIR, "01_gp_referral_letter.docx"))
     build_intake_notes(os.path.join(OUT_DIR, "02_biopsychosocial_intake_notes.docx"))
     build_session_log(os.path.join(OUT_DIR, "03_session_log_progress_notes.docx"))
     build_treatment_review_source(os.path.join(OUT_DIR, "04_treatment_review_source.docx"))
+    build_discharge_summary(os.path.join(OUT_DIR, "05_discharge_summary.docx"))
+    build_risk_assessment(os.path.join(OUT_DIR, "06_risk_assessment.docx"))
+    build_case_conference_note(os.path.join(OUT_DIR, "07_case_conference_note.docx"))
     print("done:", os.listdir(OUT_DIR))

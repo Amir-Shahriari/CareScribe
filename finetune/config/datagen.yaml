@@ -1,0 +1,36 @@
+# Synthetic-encounter datagen. Read by build_dataset (CLI flags override).
+
+rng:
+  seed: 0
+
+counts:
+  total: 20000          # generate ~1.7x the target; validation drops the rest
+  train_target: 12000
+  dev_target: 1500
+  test_target: 1500
+
+# Relative weight per specialty (vignette weights still apply within each).
+specialty_weights:
+  general practice: 1.4
+  community mental health: 1.3
+  cardiology: 1.0
+  respiratory: 1.0
+  elderly care: 1.0
+
+form_types: ["soap", "progress_note", "handover", "care_plan"]
+
+encounter_type_weights:
+  new: 1.0
+  follow_up: 1.2
+  discharge: 0.7
+  handover: 0.6
+  crisis: 0.5
+
+quality:
+  gap_probability: 0.25    # chance a gappable field is blanked -> "Not documented."
+  styled_fraction: 0.30    # fraction conditioned on a house-style exemplar
+  polish_fraction: 0.50    # fraction passed through model prose-polish (ollama backend)
+
+backend:
+  name: "template"         # "template" (CI / dry run) | "ollama" | "openai-compatible"
+  ollama_model: "qwen2.5:7b-instruct"

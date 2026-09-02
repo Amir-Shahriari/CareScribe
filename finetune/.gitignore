@@ -1,0 +1,9 @@
+# Training artefacts — heavy, reproducible, not source.
+data/
+runs/*/adapter/
+runs/*/checkpoint-*/
+runs/*/merged-fp16/
+runs/*/*.gguf
+runs/base-gguf/
+.venv*/
+*.safetensors

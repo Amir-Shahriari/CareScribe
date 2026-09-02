@@ -11,7 +11,9 @@ Selection order, decided at runtime:
    external install at all.
 3. :class:`CloudBackend` — **off unless explicitly configured**, and even then
    only if a key is present in the environment. Never bundled, never a default,
-   never reached by accident.
+   never reached by accident. Transport lives in :mod:`carescribe.core.cloud_client`
+   (Anthropic Messages API, or the OpenAI-compatible shape for Azure / private /
+   self-hosted endpoints).
 
 All three see the same thing: approved de-identified text with placeholders.
 Re-identification stays in Python, after generation. That is what makes the
@@ -40,6 +42,23 @@ class BackendError(RuntimeError):
     """Raised when a backend cannot be used, with the fix in the message."""
 
 
+def _truncation_error() -> BackendError:
+    """Shared message for a completion cut off by the token/context budget.
+
+    A half-filled clinical form that looks superficially complete is worse
+    than an outright crash — nothing else in the pipeline can tell a
+    truncated draft apart from a genuinely short one, so this has to be
+    caught here, at the one place that sees ``finish_reason``.
+    """
+    return BackendError(
+        "Generation was cut off by the token limit before the draft was "
+        "complete. This form has more fields (or the source text is longer) "
+        "than the current generation budget can cover — try again with fewer "
+        "source documents, a smaller form, or a backend with more headroom "
+        "(Ollama with a larger model, or cloud generation if configured)."
+    )
+
+
 # --------------------------------------------------------------------------
 # 2. The default — a small quantised model on the CPU
 # --------------------------------------------------------------------------
@@ -59,7 +78,19 @@ class LocalGGUFBackend:
         model_path=None,
         *,
         context_tokens: int = 8192,
-        max_tokens: int = 1600,
+        # 4096, not the 1600 this started as. Measured against the bundled
+        # 62-field biopsychosocial form (the largest shipped clinical form):
+        # the model's own observed field-content density (~50 tokens/field
+        # including the <<FIELD:key>> marker, from a real truncated run) puts
+        # a full 62-field draft at roughly 3700-4000 completion tokens, so
+        # 4096 is sized to that, not picked round. It is safe to set this
+        # higher than what a given prompt leaves in the context window:
+        # llama-cpp-python clamps ``max_tokens`` to whatever room remains
+        # under ``n_ctx`` rather than erroring, so a large combined source
+        # that leaves little headroom just generates less and reports
+        # ``finish_reason == "length"`` — which ``generate()`` below turns
+        # into a ``BackendError`` instead of a silent partial draft.
+        max_tokens: int = 4096,
         # Zero, not the 0.2 the Ollama backend uses. Measured on the bundled 3B:
         # at 0.2 it invented "anxiety and occasional insomnia" and "a history of
         # depression" for a source that contained neither; at 0.0 the same
@@ -120,31 +151,64 @@ class LocalGGUFBackend:
         LocalGGUFBackend._cache[path] = model
         return model
 
-    def generate(self, system: str, prompt: str, stream: bool = True) -> Iterator[str]:
+    def generate(
+        self, system: str, prompt: str, stream: bool = True, *, grammar: str | None = None
+    ) -> Iterator[str]:
         model = self._llama()
         messages = [
             {"role": "system", "content": system},
             {"role": "user", "content": prompt},
         ]
+        kwargs: dict = dict(
+            messages=messages,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            stream=bool(stream),
+        )
+        # A GBNF grammar constrains decoding structurally (see
+        # carescribe.core.grammar). Best-effort: a compile failure or a missing
+        # runtime feature just means unconstrained generation.
+        if grammar:
+            from carescribe.core.grammar import compile_grammar
+
+            compiled = compile_grammar(grammar)
+            if compiled is not None:
+                kwargs["grammar"] = compiled
         try:
-            completion = model.create_chat_completion(
-                messages=messages,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                stream=bool(stream),
-            )
+            completion = model.create_chat_completion(**kwargs)
+
+            if not stream:
+                choice = completion["choices"][0]
+                if choice.get("finish_reason") == "length":
+                    raise _truncation_error()
+                yield choice["message"]["content"]
+                return
+
+            # llama-cpp-python's chat-completion stream carries
+            # "finish_reason": None on every chunk except the last, where it
+            # is "stop" (natural completion) or "length" (cut off by the
+            # token budget / remaining context). That final chunk's delta is
+            # empty, so it never yields text — only the reason is read from
+            # it. The stream is lazy: create_chat_completion() itself never
+            # touches the model, so a prompt that overflows n_ctx only
+            # raises once this loop pulls the first chunk — which is why the
+            # loop has to stay inside this try, not just the call above it.
+            finish_reason = None
+            for chunk in completion:
+                choice = chunk.get("choices", [{}])[0]
+                piece = choice.get("delta", {}).get("content")
+                if piece:
+                    yield piece
+                reason = choice.get("finish_reason")
+                if reason is not None:
+                    finish_reason = reason
+        except BackendError:
+            raise
         except Exception as exc:  # noqa: BLE001
             raise BackendError(f"Local generation failed: {exc}") from exc
 
-        if not stream:
-            yield completion["choices"][0]["message"]["content"]
-            return
-
-        for chunk in completion:
-            delta = chunk.get("choices", [{}])[0].get("delta", {})
-            piece = delta.get("content")
-            if piece:
-                yield piece
+        if finish_reason == "length":
+            raise _truncation_error()
 
 
 # --------------------------------------------------------------------------
@@ -174,13 +238,14 @@ class CloudBackend:
     """A remote provider, reachable only when explicitly configured.
 
     Receives approved de-identified text and nothing else — the same input the
-    local backends get. The key is read from the environment at call time and
-    is never written, logged, or bundled.
+    local backends get. The key is read from the environment at call time (in
+    :mod:`carescribe.core.cloud_client`) and is never written, logged, or
+    bundled.
 
-    Deliberately not implemented against a specific provider here: wiring one in
-    is a deployment decision that needs an information-governance sign-off and a
-    paid no-training tier, not a default someone can trip over. The class exists
-    so the selection logic and its tests are real.
+    Enabling this is still a deployment decision that needs an
+    information-governance sign-off and a paid no-training tier — see
+    ``docs/deployer-cloud-note.md``. The two-switch gate and the last-place
+    position in the selection ladder are what stop it being tripped into.
     """
 
     def __init__(self, provider: str | None = None) -> None:
@@ -197,14 +262,20 @@ class CloudBackend:
                 "environment. CareScribe never bundles or stores a key."
             )
 
-    def generate(self, system: str, prompt: str, stream: bool = True) -> Iterator[str]:
-        raise BackendError(
-            f"No transport is wired up for provider '{self.provider}'. Cloud "
-            "generation requires a paid no-training tier and an "
-            "information-governance sign-off before it is enabled — see "
-            "docs/deployer-cloud-note.md."
-        )
-        yield ""  # pragma: no cover — unreachable, keeps this a generator
+    def generate(
+        self, system: str, prompt: str, stream: bool = True, *, grammar: str | None = None
+    ) -> Iterator[str]:
+        # A remote API cannot be handed a GBNF grammar generically; the
+        # placeholder/format guarantees still hold via assert_deidentified and
+        # parse_fields' "Not documented" default.
+        from . import cloud_client
+
+        try:
+            yield from cloud_client.stream_generation(
+                self.provider, system, prompt, stream=stream
+            )
+        except cloud_client.CloudError as exc:
+            raise BackendError(str(exc)) from exc
 
 
 # --------------------------------------------------------------------------
@@ -235,11 +306,19 @@ def describe_backends() -> dict:
     }
 
 
-def select_backend(prefer: str | None = None):
+def select_backend(
+    prefer: str | None = None,
+    model: str | None = None,
+    temperature: float | None = None,
+):
     """Pick a backend. Returns ``(kind, backend, label)``.
 
-    ``prefer`` lets the UI honour an explicit choice; without it the ladder is
-    Ollama → bundled GGUF → cloud-only-if-configured.
+    ``prefer`` lets the UI honour an explicit backend choice; without it the
+    ladder is Ollama -> bundled GGUF -> cloud-only-if-configured. ``model``
+    pins an explicit installed Ollama model (falling back to the guessed
+    default if it is not actually installed — a stale saved preference must
+    not turn into an error). ``temperature`` overrides the backend's own
+    default on Ollama and the bundled GGUF backend.
     """
     state = describe_backends()
 
@@ -247,13 +326,16 @@ def select_backend(prefer: str | None = None):
         if kind == BACKEND_OLLAMA and state["ollama"]["available"]:
             from .carenotes import OllamaBackend
 
-            model = state["ollama"]["default_model"]
-            return kind, OllamaBackend(model), f"Ollama · {model}"
+            chosen = model if model in state["ollama"]["models"] else None
+            chosen = chosen or state["ollama"]["default_model"]
+            kwargs = {} if temperature is None else {"temperature": temperature}
+            return kind, OllamaBackend(chosen, **kwargs), f"Ollama · {chosen}"
         if kind == BACKEND_LOCAL_GGUF and state["local"]["available"]:
             from pathlib import Path
 
             name = Path(state["local"]["model_path"]).name
-            return kind, LocalGGUFBackend(), f"Built-in model · {name}"
+            kwargs = {} if temperature is None else {"temperature": temperature}
+            return kind, LocalGGUFBackend(**kwargs), f"Built-in model · {name}"
         if kind == BACKEND_CLOUD and state["cloud"]["available"]:
             provider = state["cloud"]["provider"]
             return kind, CloudBackend(provider), f"Cloud · {provider}"
