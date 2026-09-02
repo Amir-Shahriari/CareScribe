@@ -30,6 +30,24 @@ def test_reads_a_file_path(tmp_path):
     assert ingest.extract_text(str(path)) == "Patient: Alice Brown"
 
 
+@pytest.mark.parametrize(
+    "line_ending", ["\r\n", "\r"], ids=["crlf", "cr"]
+)
+def test_txt_line_endings_are_normalised_to_lf(line_ending):
+    """A Windows-authored .txt file must not leak its raw \\r into the pipeline.
+
+    De-identify relies on several \\n-anchored patterns (letterhead
+    "Town, County" lines, footer sign-offs) to find identifiers on their own
+    line. A stray \\r left in front of those anchors makes the match silently
+    fail — an ingest-level bug, not a deidentify one, since the same text read
+    via Path.read_text() (which normalises newlines) never showed it.
+    """
+    raw = line_ending.join(["Line one", "Line two", "Line three"]).encode("utf-8")
+    text = ingest.extract_text(FakeUpload("a.txt", raw))
+    assert "\r" not in text
+    assert text == "Line one\nLine two\nLine three"
+
+
 def test_rejects_an_unsupported_type():
     with pytest.raises(ingest.IngestError, match="Unsupported file type"):
         ingest.extract_text(FakeUpload("scan.xyz", b"data"))

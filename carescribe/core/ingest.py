@@ -140,4 +140,10 @@ def extract_text(file: Any) -> str:
             "layer — OCR it first (CareScribe does not run OCR)."
         )
 
-    return text
+    # De-identify relies on several \n-anchored patterns (letterhead lines,
+    # footer sign-offs) to find identifiers on their own line. A raw \r left
+    # in front of one of those anchors — routine in a Windows-authored .txt
+    # file — makes the match silently fail, which is a leak, not a cosmetic
+    # issue. Normalise every line ending to \n once, here, so nothing
+    # downstream has to know a document ever had \r\n or bare \r in it.
+    return text.replace("\r\n", "\n").replace("\r", "\n")
