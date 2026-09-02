@@ -267,3 +267,33 @@ def test_durations_and_frequencies_are_untouched(value):
 def test_a_clinical_date_with_no_contact_anchor_still_survives():
     text = "Angiography on 06/06/2026 demonstrated a 90% stenosis of the LAD.\n"
     assert "06/06/2026" in deidentify.deidentify(text).redacted_text
+
+
+# ==========================================================================
+# A person actually surnamed "Falls" is not a trim word
+# ==========================================================================
+#
+# Not one of the original A1-A9 leaks above — found later, while extending
+# the stress corpus with a risk-assessment-grid document (#15). "Falls"
+# standing alone in a pipe-table cell was misread as a name/organisation, and
+# the first attempted fix added "falls" to _NOT_A_NAME, the list _trim_span
+# uses to strip a trailing token off any detected PERSON span. That ran
+# unconditionally, in every context, so a clinician or patient genuinely
+# surnamed Falls ("Dr Sarah Falls") had the surname silently stripped down to
+# the given name alone — a live under-redaction risk, caught in review and
+# fixed by removing "falls" from _NOT_A_NAME. The table-cell false positive
+# that motivated the entry in the first place is now handled precisely
+# (and independently of this trim list) by deidentify._RISK_GRID_WORDS /
+# deidentify._is_isolated_table_cell, which only exempts the bare word when
+# it is the ENTIRE content of an isolated pipe-table cell — see
+# stress_corpus/doc15_risk_assessment_grid.txt for that half of the fix.
+
+def test_a_person_actually_surnamed_falls_is_fully_redacted():
+    text = (
+        "Reviewed by Dr Sarah Falls, Consultant Psychiatrist.\n"
+        "Dr Falls confirmed the plan.\n"
+    )
+    result = deidentify.deidentify(text)
+    assert "Sarah Falls" not in result.redacted_text
+    assert "Falls" not in result.redacted_text
+    assert "[CLINICIAN]" in result.redacted_text

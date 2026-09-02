@@ -997,11 +997,22 @@ _NOT_A_NAME = frozenset(
     after before both either neither also however therefore because since although
     angiography angiogram echocardiogram procedure operation theatre recovery
     outpatient inpatient community district safeguarding capacity mobility
-    continence nutrition hydration skin pressure falls risk care plan handover
+    continence nutrition hydration skin pressure risk care plan handover
     level levels value values range ranges count counts score scores reading
     readings dose doses units unit result baseline target trend
     """.split()
 )
+# "falls" was deliberately dropped from the list above: it is an attested
+# English surname, and this set trims the TRAILING token off any detected
+# PERSON span unconditionally — a genuine clinician or patient named "Falls"
+# ("Dr Sarah Falls") had their surname silently stripped down to the given
+# name alone, in every context, not just the nursing-assessment-heading case
+# this word was added for. The risk-grid false positive that motivated
+# adding it in the first place ("Falls" standing alone as a table-cell risk
+# category) is handled separately and more precisely by
+# _RISK_GRID_WORDS/_is_isolated_table_cell below, which only fires when the
+# word is the entire content of an isolated pipe-table cell — so removing it
+# here costs no coverage.
 
 # Street descriptors that make a place name part of an address rather than a
 # bare mention of a town.
