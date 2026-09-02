@@ -42,6 +42,23 @@ class BackendError(RuntimeError):
     """Raised when a backend cannot be used, with the fix in the message."""
 
 
+def _truncation_error() -> BackendError:
+    """Shared message for a completion cut off by the token/context budget.
+
+    A half-filled clinical form that looks superficially complete is worse
+    than an outright crash — nothing else in the pipeline can tell a
+    truncated draft apart from a genuinely short one, so this has to be
+    caught here, at the one place that sees ``finish_reason``.
+    """
+    return BackendError(
+        "Generation was cut off by the token limit before the draft was "
+        "complete. This form has more fields (or the source text is longer) "
+        "than the current generation budget can cover — try again with fewer "
+        "source documents, a smaller form, or a backend with more headroom "
+        "(Ollama with a larger model, or cloud generation if configured)."
+    )
+
+
 # --------------------------------------------------------------------------
 # 2. The default — a small quantised model on the CPU
 # --------------------------------------------------------------------------
@@ -61,7 +78,19 @@ class LocalGGUFBackend:
         model_path=None,
         *,
         context_tokens: int = 8192,
-        max_tokens: int = 1600,
+        # 4096, not the 1600 this started as. Measured against the bundled
+        # 62-field biopsychosocial form (the largest shipped clinical form):
+        # the model's own observed field-content density (~50 tokens/field
+        # including the <<FIELD:key>> marker, from a real truncated run) puts
+        # a full 62-field draft at roughly 3700-4000 completion tokens, so
+        # 4096 is sized to that, not picked round. It is safe to set this
+        # higher than what a given prompt leaves in the context window:
+        # llama-cpp-python clamps ``max_tokens`` to whatever room remains
+        # under ``n_ctx`` rather than erroring, so a large combined source
+        # that leaves little headroom just generates less and reports
+        # ``finish_reason == "length"`` — which ``generate()`` below turns
+        # into a ``BackendError`` instead of a silent partial draft.
+        max_tokens: int = 4096,
         # Zero, not the 0.2 the Ollama backend uses. Measured on the bundled 3B:
         # at 0.2 it invented "anxiety and occasional insomnia" and "a history of
         # depression" for a source that contained neither; at 0.0 the same
@@ -151,14 +180,29 @@ class LocalGGUFBackend:
             raise BackendError(f"Local generation failed: {exc}") from exc
 
         if not stream:
-            yield completion["choices"][0]["message"]["content"]
+            choice = completion["choices"][0]
+            if choice.get("finish_reason") == "length":
+                raise _truncation_error()
+            yield choice["message"]["content"]
             return
 
+        # llama-cpp-python's chat-completion stream carries "finish_reason":
+        # None on every chunk except the last, where it is "stop" (natural
+        # completion) or "length" (cut off by the token budget / remaining
+        # context). That final chunk's delta is empty, so it never yields
+        # text — only the reason is read from it.
+        finish_reason = None
         for chunk in completion:
-            delta = chunk.get("choices", [{}])[0].get("delta", {})
-            piece = delta.get("content")
+            choice = chunk.get("choices", [{}])[0]
+            piece = choice.get("delta", {}).get("content")
             if piece:
                 yield piece
+            reason = choice.get("finish_reason")
+            if reason is not None:
+                finish_reason = reason
+
+        if finish_reason == "length":
+            raise _truncation_error()
 
 
 # --------------------------------------------------------------------------
