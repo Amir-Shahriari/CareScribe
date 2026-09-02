@@ -813,6 +813,28 @@ def flatten_lines(text: str) -> tuple[str, list[int]]:
     return "".join(flat), index_map
 
 
+# A blank line — two or more newlines with only spaces/tabs between them — is
+# a paragraph or section boundary. flatten_lines() (above) collapses it to a
+# single space like any other line break, on purpose: it exists to reconnect
+# a name split by ONE line wrap ("Oluwaseun\nAdeyinka"), and that flattened
+# copy is exactly what the "wrapped" detection pass in analyze() runs NER
+# over. A wrapped name never has a blank paragraph in the middle of it, so a
+# wrapped-pass span whose original-text range crosses one is never a genuine
+# reconnection — corpus document #15 caught this exact shape: "Overall risk
+# rating: Medium" was immediately followed by a blank line and then an
+# unrelated paragraph ("Bloods showed..."), and the flattened copy joined
+# them into what read as a two-word name, later trimmed down to "Medium"
+# alone. _crosses_paragraph_break lets analyze() reject that class of
+# cross-section artefact without touching flatten_lines() itself, which
+# other, genuine same-paragraph wraps still depend on.
+_BLANK_LINE = re.compile(r"\n[ \t]*\r?\n")
+
+
+def _crosses_paragraph_break(text: str, start: int, end: int) -> bool:
+    """True if the ORIGINAL-text span ``text[start:end]`` contains a blank line."""
+    return bool(_BLANK_LINE.search(text[start:end]))
+
+
 def _is_staff_context(text: str, start: int, end: int) -> bool:
     """True if an initial+surname sits somewhere that vouches for it being staff.
 
@@ -1137,6 +1159,42 @@ def _location_is_address(text: str, start: int, end: int) -> bool:
     return bool(ADDRESS_LINE.match(text[line_start:line_end]))
 
 
+# Bare risk-rating and risk-category words ("Low", "Medium", "High", "Falls",
+# "Absconding") that a risk-assessment grid renders as plain-text pipe-table
+# cells. spaCy reliably mislabels them as PERSON/ORGANIZATION there — corpus
+# document #15 caught "Falls" (raw NER) and "Absconding" (the line-flattened
+# pass merging a table row into its neighbour) becoming a facility.
+#
+# This is deliberately NOT a global allow-list entry (protected_terms.txt):
+# "Low" and "Falls" are both attested English surnames, so exempting them
+# everywhere would silently under-redact a real patient or clinician who
+# happens to be named one. Scoping the exemption to "this exact word, AND it
+# is the entire trimmed content of an isolated pipe-table cell" keeps every
+# other occurrence — free prose, a labelled field, a name that merely shares
+# a line with a "|" — fully subject to ordinary detection.
+_RISK_GRID_WORDS = frozenset({"low", "medium", "high", "falls", "absconding"})
+
+
+def _is_isolated_table_cell(text: str, start: int, end: int) -> bool:
+    """True if ``text[start:end]`` is one whole pipe-table cell's content.
+
+    The line must contain a "|" at all — ordinary prose never qualifies —
+    and the span must be bounded by a "|" (or the line's own start/end) on
+    both sides, with nothing but whitespace filling the gap. A name that
+    merely sits somewhere on a line with a pipe character, or that runs into
+    other text before reaching the next "|", does not qualify.
+    """
+    line_start, line_end = _line_bounds(text, start)
+    line = text[line_start:line_end]
+    if "|" not in line:
+        return False
+    before = text[line_start:start]
+    after = text[end:line_end]
+    before_ok = before.strip(" \t") == "" or before.rstrip(" \t").endswith("|")
+    after_ok = after.strip(" \t") == "" or after.lstrip(" \t").startswith("|")
+    return before_ok and after_ok
+
+
 def _span_is_plausible(text: str, span: Span) -> bool:
     """Reject the false positives NER reliably produces on clinical documents."""
     value = text[span.start : span.end].strip()
@@ -1151,6 +1209,14 @@ def _span_is_plausible(text: str, span: Span) -> bool:
         span.entity_type == "ADDRESS" and span.source != "regex"
     ):
         if _is_acronym(value) or _looks_clinical(value):
+            return False
+        # A risk-grid rating/category word standing alone as a whole
+        # pipe-table cell — see _RISK_GRID_WORDS above. Scoped to that exact
+        # shape, so the same word in free prose is unaffected.
+        if (
+            value.casefold() in _RISK_GRID_WORDS
+            and _is_isolated_table_cell(text, span.start, span.end)
+        ):
             return False
         # "Aspirin 75mg" — a capitalised token followed by a dose is a drug.
         if _DOSE_AFTER.match(text[span.end : span.end + 16]):
@@ -1753,7 +1819,10 @@ def analyze(text: str) -> list[dict]:
         if USE_GLINER:
             wrapped.extend(gliner_spans(flattened))
         # Only the span types a line wrap can hide are taken from this pass;
-        # anything line-anchored keeps the first pass's answer.
+        # anything line-anchored keeps the first pass's answer. A span whose
+        # original-text range crosses a blank line is a cross-paragraph
+        # artefact of the flattening, not a genuine wrapped name or
+        # organisation — see _crosses_paragraph_break.
         layers.append([
             Span(
                 index_map[span.start],
@@ -1766,6 +1835,9 @@ def analyze(text: str) -> list[dict]:
             if (span.entity_type in mapping.PERSON_TYPES
                 or span.entity_type in mapping.FACILITY_TYPES)
             and 0 <= span.start < span.end <= len(index_map)
+            and not _crosses_paragraph_break(
+                text, index_map[span.start], index_map[span.end - 1] + 1
+            )
         ])
 
     known_as = mapping.find_known_as(text)

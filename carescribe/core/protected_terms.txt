@@ -134,17 +134,3 @@ Naltrexone
 Acamprosate
 Thiamine
 Pabrinex
-
-# --- Risk assessment vocabulary ---------------------------------------------
-# Single capitalised words in a risk-assessment grid ("Falls", "Absconding")
-# or a bare rating ("Low", "Medium", "High") sit exactly where a name or an
-# organisation would in free prose, and spaCy's small model reliably
-# mislabels them as ORGANIZATION or PERSON in that layout — corpus document
-# #15 caught "Falls" and "Absconding" becoming a clinic and "Medium" becoming
-# a person. None of these words can ever legitimately be someone's PII, so
-# protecting them costs no recall.
-Absconding
-Falls
-Low
-Medium
-High
