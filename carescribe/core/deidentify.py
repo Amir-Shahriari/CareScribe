@@ -534,6 +534,38 @@ HEADER_LOCATION = re.compile(
     rf"^[ \t]*({_PLACE_PHRASE},[ \t]*{_PLACE_PHRASE})[ \t]*$"
 )
 
+# A letterhead often carries the site's *street* address inline, mixed with a
+# clinic name and a phone number on the same line, e.g.
+#   "Northgate Psychology Clinic, 8 Derby Street, Pascoe Vale VIC 3044 | Ph: ..."
+# That is neither a labelled ``Address:`` line (ADDRESS_LINE) nor the bare
+# "Town, County" shape (HEADER_LOCATION), so the house number and postcode used
+# to survive in the clear. This takes the whole "<number> <Street>, <suburb>
+# <state?> <postcode>" run as one ADDRESS span. It is only applied inside the
+# header/footer zone (see structured_spans), and it requires a leading house
+# number followed by a capitalised street name and a street suffix — clinical
+# prose ("walking down Derby Street", "scored 8 on the assessment") never takes
+# that shape, so the precision cost is close to nil.
+_STREET_SUFFIX = (
+    r"Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Dr|Court|Ct|Place|Pl|Way|"
+    r"Terrace|Tce|Close|Crescent|Cres|Parade|Pde|Highway|Hwy|Boulevard|Blvd|"
+    r"Row|Walk|Square|Sq|Gardens|Grove|Mews|Rise|Circuit|Cct|Esplanade"
+)
+_AU_STATE = r"VIC|NSW|QLD|SA|WA|TAS|NT|ACT"
+_UK_POSTCODE_SRC = STRUCTURED["ADDRESS"]
+
+LETTERHEAD_ADDRESS = re.compile(
+    r"\b("
+    r"\d{1,4}[A-Za-z]?(?:[ \t]*[-/][ \t]*\d{1,4}[A-Za-z]?)?"      # house no / range / unit
+    r"[ \t]+[A-Z][\w'’.\-]*(?:[ \t]+[A-Z][\w'’.\-]*){0,3}"        # 1-4 capitalised street words
+    rf"[ \t]+(?:{_STREET_SUFFIX})\b"                              # street suffix
+    r"(?:"                                                        # optional , suburb state postcode
+    r",[ \t]*[A-Z][\w'’.\-]*(?:[ \t]+[A-Z][\w'’.\-]*){0,3}"
+    rf"(?:[ \t]+(?:{_AU_STATE}))?"
+    rf"(?:[ \t]+\d{{4}}|[ \t]+{_UK_POSTCODE_SRC})"
+    r")?"
+    r")"
+)
+
 # A clinician sign-off in a footer ("Dr Adaeze Chukwuemeka, Consultant
 # Psychiatrist") has exactly the same two-phrases-joined-by-a-comma shape as a
 # letterhead town/county line, and it sits in the same footer zone. Document
@@ -969,6 +1001,14 @@ def structured_spans(text: str) -> list[Span]:
         spans.append(Span(match.start(1), match.end(1), "ADDRESS"))
 
     for zone_start, zone_end in _header_footer_bounds(text):
+        # An inline letterhead street address ("8 Derby Street, Pascoe Vale VIC
+        # 3044"), taken whole. Confined to the header/footer zone so the leading
+        # house number is the only anchor a stray "12 Church Street" in prose
+        # would need — and prose almost never puts one in the first/last lines.
+        for addr in LETTERHEAD_ADDRESS.finditer(text[zone_start:zone_end]):
+            spans.append(
+                Span(zone_start + addr.start(1), zone_start + addr.end(1), "ADDRESS")
+            )
         for line in re.finditer(r"[^\n]*", text[zone_start:zone_end]):
             match = HEADER_LOCATION.match(line.group(0))
             if not match:
