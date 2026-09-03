@@ -249,7 +249,9 @@ def generate_document(
     # Only pass `grammar` when there is one, so a backend (or a test stub) whose
     # generate() predates the keyword still works for the unconstrained path.
     extra = {"grammar": grammar} if grammar else {}
-    return backend.generate(system or system_prompt(), prompt, stream, **extra)
+    return _without_reasoning(
+        backend.generate(system or system_prompt(), prompt, stream, **extra)
+    )
 
 
 def refine_document(
@@ -302,7 +304,111 @@ def refine_document(
     )
     assert_deidentified(prompt, phi_values)
 
-    return backend.generate(system or system_prompt(), prompt, stream)
+    return _without_reasoning(backend.generate(system or system_prompt(), prompt, stream))
+
+
+# --------------------------------------------------------------------------
+# Dropping the model's own reasoning
+# --------------------------------------------------------------------------
+#
+# A reasoning-capable model narrates its planning before (and sometimes after)
+# the answer: "The user wants a SOAP note. Let's analyse... Wait, check the
+# rules...". It arrives three ways — a well-formed ``<think>...</think>`` block,
+# a bare ``</think>`` with the planning text in front of it and no opening tag,
+# or (a truncated stream) an unclosed ``<think>``. None of it is the document.
+# ``ollama_client`` also asks Ollama to disable thinking; this is the belt to
+# that braces, and it covers the GGUF and cloud backends too.
+
+_REASON_TAGS = "think|thinking|reasoning|thought|scratchpad"
+_THINK_BLOCK_RE = re.compile(
+    rf"<\s*({_REASON_TAGS})\s*>.*?<\s*/\s*\1\s*>\s*",
+    re.DOTALL | re.IGNORECASE,
+)
+_OPEN_TAG_RE = re.compile(rf"<\s*(?:{_REASON_TAGS})\s*>", re.IGNORECASE)
+_CLOSE_TAG_RE = re.compile(rf"<\s*/\s*(?:{_REASON_TAGS})\s*>", re.IGNORECASE)
+_ORPHAN_CLOSE_RE = re.compile(
+    rf"\A.*?<\s*/\s*(?:{_REASON_TAGS})\s*>\s*",
+    re.DOTALL | re.IGNORECASE,
+)
+
+# How much answer text to buffer before concluding no reasoning prefix is
+# coming and releasing it. Real planning monologues run to thousands of
+# characters, so this only delays the first render of a genuinely long,
+# reasoning-free draft — never drops any of it.
+_REASON_STREAM_FLUSH = 4000
+
+_TAG_FRAGMENTS = tuple(
+    f"<{slash}{name}"
+    for name in _REASON_TAGS.split("|")
+    for slash in ("", "/")
+)
+
+
+def strip_reasoning(text: str) -> str:
+    """Remove a model's reasoning monologue from a finished draft.
+
+    Idempotent. Text with no reasoning markers comes back unchanged apart from
+    leading whitespace. ``None`` passes through.
+    """
+    if not text:
+        return text
+    cleaned = _THINK_BLOCK_RE.sub("", text)
+    open_match = _OPEN_TAG_RE.search(cleaned)
+    if open_match and not _CLOSE_TAG_RE.search(cleaned):
+        # Unclosed block (truncated output): drop from the open tag on.
+        cleaned = cleaned[: open_match.start()]
+    elif _CLOSE_TAG_RE.search(cleaned) and not _OPEN_TAG_RE.search(cleaned):
+        # Bare closing tag: everything ahead of it was pre-answer reasoning.
+        cleaned = _ORPHAN_CLOSE_RE.sub("", cleaned, count=1)
+    return cleaned.lstrip()
+
+
+def _ends_mid_tag(text: str) -> bool:
+    """True if ``text`` ends part-way through what could be a reasoning tag."""
+    tail = text[-12:].lower()
+    cut = tail.rfind("<")
+    if cut == -1:
+        return False
+    frag = tail[cut:]
+    return any(t.startswith(frag) or frag.startswith(t) for t in _TAG_FRAGMENTS)
+
+
+def _without_reasoning(chunks: Iterable[str]) -> Iterator[str]:
+    """Filter a token stream so a reasoning prefix never reaches the consumer.
+
+    Buffers until it can tell whether the answer is prefixed with reasoning (a
+    ``<think>`` block or a lone ``</think>``); once the document proper has
+    started, streams the rest through untouched.
+    """
+    buffer = ""
+    streaming = False
+    pending_lstrip = False
+    for chunk in chunks:
+        if streaming:
+            if pending_lstrip:
+                chunk = chunk.lstrip()
+                if not chunk:
+                    continue
+                pending_lstrip = False
+            yield chunk
+            continue
+        buffer += chunk
+        close = _CLOSE_TAG_RE.search(buffer)
+        if close:
+            rest = buffer[close.end():].lstrip()
+            buffer, streaming = "", True
+            if rest:
+                yield rest
+            else:
+                pending_lstrip = True
+            continue
+        if _OPEN_TAG_RE.search(buffer) or _ends_mid_tag(buffer):
+            continue  # still inside (or possibly inside) a reasoning block
+        if len(buffer) >= _REASON_STREAM_FLUSH:
+            yield buffer
+            buffer, streaming = "", True
+    if buffer and not streaming:
+        yield strip_reasoning(buffer)
 
 
 def with_banner(draft: str) -> str:
@@ -353,7 +459,7 @@ def generate_care_note(
         deidentified_text, template, backend, stream=False,
         custom_instruction=custom_instruction,
     )
-    return with_banner("".join(chunks))
+    return with_banner(strip_reasoning("".join(chunks)))
 
 
 __all__ = [
@@ -372,6 +478,7 @@ __all__ = [
     "load_prompt",
     "refine_document",
     "render_prompt",
+    "strip_reasoning",
     "system_prompt",
     "template_names",
     "with_banner",

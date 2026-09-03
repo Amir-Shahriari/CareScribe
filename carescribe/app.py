@@ -1525,7 +1525,7 @@ def _run_generation(document, template, custom, draft_state) -> None:
         return
 
     placeholder.empty()
-    draft_state["deidentified"] = carenotes.with_banner(draft)
+    draft_state["deidentified"] = carenotes.with_banner(carenotes.strip_reasoning(draft))
     draft_state["reidentified"] = ""
     draft_state["unresolved"] = []
     draft_state["history"] = []
@@ -1605,7 +1605,9 @@ def render_refinement(document: batch.Document, draft_state: dict) -> None:
                 return
             placeholder.empty()
             draft_state["history"].append((instruction, ""))
-            draft_state["deidentified"] = carenotes.with_banner(revised)
+            draft_state["deidentified"] = carenotes.with_banner(
+                carenotes.strip_reasoning(revised)
+            )
             draft_state["reidentified"] = ""
             draft_state["unresolved"] = []
             st.rerun()

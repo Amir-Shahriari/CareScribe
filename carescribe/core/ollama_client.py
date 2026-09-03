@@ -161,6 +161,11 @@ def generate(
         "system": system,
         "prompt": prompt,
         "stream": bool(stream),
+        # Ask a reasoning-capable model not to think out loud. Ollama ignores
+        # this field for models that have no thinking mode, so it is safe to
+        # send unconditionally; carenotes.strip_reasoning() is the fallback for
+        # a model that emits a planning monologue anyway.
+        "think": False,
         "options": {"temperature": float(temperature)},
     }
 
