@@ -5,8 +5,8 @@
     "semantic_hash": "533e72a4166008742fe4d6516435cf00"
   },
   "carescribe/app.py": {
-    "mtime": 1788376005.5426817,
-    "ast_hash": "f01e01e90b04cca7306b78147d397fb3",
+    "mtime": 1788431620.281971,
+    "ast_hash": "535576fb2d07689b7461d9f8999e9600",
     "semantic_hash": ""
   },
   "carescribe/core/__init__.py": {
@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "carescribe/core/carenotes.py": {
-    "mtime": 1788376005.5447147,
-    "ast_hash": "49cd532dca45a5b081c70252079b272b",
+    "mtime": 1788431643.0315764,
+    "ast_hash": "44c2bee3c7dc1d671d066a7b17a70221",
     "semantic_hash": ""
   },
   "carescribe/core/deidentify.py": {
@@ -40,9 +40,9 @@
     "semantic_hash": ""
   },
   "carescribe/core/ollama_client.py": {
-    "mtime": 1785988775.9739954,
-    "ast_hash": "14eab138ae41eff2095ff262b08581c8",
-    "semantic_hash": "14eab138ae41eff2095ff262b08581c8"
+    "mtime": 1788431609.8272738,
+    "ast_hash": "f69eee6deb1d8b00a0f9deeca6af7b85",
+    "semantic_hash": ""
   },
   "carescribe/prompts/__init__.py": {
     "mtime": 1785732012.16356,
@@ -105,8 +105,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1788376005.5421698,
-    "ast_hash": "bb1bc790b20de0f87bcdc6945a974bab",
+    "mtime": 1788432101.2509751,
+    "ast_hash": "4539ca6ff560fd8e1e3c8c6aa03086b7",
     "semantic_hash": ""
   },
   "requirements.txt": {
@@ -205,9 +205,9 @@
     "semantic_hash": "c8b6537810c4ede86fe4e3cd919da8d2"
   },
   "carescribe/prompts/system.txt": {
-    "mtime": 1785988801.6834924,
-    "ast_hash": "367c4218bd54d3878c59fb06713d53b1",
-    "semantic_hash": "367c4218bd54d3878c59fb06713d53b1"
+    "mtime": 1788432090.2926874,
+    "ast_hash": "bf0cb1b87718c1c3b8b5572bf7c78bc1",
+    "semantic_hash": ""
   },
   "stress_corpus/README.md": {
     "mtime": 1788376005.5906906,
@@ -590,8 +590,8 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1788376005.541145,
-    "ast_hash": "8434039dd7f0e7828a5b25f1c1488b95",
+    "mtime": 1788432086.2114208,
+    "ast_hash": "1a91d5f8662a5d40c87a9c7acc4d97c8",
     "semantic_hash": ""
   },
   "docs/swarm-pipeline.md": {
@@ -1102,6 +1102,11 @@
   "tests/test_sample_document_identifiers.py": {
     "mtime": 1788430586.58375,
     "ast_hash": "0d2fb71d70f9ba289b38fc69b1c87ce6",
+    "semantic_hash": ""
+  },
+  "tests/test_reasoning_strip.py": {
+    "mtime": 1788431561.9253852,
+    "ast_hash": "93304d7bab39acf321cee8219e49bdf4",
     "semantic_hash": ""
   }
 }
