@@ -108,9 +108,21 @@ def safe_stem(name: str) -> str:
     return stem or "document"
 
 
-def approved_path(name: str) -> Path:
+def _resolve_output_dir(output_dir: Path | str | None) -> Path:
+    """The folder a write lands in — an explicit override, or the default.
+
+    ``output_dir`` is how the per-patient records store routes the same three
+    write functions at ``patients/<id>/documents`` instead of the flat output
+    folder (see :mod:`carescribe.core.patients`). ``None`` keeps the historical
+    behaviour and, crucially, reads ``OUTPUT_DIR`` at call time so a test that
+    monkeypatches the module global still works.
+    """
+    return Path(output_dir) if output_dir is not None else OUTPUT_DIR
+
+
+def approved_path(name: str, output_dir: Path | str | None = None) -> Path:
     """Where the approved de-identified text for ``name`` will be written."""
-    return OUTPUT_DIR / f"{safe_stem(name)}{APPROVED_SUFFIX}"
+    return _resolve_output_dir(output_dir) / f"{safe_stem(name)}{APPROVED_SUFFIX}"
 
 
 def list_folder(folder: str | Path) -> list[Path]:
@@ -236,6 +248,7 @@ def write_approved(
     deidentified_text: str,
     *,
     acknowledged: list[str] | tuple[str, ...] = (),
+    output_dir: Path | str | None = None,
 ) -> Path:
     """Write approved de-identified text to the output folder.
 
@@ -248,6 +261,9 @@ def write_approved(
     the *de-identified* text. The identity mapping is not a parameter here and
     no caller can make it one: the only thing that reaches disk is the text
     passed in.
+
+    ``output_dir`` routes the write at a per-patient folder instead of the flat
+    default; the sweep and refusal are identical either way.
     """
     if not deidentified_text or not deidentified_text.strip():
         raise BatchError("There is no de-identified text to write.")
@@ -259,8 +275,9 @@ def write_approved(
             "identifiers — " + ", ".join(repr(value) for value in residual[:10])
         )
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    destination = approved_path(name)
+    dest_dir = _resolve_output_dir(output_dir)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    destination = approved_path(name, dest_dir)
     destination.write_text(deidentified_text, encoding="utf-8")
     return destination
 
@@ -288,9 +305,9 @@ def approved_map(entities, known_as: str | None = None) -> dict[str, str]:
     return dict(sorted(literals.items(), key=lambda kv: len(kv[0]), reverse=True))
 
 
-def review_record_path(name: str) -> Path:
+def review_record_path(name: str, output_dir: Path | str | None = None) -> Path:
     """Where the review audit sidecar for ``name`` will be written."""
-    return OUTPUT_DIR / (safe_stem(name) + REVIEW_SUFFIX)
+    return _resolve_output_dir(output_dir) / (safe_stem(name) + REVIEW_SUFFIX)
 
 
 def write_review_record(
@@ -301,6 +318,7 @@ def write_review_record(
     flags_redacted: int,
     flags_dismissed: int,
     attested: bool = False,
+    output_dir: Path | str | None = None,
 ) -> Path:
     """Write the no-PHI audit sidecar for one approved document.
 
@@ -343,17 +361,18 @@ def write_review_record(
         "contains_phi": False,
     }
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    destination = review_record_path(name)
+    dest_dir = _resolve_output_dir(output_dir)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    destination = review_record_path(name, dest_dir)
     destination.write_text(
         json.dumps(record, indent=2, ensure_ascii=False), encoding="utf-8"
     )
     return destination
 
 
-def approved_docx_path(name: str) -> Path:
+def approved_docx_path(name: str, output_dir: Path | str | None = None) -> Path:
     """Where the approved redacted .docx for ``name`` will be written."""
-    return OUTPUT_DIR / (safe_stem(name) + APPROVED_DOCX_SUFFIX)
+    return _resolve_output_dir(output_dir) / (safe_stem(name) + APPROVED_DOCX_SUFFIX)
 
 
 def write_approved_docx(
@@ -362,6 +381,7 @@ def write_approved_docx(
     replacements: dict[str, str],
     *,
     acknowledged: list[str] | tuple[str, ...] = (),
+    output_dir: Path | str | None = None,
 ) -> Path:
     """Redact the original .docx into the output folder, structure preserved.
 
@@ -404,8 +424,9 @@ def write_approved_docx(
             + ", ".join(repr(value) for value in residual[:10])
         )
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    destination = approved_docx_path(name)
+    dest_dir = _resolve_output_dir(output_dir)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    destination = approved_docx_path(name, dest_dir)
     destination.write_bytes(staged.getvalue())
     return destination
 

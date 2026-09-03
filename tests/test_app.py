@@ -280,6 +280,35 @@ def test_blocked_approval_is_surfaced():
     assert "01632 960 188" in errors
 
 
+def test_selecting_a_patient_files_the_approval_in_their_folder(tmp_path, monkeypatch):
+    monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path / "flat")
+    monkeypatch.setenv("CARESCRIBE_PATIENTS_DIR", str(tmp_path / "patients"))
+    from carescribe.core import patients
+
+    patient = patients.create_patient("Test Patient")
+    document = _clean_auto_doc()
+    document.attested = True
+    state = {
+        "docs": {document.name: document},
+        "order": [document.name],
+        "selected": document.name,
+        # The patient-bar selectbox key is the source of truth; the app mirrors
+        # it to patient_id, which the write routing reads.
+        "patient_select": patient.id,
+    }
+
+    app = run_app(**state)
+    app.button(key="approve_clean.txt").click().run()
+
+    assert document.approved
+    filed = patients.patient_output_dir(patient.id) / "clean.deid.txt"
+    assert filed.is_file()
+    assert filed.read_text(encoding="utf-8") == document.redacted_text
+    assert not (tmp_path / "flat").exists()  # scratch folder untouched
+    review = patients.patient_output_dir(patient.id) / "clean.review.json"
+    assert json.loads(review.read_text(encoding="utf-8"))["contains_phi"] is False
+
+
 def test_generate_report_is_gated_on_approval():
     """Generation must never run on text a human has not approved."""
     app = run_app(**analysed_batch(1))

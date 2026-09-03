@@ -12,7 +12,10 @@ Privacy model
   (real value -> placeholder) live ONLY in ``st.session_state`` — server-side
   RAM. None of it is written to disk, ever.
 * The single write path is approval, and it writes de-identified text only, to
-  ``carescribe/output/deidentified/``.
+  ``carescribe/output/deidentified/`` — or, when a patient is selected, to that
+  patient's folder under the records store (see :mod:`carescribe.core.patients`).
+  The patient roster (display names) is the one identifying thing persisted;
+  documents and the identity map are not.
 
 Generation is deliberately not wired up. See :mod:`carescribe.core.carenotes`.
 """
@@ -34,8 +37,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from carescribe.core import (  # noqa: E402
     applog, backends, batch, carenotes, deidentify, desktop, generation_status,
-    ingest, mapping, model_setup, ollama_client, review_checklist, review_flags,
-    review_spans, settings,
+    ingest, mapping, model_setup, ollama_client, patients, review_checklist,
+    review_flags, review_spans, settings,
 )
 from carescribe.components.highlight_review import highlight_review  # noqa: E402
 from carescribe.ui import components as ui, theme as ui_theme  # noqa: E402
@@ -72,7 +75,18 @@ PHI_KEYS: dict = {
     "form_drafts": {},
 }
 
-DEFAULTS = {**PHI_KEYS, "uploader_nonce": 0, "folder_path": ""}
+# The selected patient's opaque id ("" = scratch / flat output folder). Not PHI
+# itself — it is an opaque id, and the roster it points at is on disk, not in
+# session — but a wipe returns to scratch so the next batch does not silently
+# file into whoever was last selected.
+DEFAULTS = {
+    **PHI_KEYS,
+    "uploader_nonce": 0,
+    "folder_path": "",
+    "patient_id": "",
+    # Bumped after create/rename/delete so the patient-bar text inputs reset.
+    "patient_nonce": 0,
+}
 
 
 def init_state() -> None:
@@ -89,12 +103,22 @@ def wipe_phi() -> None:
     # (f"hdr_{draft_key}_{header.key}"), so they can't be listed statically
     # in PHI_KEYS — each one holds real, typed PHI (client name, DOB, ...).
     for key in list(st.session_state.keys()):
-        if key.startswith(("hdr_", "attest_", "textbox_ack_")):
+        if key.startswith((
+            "hdr_", "attest_", "textbox_ack_",
+            # Patient-bar widgets: the selector, and the name/rename/delete-
+            # confirm inputs (a name typed but not yet created still counts).
+            "patient_select", "new_patient_name_", "rename_", "del_confirm_",
+        )):
             del st.session_state[key]
+    st.session_state.pop("_patient_pending", None)
     # Not PHI themselves, but stale UI state after a wipe.
     st.session_state.pop("form_type", None)
     st.session_state.pop("form_sources", None)
     st.session_state.pop("_batch_approve_summary", None)
+    # Return to scratch. This does NOT delete the patient's folder — "wipe PHI"
+    # has always left files already on disk alone; deleting a patient is its own
+    # explicit action in the patient bar.
+    st.session_state["patient_id"] = ""
     # Force the uploader to forget its files by rotating its widget key.
     st.session_state.uploader_nonce = st.session_state.get("uploader_nonce", 0) + 1
 
@@ -167,6 +191,21 @@ def documents() -> dict[str, batch.Document]:
 
 def current() -> batch.Document | None:
     return documents().get(st.session_state.selected)
+
+
+def active_patient_id() -> str:
+    """The selected patient's id, or "" for scratch mode."""
+    return st.session_state.get("patient_id", "") or ""
+
+
+def active_output_dir() -> Path | None:
+    """Where approved output for the current selection is filed.
+
+    ``None`` means the flat default folder (scratch). A real id means that
+    patient's ``documents/`` folder — passed straight to ``batch.write_*``.
+    """
+    pid = active_patient_id()
+    return patients.patient_output_dir(pid) if pid else None
 
 
 def refresh(document: batch.Document, entities: list[dict]) -> None:
@@ -628,6 +667,7 @@ def write_approved_word(document: batch.Document) -> None:
                 document.source_bytes,
                 batch.approved_map(document.entities, document.known_as),
                 acknowledged=document.dismissed,
+                output_dir=active_output_dir(),
             )
         )
     except batch.BatchError as exc:
@@ -971,7 +1011,9 @@ def render_approval(document: batch.Document, spans: list) -> None:
         else:
             try:
                 path = batch.write_approved(
-                    document.name, document.redacted_text, acknowledged=document.dismissed
+                    document.name, document.redacted_text,
+                    acknowledged=document.dismissed,
+                    output_dir=active_output_dir(),
                 )
             except batch.BatchError as exc:
                 st.error(str(exc))
@@ -986,15 +1028,22 @@ def render_approval(document: batch.Document, spans: list) -> None:
                     flags_redacted=st.session_state.flag_redacted.get(document.name, 0),
                     flags_dismissed=len(flag_dismissals(document)),
                     attested=document.attested,
+                    output_dir=active_output_dir(),
                 )
         st.rerun()
 
     if reason:
         st.caption(f"Approve is disabled — {reason}")
 
+    destination = active_output_dir() or batch.OUTPUT_DIR
+    pid = active_patient_id()
+    where = (
+        f"this patient's folder (`{destination}`)" if pid
+        else f"`{destination}`"
+    )
     st.caption(
-        f"Approved files are written to `{batch.OUTPUT_DIR}` as de-identified "
-        "text only. The identity mapping stays in memory and is never saved."
+        f"Approved files are written to {where} as de-identified text only. The "
+        "identity mapping stays in memory and is never saved."
     )
 
 
@@ -1111,7 +1160,8 @@ def render_batch_approve(docs: dict, ready: list) -> None:
                 continue
             try:
                 path = batch.write_approved(
-                    doc.name, doc.redacted_text, acknowledged=doc.dismissed
+                    doc.name, doc.redacted_text, acknowledged=doc.dismissed,
+                    output_dir=active_output_dir(),
                 )
             except batch.BatchError:
                 blocked.append(doc.name)
@@ -1126,6 +1176,7 @@ def render_batch_approve(docs: dict, ready: list) -> None:
                 flags_redacted=st.session_state.flag_redacted.get(doc.name, 0),
                 flags_dismissed=len(flag_dismissals(doc)),
                 attested=doc.attested,
+                output_dir=active_output_dir(),
             )
             approved.append(doc.name)
         st.session_state["_batch_approve_summary"] = {
@@ -2083,6 +2134,180 @@ def _privacy_state() -> str:
     return "offline"
 
 
+_FILED_KIND_LABEL = {"text": "De-identified text", "word": "Redacted Word", "audit": "Review record"}
+_FILED_KIND_MIME = {
+    "text": "text/plain",
+    "word": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "audit": "application/json",
+}
+
+
+def render_filed_documents(patient_id: str) -> None:
+    """Read-only list of what has been filed for this patient."""
+    try:
+        filed = patients.filed_documents(patient_id)
+    except patients.PatientError as exc:
+        st.caption(f"Could not read filed documents: {exc}")
+        return
+
+    if not filed:
+        st.caption("No documents filed for this patient yet.")
+        return
+
+    out_dir = patients.patient_output_dir(patient_id)
+    with st.expander(f"Filed documents ({len(filed)})", expanded=False):
+        for item in filed:
+            row = st.columns([5, 3, 2])
+            row[0].markdown(f"`{item.name}`")
+            row[1].caption(f"{_FILED_KIND_LABEL.get(item.kind, item.kind)} · {item.modified_at}")
+            try:
+                data = (out_dir / item.name).read_bytes()
+            except OSError:
+                row[2].caption("unavailable")
+                continue
+            row[2].download_button(
+                "Download",
+                data=data,
+                file_name=item.name,
+                mime=_FILED_KIND_MIME.get(item.kind, "application/octet-stream"),
+                key=f"filed_dl_{patient_id}_{item.name}",
+            )
+        st.caption(
+            "These are de-identified copies only. The original documents and the "
+            "identity map were never written here."
+        )
+
+
+def render_patient_bar() -> None:
+    """Pick or create the patient whose folder approved output is filed into.
+
+    "No patient (scratch)" keeps the shared output folder — the historical
+    behaviour. This is the only place patient records are created, renamed, or
+    deleted. Deleting a patient removes their filed de-identified documents and
+    is gated behind typing the name back.
+    """
+    try:
+        roster = patients.list_patients()
+    except patients.PatientError as exc:
+        st.warning(f"Patient store unavailable — filing to the shared folder. ({exc})")
+        return
+
+    by_id = {p.id: p for p in roster}
+    name_counts: dict[str, int] = {}
+    for p in roster:
+        key = p.display_name.casefold()
+        name_counts[key] = name_counts.get(key, 0) + 1
+
+    def label(pid: str) -> str:
+        if not pid:
+            return "No patient (scratch)"
+        p = by_id[pid]
+        if name_counts.get(p.display_name.casefold(), 0) > 1:
+            return f"{p.display_name}  ·  {p.id[2:8]}"
+        return p.display_name
+
+    options = [""] + [p.id for p in roster]
+
+    # A create/delete handler cannot touch the selectbox's own state key after
+    # the widget exists, so it parks the id it wants selected here and we apply
+    # it before the widget is built on the next run.
+    pending = st.session_state.pop("_patient_pending", None)
+    if pending is not None:
+        st.session_state["patient_select"] = pending
+    # Drop a stale selection (patient deleted in another way, roster moved).
+    if st.session_state.get("patient_select", "") not in options:
+        st.session_state["patient_select"] = ""
+
+    nonce = st.session_state.get("patient_nonce", 0)
+
+    st.markdown("#### Patient")
+    chosen = st.selectbox(
+        "Filing approved output for",
+        options,
+        format_func=label,
+        key="patient_select",
+        label_visibility="collapsed",
+    )
+    # The selectbox key is the source of truth; mirror it to patient_id, which
+    # active_output_dir() reads. Runs before the pipeline sections below, so an
+    # approve later this same run files into the right place.
+    st.session_state["patient_id"] = chosen
+
+    with st.expander("＋ New patient"):
+        new_name = st.text_input(
+            "Display name", key=f"new_patient_name_{nonce}",
+            placeholder="e.g. Margaret Chen",
+        )
+        if st.button(
+            "Create patient", key="new_patient_go", disabled=not new_name.strip()
+        ):
+            try:
+                created = patients.create_patient(new_name)
+            except patients.PatientError as exc:
+                st.error(str(exc))
+            else:
+                st.session_state["_patient_pending"] = created.id
+                st.session_state["patient_nonce"] = nonce + 1
+                st.rerun()
+
+    if not chosen:
+        st.caption(
+            "Scratch mode — approved documents go to the shared output folder, "
+            "not filed under any patient."
+        )
+        return
+
+    patient = by_id.get(chosen)
+    if patient is None:  # roster changed under us
+        return
+
+    st.caption(
+        f"Approved de-identified documents are filed under **{patient.display_name}** "
+        f"in `{patients.patient_dir(patient.id)}`. The original document and the "
+        "identity map are still never written."
+    )
+
+    render_filed_documents(patient.id)
+
+    with st.expander("Rename or delete this patient"):
+        rename_to = st.text_input(
+            "Rename to", value=patient.display_name, key=f"rename_{patient.id}_{nonce}",
+        )
+        if st.button(
+            "Save name", key=f"rename_go_{patient.id}",
+            disabled=not rename_to.strip() or rename_to.strip() == patient.display_name,
+        ):
+            try:
+                patients.rename_patient(patient.id, rename_to)
+            except patients.PatientError as exc:
+                st.error(str(exc))
+            else:
+                st.session_state["patient_nonce"] = nonce + 1
+                st.rerun()
+
+        st.divider()
+        st.caption(
+            "Deleting a patient permanently removes their folder and every "
+            "de-identified document filed in it. This cannot be undone."
+        )
+        confirm = st.text_input(
+            "Type the patient's name to confirm deletion",
+            key=f"del_confirm_{patient.id}_{nonce}", placeholder=patient.display_name,
+        )
+        if st.button(
+            "Delete this patient", type="primary", key=f"del_go_{patient.id}",
+            disabled=confirm.strip() != patient.display_name,
+        ):
+            try:
+                patients.delete_patient(patient.id)
+            except patients.PatientError as exc:
+                st.error(str(exc))
+            else:
+                st.session_state["_patient_pending"] = ""
+                st.session_state["patient_nonce"] = nonce + 1
+                st.rerun()
+
+
 def main() -> None:
     ui_theme.inject()
     render_sidebar()
@@ -2107,6 +2332,12 @@ def main() -> None:
     docs = documents()
     order = st.session_state.order
     st.markdown(ui.step_tracker(_pipeline_step(docs)), unsafe_allow_html=True)
+
+    # Which patient (if any) approved output is filed under. Its own card,
+    # above the pipeline, because it changes where step 3 writes.
+    with st.container(border=True):
+        st.markdown('<span class="cs-card"></span>', unsafe_allow_html=True)
+        render_patient_bar()
 
     # Each numbered step gets its own card (see ui.theme.CSS). Sections still
     # guard themselves — the predicates here only decide whether to open a card,

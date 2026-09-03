@@ -172,7 +172,7 @@ function How() {
 
 const GUARANTEES = [
   { icon: WifiOff, text: "No network calls in the de-identification stage." },
-  { icon: FileCheck, text: "Only de-identified text is written to disk." },
+  { icon: FileCheck, text: "Only de-identified document text is written to disk — plus the patient names you choose to enter." },
   { icon: KeyRound, text: "The re-identification map stays in memory." },
   { icon: Trash2, text: "One action wipes every document and mapping." },
 ];

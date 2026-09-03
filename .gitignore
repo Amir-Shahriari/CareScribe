@@ -26,7 +26,10 @@ Thumbs.db
 # reviewer may have marked identifiers "Keep" on purpose.
 # ---------------------------------------------------------------------------
 carescribe/output/
+carescribe/patients/
 *.deid.txt
+*.deid.docx
+*.review.json
 *_deidentified.txt
 *_deidentified.md
 *_carenote.txt

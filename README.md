@@ -61,9 +61,12 @@ These are the properties the code is structured to make checkable, not just to c
 | Everything written is de-identified | Three write paths, all in `batch.py`: the approved text, the redacted `.docx`, and the audit sidecar. The first two re-run `residual_scan()` and refuse the write if anything survives; the third records counts and types only |
 | Original documents are never copied | Ingestion reads bytes into memory, and `.docx` redaction runs entirely in memory — the un-redacted original is never staged to a temp file. `test_docx_roundtrip.py::test_the_original_document_is_never_written_to_disk` spies on every write and fails if the original's bytes appear |
 | The audit sidecar holds no PHI | `<name>.review.json` records checklist keys, flag counts, and a placeholder tally by type. A test asserts that no `must_redact` string from the whole stress corpus can appear in it |
+| Patient names are the only persisted identifier | When you file output under a patient, that patient's **display name** is written to `patients/<id>/patient.json` — the one identifying string CareScribe persists. The folder is an opaque id, never the name; a document's contents and the identity map never reach a patient folder. `test_patients.py` runs a real de-identification through the per-patient write path and asserts no mapping value and nothing the safety sweep flags lands under `patients/` |
 
 `🧹 Clear session / wipe PHI` drops every document, identifier table, and identity map from
-memory. It leaves approved files already on disk alone.
+memory, and returns to "no patient" (scratch). It leaves approved files already on disk
+alone — deleting a patient's filed documents is a separate, explicit action in the patient
+bar.
 
 ---
 
@@ -358,11 +361,19 @@ Opens on `http://127.0.0.1:8501`, bound to loopback only.
 ### Where approved output lands
 
 ```
-carescribe/output/deidentified/<filename>.deid.txt
+carescribe/output/deidentified/<filename>.deid.txt          # no patient selected (scratch)
+<app-data>/patients/<id>/documents/<filename>.deid.txt       # filed under a patient
 ```
 
-De-identified text only. The identity mapping is never written — it has no code path to
-disk, and `write_approved()` has nowhere to accept it. The output folder is gitignored.
+De-identified text only, either way. The identity mapping is never written — it has no code
+path to disk, and `write_approved()` has nowhere to accept it. Both locations are gitignored.
+
+**Patients.** The patient bar above the pipeline lets you file a batch's approved output
+under a named patient instead of the shared folder. The patient's display name is stored in
+`patients/<id>/patient.json`; the folder itself is an opaque id, so the real name is never
+in a path. Re-identification of a filed document is not possible in a later session — the
+map is gone once the session ends, and you keep the original document yourself. Selecting
+"No patient (scratch)" is the original behaviour.
 
 ### The safety sweep
 

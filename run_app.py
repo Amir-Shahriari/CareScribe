@@ -81,6 +81,8 @@ def start_server(port: int) -> subprocess.Popen:
     environment["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"
     # Outputs belong in the per-user app-data directory, never beside the .exe.
     environment["CARESCRIBE_OUTPUT_DIR"] = str(desktop.output_dir())
+    # The per-patient records store lives there too.
+    environment["CARESCRIBE_PATIENTS_DIR"] = str(desktop.patients_dir())
 
     return subprocess.Popen(
         server_command(port),

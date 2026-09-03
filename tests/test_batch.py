@@ -146,8 +146,10 @@ def test_write_refuses_empty_text(tmp_path, monkeypatch):
 def test_write_approved_takes_no_mapping_argument():
     """The signature is the guarantee: there is nowhere to pass PHI in.
 
-    `acknowledged` carries only strings the reviewer read in the de-identified
-    text, so it is not a channel for the original document or the map.
+    The two positional arguments are the name and the de-identified text. The
+    keyword-only arguments are `acknowledged` (only strings the reviewer read in
+    the de-identified text) and `output_dir` (a destination folder). Neither is
+    a channel for the original document or the identity map.
     """
     import inspect
 
@@ -157,7 +159,56 @@ def test_write_approved_takes_no_mapping_argument():
         if p.kind is not inspect.Parameter.KEYWORD_ONLY
     ]
     assert positional == ["name", "deidentified_text"]
-    assert set(parameters) == {"name", "deidentified_text", "acknowledged"}
+    assert set(parameters) == {"name", "deidentified_text", "acknowledged", "output_dir"}
+    assert parameters["output_dir"].kind is inspect.Parameter.KEYWORD_ONLY
+    assert parameters["output_dir"].default is None
+
+
+# ==========================================================================
+# output_dir override — how the per-patient store routes the same writers
+# ==========================================================================
+
+def test_output_dir_override_redirects_the_text_write(tmp_path, monkeypatch, raw_text):
+    monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path / "flat")
+    elsewhere = tmp_path / "patients" / "p_x" / "documents"
+    redacted = deidentify.deidentify(raw_text).redacted_text
+
+    destination = batch.write_approved("summary.txt", redacted, output_dir=elsewhere)
+
+    assert destination == elsewhere / "summary.deid.txt"
+    assert destination.read_text(encoding="utf-8") == redacted
+    assert not (tmp_path / "flat").exists()  # the default folder was not touched
+
+
+def test_output_dir_override_redirects_the_audit_sidecar(tmp_path, monkeypatch, raw_text):
+    monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path / "flat")
+    elsewhere = tmp_path / "elsewhere"
+    result = deidentify.deidentify(raw_text)
+
+    destination = batch.write_review_record(
+        "summary.txt", entities=result.entities,
+        flags_shown=0, flags_redacted=0, flags_dismissed=0, attested=True,
+        output_dir=elsewhere,
+    )
+
+    assert destination == elsewhere / "summary.review.json"
+    assert json.loads(destination.read_text(encoding="utf-8"))["contains_phi"] is False
+
+
+def test_path_helpers_take_the_override(tmp_path):
+    assert batch.approved_path("s.txt", tmp_path) == tmp_path / "s.deid.txt"
+    assert batch.approved_docx_path("s.docx", tmp_path) == tmp_path / "s.deid.docx"
+    assert batch.review_record_path("s.txt", tmp_path) == tmp_path / "s.review.json"
+    # No override still resolves against the module default.
+    assert batch.approved_path("s.txt").parent == batch.OUTPUT_DIR
+
+
+def test_override_write_still_refuses_a_surviving_identifier(tmp_path):
+    with pytest.raises(batch.BatchError):
+        batch.write_approved(
+            "leaky.txt", "Contact NHS No 943 476 5919.",
+            output_dir=tmp_path / "patients" / "p_y" / "documents",
+        )
 
 
 # ==========================================================================

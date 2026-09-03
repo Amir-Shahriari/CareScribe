@@ -19,8 +19,13 @@ another agent.
 
 ## Never
 
-- **Never weaken the de-identification guarantee**: no identifying text is
-  written to disk, and the re-identification map stays in memory only.
+- **Never weaken the de-identification guarantee**: no document text is written
+  to disk except the approved de-identified copies, and the re-identification
+  map stays in memory only. The one identifying thing CareScribe persists is the
+  patient roster — the display names the user types in the patient bar, stored
+  in `patients/<id>/patient.json` (see `carescribe/core/patients.py`). A
+  document's contents and the identity map never reach a patient folder;
+  `tests/test_patients.py` asserts it.
 - Never touch `main`, never `git push`, never rebase or reset shared branches.
 - Never edit `.swarm/`, `.agents/`, `CLAUDE.md`, or `AGENTS.md` unless the task
   spec explicitly says to.

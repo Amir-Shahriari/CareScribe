@@ -25,6 +25,14 @@ This project follows Semantic Versioning.
 
 ### Added
 
+- Patient records store: a patient bar above the pipeline lets you file a
+  batch's approved **de-identified** output under a named patient
+  (`<app-data>/patients/<id>/documents/`) instead of the shared folder, with a
+  read-only "Filed documents" list, rename, and delete. The patient's display
+  name in `patient.json` is the only identifying data persisted; the folder is
+  an opaque id, and a document's contents and the identity map never reach it
+  (`carescribe/core/patients.py`, `tests/test_patients.py`). "No patient
+  (scratch)" keeps the original shared-folder behaviour.
 - Regression tests locking in the above: `tests/test_medicare_number_leak.py`,
   `tests/test_letterhead_address_leak.py`, `tests/test_labelled_id_leaks.py`,
   `tests/test_crisis_lines_preserved.py`, and a `sample_documents/` identifier

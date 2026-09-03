@@ -84,8 +84,20 @@ def models_dir() -> Path:
     return app_data_dir() / "models"
 
 
+def patients_dir() -> Path:
+    """Root of the per-patient records store.
+
+    One opaque-ID folder per patient, each holding a ``patient.json`` roster
+    entry and a ``documents/`` folder of approved de-identified output. The
+    roster names are the only identifying data CareScribe persists; documents
+    (original or de-identified beyond the copies filed here) and the identity
+    map are still never written. See :mod:`carescribe.core.patients`.
+    """
+    return app_data_dir() / "patients"
+
+
 def ensure_dirs() -> None:
-    for path in (output_dir(), models_dir()):
+    for path in (output_dir(), models_dir(), patients_dir()):
         path.mkdir(parents=True, exist_ok=True)
 
 
@@ -183,6 +195,7 @@ __all__ = [
     "is_frozen",
     "models_dir",
     "output_dir",
+    "patients_dir",
     "ram_verdict",
     "resource_path",
     "streamlit_config_path",
