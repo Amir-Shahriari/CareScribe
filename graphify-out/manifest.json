@@ -5,8 +5,8 @@
     "semantic_hash": "533e72a4166008742fe4d6516435cf00"
   },
   "carescribe/app.py": {
-    "mtime": 1788431620.281971,
-    "ast_hash": "535576fb2d07689b7461d9f8999e9600",
+    "mtime": 1788453586.5186996,
+    "ast_hash": "998559d23a181fb1c266b32c115b2a01",
     "semantic_hash": ""
   },
   "carescribe/core/__init__.py": {
@@ -15,8 +15,8 @@
     "semantic_hash": "636336c3fa332fba5764f7906032f96b"
   },
   "carescribe/core/batch.py": {
-    "mtime": 1788376005.5431936,
-    "ast_hash": "a2fcf53a8ff74854a845144230e2ef10",
+    "mtime": 1788453081.0799398,
+    "ast_hash": "d646eca5c13d448f17d09e9624d4a4a7",
     "semantic_hash": ""
   },
   "carescribe/core/carenotes.py": {
@@ -80,13 +80,13 @@
     "semantic_hash": "b17fc9d83133ecd962fc1ae3d53c0115"
   },
   "tests/test_app.py": {
-    "mtime": 1788376005.594786,
-    "ast_hash": "29ca1f51d91edc6626d382811b886c6d",
+    "mtime": 1788453617.2421224,
+    "ast_hash": "0c5502fddbf24f81982f80de4681b676",
     "semantic_hash": ""
   },
   "tests/test_batch.py": {
-    "mtime": 1787317241.2100215,
-    "ast_hash": "8bba84244fb1332b824d607d84ae01b8",
+    "mtime": 1788453129.8666046,
+    "ast_hash": "d0af640e46b92aaa17bff4ed79581b1c",
     "semantic_hash": ""
   },
   "tests/test_deid_pipeline.py": {
@@ -105,8 +105,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1788432101.2509751,
-    "ast_hash": "4539ca6ff560fd8e1e3c8c6aa03086b7",
+    "mtime": 1788453483.9467962,
+    "ast_hash": "525cfdb6cba1f65881555b3ec9a62ebb",
     "semantic_hash": ""
   },
   "requirements.txt": {
@@ -275,8 +275,8 @@
     "semantic_hash": ""
   },
   "carescribe/core/desktop.py": {
-    "mtime": 1788376005.5462365,
-    "ast_hash": "77f282e4593b758db533bb6582994189",
+    "mtime": 1788452913.3215442,
+    "ast_hash": "f5733e83494e899d4fb1c43ab5bf43fa",
     "semantic_hash": ""
   },
   "carescribe/core/generation_status.py": {
@@ -320,9 +320,9 @@
     "semantic_hash": "3546f712b49ef3500e516a4891c5f6e6"
   },
   "run_app.py": {
-    "mtime": 1785992248.9123418,
-    "ast_hash": "37644cf98ed2c2cb8e4868fe66a2ff36",
-    "semantic_hash": "37644cf98ed2c2cb8e4868fe66a2ff36"
+    "mtime": 1788453370.499025,
+    "ast_hash": "d7c13d113260d2f51475c4d603f5b909",
+    "semantic_hash": ""
   },
   "tests/test_desktop_packaging.py": {
     "mtime": 1788376005.5963056,
@@ -555,8 +555,8 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1788376005.541145,
-    "ast_hash": "5094ee4c726358480160259ada26ddb1",
+    "mtime": 1788453467.3345108,
+    "ast_hash": "275d65c33acf731747402bf32e731f7b",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-09-01-local-clinical-llm-finetune-design.md": {
@@ -590,8 +590,8 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1788432086.2114208,
-    "ast_hash": "1a91d5f8662a5d40c87a9c7acc4d97c8",
+    "mtime": 1788453503.2273831,
+    "ast_hash": "3e6d0791fc5424aef004a425a309a0fd",
     "semantic_hash": ""
   },
   "docs/swarm-pipeline.md": {
@@ -1030,8 +1030,8 @@
     "semantic_hash": ""
   },
   "site/src/App.tsx": {
-    "mtime": 1788376005.5886378,
-    "ast_hash": "e5fe3194ea1ed9083f4a8061b5e72cc1",
+    "mtime": 1788453491.7668884,
+    "ast_hash": "b42e8ae3d98bbf18df21ba8bc1fd7586",
     "semantic_hash": ""
   },
   "site/src/main.tsx": {
@@ -1107,6 +1107,21 @@
   "tests/test_reasoning_strip.py": {
     "mtime": 1788431561.9253852,
     "ast_hash": "93304d7bab39acf321cee8219e49bdf4",
+    "semantic_hash": ""
+  },
+  "carescribe/core/patients.py": {
+    "mtime": 1788453710.1701243,
+    "ast_hash": "0882e4aaef9b56094a872c7364d6472d",
+    "semantic_hash": ""
+  },
+  "tests/test_patients.py": {
+    "mtime": 1788453667.1351023,
+    "ast_hash": "df73a906a53ba3716dd46fcb7b843650",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-09-04-patient-records-store-design.md": {
+    "mtime": 1788452902.6029623,
+    "ast_hash": "a496fad154712f921e92a57252d005f1",
     "semantic_hash": ""
   }
 }
