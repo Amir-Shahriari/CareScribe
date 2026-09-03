@@ -419,7 +419,13 @@ _MRN_LABELS = (
     r"Chart\s*(?:No|Number)|Patient\s*(?:No|Number)|Unit\s*(?:No|Number)|"
     r"Patient\s*ID|Hosp\s*No|NHS\s*Trust\s*No|Trust\s*(?:No|Number|ID)|"
     r"GMC\s*(?:No|Number)?|NMC\s*(?:No|Number|PIN)?|HCPC\s*(?:No|Number|Registration)?|"
-    r"GPhC\s*(?:No|Number|Registration)?|Medicare(?:\s*Card)?\s*(?:No|Number)?"
+    r"GPhC\s*(?:No|Number|Registration)?|Medicare(?:\s*Card)?\s*(?:No|Number)?|"
+    # "UR (No|Number)" is the Australian hospital Unit Record number — the local
+    # equivalent of "Hospital No". "Provider (No|Number)" is a clinician's
+    # Australian provider identifier, the same class of gap GMC/NMC/HCPC filled
+    # for the UK registers. Both require the No/Number word: bare "provider" and
+    # "ur" are ordinary text.
+    r"UR\s*(?:No|Number)|Provider\s*(?:No|Number)"
 )
 
 MRN_CONTEXT = re.compile(
@@ -428,7 +434,10 @@ MRN_CONTEXT = re.compile(
     # "Case No.:" carries both a full stop and a colon, so the separator run has
     # to allow several punctuation marks, not one.
     r"[ \t]*[:#.]*[ \t]*"
-    r"([A-Z]{0,3}[\s-]?\d(?:[ \t-]?\d){4,9})\b",
+    # Value: an optional facility/scheme prefix (up to 5 letters, e.g.
+    # "MCDH-410287"), 4-10 grouped digits, and an optional single check letter
+    # ("2481726A").
+    r"([A-Z]{0,5}[-\s]?\d(?:[ \t-]?\d){3,9}[A-Za-z]?)\b",
     re.IGNORECASE,
 )
 
