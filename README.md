@@ -416,7 +416,10 @@ Never reading it is a stronger guarantee than reading it and validating it.
 Section 5 of the app unlocks once a document is **approved** — generation never
 runs on text a human has not signed off. Pick a model, pick a template, and the
 draft streams in token by token (an 8B model on CPU is slow enough that a
-progress indicator matters).
+progress indicator matters). If the model is a reasoning model, its internal
+"thinking" is disabled at the Ollama call and any planning or self-correction
+text it still emits is stripped before the draft is stored — the clinician sees
+the finished document, not the model working.
 
 | Template | Produces |
 |---|---|
@@ -466,6 +469,10 @@ it runs on this laptop or, one day, somewhere else.
   shown. A report filed with a literal `[PATIENT]` in it is worse than no report.
 - **Every draft carries a "Draft — requires clinician review" banner**, prepended
   in Python rather than asked of the model.
+- **Model reasoning never reaches the draft.** `think` is disabled on the Ollama
+  request, and `strip_reasoning()` removes any `<think>…</think>` block or
+  planning preamble the model emits anyway, in Python, before the draft is
+  banked or exported.
 - **The anti-fabrication rule is load-bearing.** `prompts/system.txt` requires
   `[not documented]` where the source is silent, rather than a plausible guess.
 

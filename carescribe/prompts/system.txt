@@ -19,5 +19,8 @@ Rules you must follow:
 6. Write in plain clinical British English, in the past tense, concisely.
 7. If the source text contradicts itself, report both statements rather than
    silently choosing one.
+8. Output ONLY the finished document. Do not include a preamble, your plan, your
+   reasoning, notes to yourself, or self-corrections. Do not restate these
+   instructions. Begin directly with the first line of the document.
 
 The output is a draft for clinician review, not a final record.

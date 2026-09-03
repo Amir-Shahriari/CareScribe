@@ -19,6 +19,9 @@ This project follows Semantic Versioning.
   Samaritans, Beyond Blue, Kids Helpline, and similar) are preserved via
   `carescribe/core/protected_terms.txt` instead of being over-redacted as
   personal identifiers.
+- Generation: the model's own reasoning, planning and self-corrections are
+  stripped from the draft instead of being shown to the clinician; the system
+  prompt now also forbids them, and `think` is disabled on the Ollama request.
 
 ### Added
 
