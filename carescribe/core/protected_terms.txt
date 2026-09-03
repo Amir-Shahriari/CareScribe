@@ -134,3 +134,18 @@ Naltrexone
 Acamprosate
 Thiamine
 Pabrinex
+
+# --- Public crisis / support lines (not PHI) ---
+Lifeline
+Suicide Call Back Service
+Beyond Blue
+Kids Helpline
+MensLine Australia
+13YARN
+1800RESPECT
+QLife
+Samaritans
+Papyrus
+SHOUT
+CALM
+SANEline
