@@ -247,6 +247,16 @@ def test_the_soap_template_asks_for_administrative_identifiers():
     assert "case" in lowered or "record" in lowered or "reference number" in lowered
 
 
+def test_the_clinic_letter_template_asks_for_administrative_identifiers():
+    """Same gap as the SOAP template, same fix: a "Re:" line names the patient
+    but the letter structure otherwise has no home for a case/hospital number.
+    """
+    prompt = carenotes.render_prompt(DEIDENTIFIED, "GP clinic letter", "")
+    lowered = prompt.casefold()
+    assert "case" in lowered or "record" in lowered or "reference number" in lowered
+    assert "hospital" in lowered or "administrative" in lowered
+
+
 def test_the_system_prompt_carries_the_load_bearing_rules():
     system = carenotes.system_prompt()
     assert "[not documented]" in system

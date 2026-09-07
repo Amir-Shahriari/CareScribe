@@ -40,6 +40,14 @@ def _mrn_values(text: str) -> set[str]:
         ("Patient ID: 7781234", "7781234"),
         ("Record Number # 5567013", "5567013"),
         ("MRN:4471982", "4471982"),
+        # Sample-document pipeline pass: a private clinic's own file number and
+        # a pathology/imaging accession number — value shape already covered,
+        # only the label was missing.
+        ("Clinic file: CPC-4471", "CPC-4471"),
+        ("Clinic File No: CPC-4471", "CPC-4471"),
+        ("Accession number: RAD-2025-77120", "RAD-2025-77120"),
+        ("Accession No: RAD-2025-77120", "RAD-2025-77120"),
+        ("File Number: 4471982", "4471982"),
     ],
 )
 def test_labelled_record_number_is_detected(line, expected):
@@ -291,3 +299,62 @@ def test_the_line_after_a_date_field_is_not_damaged():
 def test_durations_and_frequencies_are_never_dates(clinical):
     result = deidentify.deidentify(DATE_DOC)
     assert clinical in result.redacted_text
+
+
+# ==========================================================================
+# BUG 6 — a certificate's validity dates leaked (sample-document pipeline pass)
+# ==========================================================================
+
+# A WorkCover certificate of capacity states its span as "Certificate period:
+# <date> to <date>". "period" was not a date-field label word, so the field
+# never anchored; and even where the label was known, only the FIRST date of a
+# "<d> to <d>" range was taken — the tail sat behind a date and a connector.
+CERT_DOC = """Certificate period: 05/03/2026 to 02/04/2026
+Review date: 02/04/2026
+Cover period: 10 April 2026 - 8 May 2026
+Certificate expiry: 8 May 2026
+Certified by: Dr S Ng. Provider No. 2481726A. Date: 05/03/2026.
+
+A three-day rest period was advised before return to duties.
+"""
+
+
+@pytest.mark.parametrize(
+    "value",
+    ["05/03/2026", "02/04/2026", "10 April 2026", "8 May 2026"],
+)
+def test_certificate_period_dates_are_redacted_at_both_ends(value):
+    assert not deidentify.REDACT_INPROSE_DATES
+    result = deidentify.deidentify(CERT_DOC)
+    assert value not in result.redacted_text
+
+
+def test_certificate_period_leaves_the_clinical_prose_alone():
+    """A "rest period" in the narrative is not a labelled date field."""
+    result = deidentify.deidentify(CERT_DOC)
+    assert "three-day rest period" in result.redacted_text
+
+
+def test_certificate_period_residual_scan_is_clean():
+    result = deidentify.deidentify(CERT_DOC)
+    assert deidentify.residual_scan(result.redacted_text) == []
+
+
+# The phrase set is closed: a *clinical* "<x> period:" is followed by a
+# duration, not a date, and must not be dragged in by the certificate rule.
+DURATION_DOC = """Rest period: 20 minutes between sets.
+Recovery period: several weeks expected.
+Post-operative period: 6 weeks of restricted lifting.
+Incubation period: 2 to 14 days.
+Wash-out period: 5 days before the repeat assay.
+"""
+
+
+@pytest.mark.parametrize(
+    "kept",
+    ["20 minutes", "several weeks", "6 weeks", "2 to 14 days", "5 days"],
+)
+def test_clinical_period_fields_are_not_treated_as_dates(kept):
+    result = deidentify.deidentify(DURATION_DOC)
+    assert kept in result.redacted_text
+    assert "[DATE]" not in result.redacted_text

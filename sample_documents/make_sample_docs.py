@@ -580,6 +580,440 @@ def build_case_conference_note(path):
     doc.save(path)
 
 
+# ---------------------------------------------------------------------------
+# Document 8: Pathology report — numeric result tables, a lab accession number
+# ---------------------------------------------------------------------------
+def build_pathology_report(path):
+    doc = Document()
+    doc.add_heading("Pathology Report — Northside Pathology", level=0)
+    _para(doc, "Laboratory: 88 Bell Street, Coburg VIC 3058  |  Ph: (03) 5551 6200  |  NATA accredited")
+    doc.add_paragraph()
+
+    _heading(doc, "Patient & Request Details", level=2)
+    _two_col_table(doc, [
+        ("Full name", "Jordan Elliot Whitfield"),
+        ("Date of birth", "12/04/1985"),
+        ("Medicare number", "2934 5671 0"),
+        ("Address", "45 Kestrel Ave, Coburg VIC 3058"),
+        ("Lab reference", "25-0788-441907"),
+        ("Specimen collected", "05/03/2026 08:41"),
+        ("Specimen received", "05/03/2026 10:12"),
+        ("Requesting doctor", "Dr. Susan Ng, Riverside Family Medical Practice"),
+        ("Provider number", "2481726A"),
+        ("Copy to", "Dr. Amelia Ferro, Northgate Psychology Clinic"),
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Full Blood Count", level=2)
+    _grid_table(doc, ["Analyte", "Result", "Units", "Reference range", "Flag"], [
+        ["Haemoglobin", "148", "g/L", "130 - 170", ""],
+        ["White cell count", "6.8", "x10^9/L", "4.0 - 11.0", ""],
+        ["Platelets", "263", "x10^9/L", "150 - 400", ""],
+        ["Haematocrit", "0.44", "L/L", "0.40 - 0.50", ""],
+        ["Neutrophils", "4.1", "x10^9/L", "2.0 - 7.5", ""],
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Biochemistry", level=2)
+    _grid_table(doc, ["Analyte", "Result", "Units", "Reference range", "Flag"], [
+        ["Sodium", "139", "mmol/L", "135 - 145", ""],
+        ["Potassium", "4.3", "mmol/L", "3.5 - 5.2", ""],
+        ["Creatinine", "82", "umol/L", "60 - 110", ""],
+        ["eGFR", ">90", "mL/min/1.73m2", ">= 90", ""],
+        ["ALT", "44", "U/L", "5 - 40", "High"],
+        ["GGT", "61", "U/L", "5 - 50", "High"],
+        ["Total cholesterol", "5.9", "mmol/L", "< 5.5", "High"],
+        ["LDL cholesterol", "3.7", "mmol/L", "< 3.5", "High"],
+        ["HDL cholesterol", "1.1", "mmol/L", "> 1.0", ""],
+        ["Triglycerides", "2.1", "mmol/L", "< 1.7", "High"],
+        ["HbA1c", "5.4", "%", "< 6.0", ""],
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Comment", level=2)
+    doc.add_paragraph(
+        "Mildly elevated ALT and GGT, consistent with the reported alcohol intake of "
+        "6-8 standard drinks per week; recommend repeat liver function tests in 8 weeks "
+        "after a period of reduced intake. Lipids above target - suggest lifestyle "
+        "measures and a fasting lipid recheck in 3 months, with the atorvastatin dose "
+        "reviewed by Dr. Susan Ng at that time. All other results within normal limits."
+    )
+    doc.save(path)
+
+
+# ---------------------------------------------------------------------------
+# Document 9: Inpatient medication administration chart — dense grid
+# ---------------------------------------------------------------------------
+def build_medication_chart(path):
+    doc = Document()
+    doc.add_heading("Medication Administration Chart — Merri Creek District Hospital", level=0)
+    _two_col_table(doc, [
+        ("Patient", "Jordan Elliot Whitfield"),
+        ("Date of birth", "12/04/1985"),
+        ("UR number", "MCDH-410287"),
+        ("Ward / bed", "Short-stay Unit, Bed 6"),
+        ("Admission", "14 October 2025"),
+        ("Weight", "84 kg"),
+        ("Known allergies", "Nil known"),
+        ("Consultant", "Dr. Farid Kassab, Orthopaedic Registrar"),
+        ("Pharmacist review", "Priya Kapoor (hospital pharmacist), 15/10/2025"),
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Regular Medications", level=2)
+    _grid_table(
+        doc,
+        ["Drug", "Dose", "Route", "Frequency", "Prescriber", "14/10 08:00", "14/10 20:00", "15/10 08:00"],
+        [
+            ["Paracetamol", "1 g", "PO", "QID", "F. Kassab", "AF", "RJ", "AF"],
+            ["Atorvastatin", "20 mg", "PO", "Nocte", "F. Kassab", "-", "RJ", "-"],
+            ["Enoxaparin", "40 mg", "S/C", "Daily", "F. Kassab", "AF", "-", "AF"],
+        ],
+    )
+    doc.add_paragraph()
+
+    _heading(doc, "PRN Medications", level=2)
+    _grid_table(
+        doc,
+        ["Drug", "Dose", "Route", "Max frequency", "Indication", "Prescriber", "Given 14/10", "Given 15/10"],
+        [
+            ["Oxycodone IR", "5 mg", "PO", "4-6 hourly, max 30 mg/24h", "Breakthrough pain", "F. Kassab", "14:10 (RJ), 21:30 (RJ)", "09:05 (AF)"],
+            ["Ondansetron", "4 mg", "IV", "8 hourly", "Nausea", "F. Kassab", "14:15 (RJ)", "nil"],
+            ["Temazepam", "10 mg", "PO", "Nocte, max 1", "Sleep", "S. Ng (phone order, countersigned)", "22:40 (RJ)", "nil"],
+        ],
+    )
+    doc.add_paragraph()
+
+    _para(doc, "Nursing signatures: AF = A. Fenech (RN); RJ = R. Jarrah (RN). Prescriber "
+               "contact: Dr. Farid Kassab, pager 5551 7788. Discharge script written 16/10/2025 "
+               "and faxed to Riverside Family Medical Practice (fax (03) 5551 0193) for Dr. Susan Ng.")
+    doc.save(path)
+
+
+# ---------------------------------------------------------------------------
+# Document 10: Consultant psychiatrist review letter — prose, clinic file no.
+# ---------------------------------------------------------------------------
+def build_psychiatry_letter(path):
+    doc = Document()
+    doc.add_heading("Psychiatric Review — Coburg Psychiatry Consulting", level=0)
+    _para(doc, "Suite 4, 301 Sydney Road, Coburg VIC 3058  |  Ph: (03) 5551 9040  |  Fax: (03) 5551 9041")
+    doc.add_paragraph()
+
+    _para(doc, "18 March 2026", bold_label="Date: ")
+    _para(doc, "Dr. Susan Ng, Riverside Family Medical Practice, 12 Wattle Street, Coburg VIC 3058",
+          bold_label="To: ")
+    _para(doc, "Dr. Amelia Ferro, Clinical Psychologist, Northgate Psychology Clinic",
+          bold_label="Cc: ")
+    doc.add_paragraph()
+
+    _heading(doc, "Patient", level=2)
+    _two_col_table(doc, [
+        ("Name", "Jordan Elliot Whitfield"),
+        ("Date of birth", "12/04/1985"),
+        ("Medicare number", "2934 5671 0"),
+        ("Clinic file", "CPC-4471"),
+        ("Reviewing psychiatrist", "Dr. Nadia Haddad, Consultant Psychiatrist"),
+        ("Provider number", "2559071T"),
+        ("MBS item billed", "296 (initial psychiatrist assessment)"),
+    ])
+    doc.add_paragraph()
+
+    doc.add_paragraph(
+        "Thank you for referring Mr Whitfield, a 40-year-old warehouse supervisor, for "
+        "psychiatric review following a workplace incident at Coburg Logistics Pty Ltd on "
+        "14 October 2025 and subsequent development of post-traumatic stress symptoms. I "
+        "reviewed him at Coburg Psychiatry Consulting on 18 March 2026; his wife Priya "
+        "Whitfield attended for part of the appointment and was contactable afterwards on "
+        "0433 990 214."
+    )
+    _heading(doc, "History", level=2)
+    doc.add_paragraph(
+        "Mr Whitfield describes intrusive memories of the near-miss with a reversing "
+        "forklift, hypervigilance around machinery, avoidance of the warehouse floor, and "
+        "sleep-onset insomnia. Symptoms have been present for approximately five months and "
+        "are improving with trauma-focused CBT under Dr Amelia Ferro (six sessions to date). "
+        "He reports low mood, reduced enjoyment, and alcohol intake of 6-8 standard drinks "
+        "per week (down from a peak of around 14). No prior psychiatric history. No current "
+        "suicidal ideation; he cites his children Kai and Mira and his marriage as protective."
+    )
+    _heading(doc, "Mental State Examination", level=2)
+    doc.add_paragraph(
+        "Casually dressed, right wrist in a removable splint, cooperative, good eye contact. "
+        "Speech normal rate and volume. Mood 'flat', affect congruent and reactive. No "
+        "psychotic phenomena. Cognition grossly intact. Insight and judgement good."
+    )
+    _heading(doc, "Impression & Plan", level=2)
+    doc.add_paragraph(
+        "1. Post-traumatic stress disorder, moderate, improving. 2. Adjustment-related low "
+        "mood. 3. Alcohol use in the hazardous range, reducing. I have commenced sertraline "
+        "50 mg mane, to increase to 100 mg after two weeks if tolerated, and discussed sleep "
+        "measures. Continue trauma-focused CBT. I will review Mr Whitfield in six weeks and "
+        "provide a further letter to enable extended Mental Health Care Plan sessions. Please "
+        "contact me via the rooms on (03) 5551 9040 if concerns arise before then."
+    )
+    _para(doc, "Dr. Nadia Haddad, MBBS FRANZCP  |  Provider No. 2559071T", bold_label="")
+    doc.save(path)
+
+
+# ---------------------------------------------------------------------------
+# Document 11: Psychometric assessment report — standardised score tables
+# ---------------------------------------------------------------------------
+def build_psychometric_report(path):
+    doc = Document()
+    doc.add_heading("Psychometric Assessment Report — Northgate Psychology Clinic", level=0)
+    _two_col_table(doc, [
+        ("Client", "Jordan Elliot Whitfield"),
+        ("Date of birth", "12/04/1985"),
+        ("Age at assessment", "40 years 11 months"),
+        ("Assessor", "Dr. Amelia Ferro, Clinical Psychologist"),
+        ("Provider number", "2705513Y"),
+        ("Assessment dates", "26/02/2026 and 04/03/2026"),
+        ("Referral source", "Dr. Susan Ng, Riverside Family Medical Practice"),
+        ("Reason for referral", "Cognitive screen and symptom quantification post workplace trauma"),
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Tests Administered", level=2)
+    doc.add_paragraph(
+        "Wechsler Adult Intelligence Scale - Fourth Edition (WAIS-IV, selected indices); "
+        "Trail Making Test A and B; Rey Auditory Verbal Learning Test (RAVLT); Depression "
+        "Anxiety Stress Scales (DASS-21); PTSD Checklist for DSM-5 (PCL-5); Insomnia "
+        "Severity Index (ISI). All administered by the assessor under standard conditions."
+    )
+    doc.add_paragraph()
+
+    _heading(doc, "WAIS-IV Index Scores", level=2)
+    _grid_table(doc, ["Index", "Standard score", "Percentile", "95% CI", "Descriptor"], [
+        ["Verbal Comprehension", "104", "61", "98 - 110", "Average"],
+        ["Perceptual Reasoning", "109", "73", "102 - 115", "Average"],
+        ["Working Memory", "92", "30", "86 - 99", "Average"],
+        ["Processing Speed", "85", "16", "78 - 95", "Low Average"],
+        ["Full Scale IQ (prorated)", "98", "45", "93 - 103", "Average"],
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Attention & Memory", level=2)
+    _grid_table(doc, ["Measure", "Raw / time", "Scaled / z", "Interpretation"], [
+        ["Trail Making Test A", "31 sec", "z = -0.4", "Within normal limits"],
+        ["Trail Making Test B", "94 sec", "z = -1.3", "Mildly slowed"],
+        ["RAVLT total (trials 1-5)", "47", "z = -0.6", "Within normal limits"],
+        ["RAVLT delayed recall", "9", "z = -0.5", "Within normal limits"],
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Self-Report Symptom Measures", level=2)
+    _grid_table(doc, ["Measure", "Score", "Range / cutoff", "Severity"], [
+        ["DASS-21 Depression", "12", "0 - 42", "Mild"],
+        ["DASS-21 Anxiety", "10", "0 - 42", "Moderate"],
+        ["DASS-21 Stress", "16", "0 - 42", "Mild"],
+        ["PCL-5 total", "28", "cutoff 31-33", "Sub-threshold, improving"],
+        ["Insomnia Severity Index", "14", "0 - 28", "Clinical insomnia (moderate)"],
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Summary & Recommendations", level=2)
+    doc.add_paragraph(
+        "Mr Whitfield presents with broadly average general cognitive ability. Processing "
+        "speed and set-shifting are mildly reduced relative to other indices, most likely "
+        "reflecting current sleep disturbance and anxiety rather than a fixed deficit. "
+        "Self-report measures show a mild-to-moderate residual symptom burden that has "
+        "improved since treatment commenced. Recommendations: continue trauma-focused CBT; "
+        "prioritise sleep; re-screen processing speed and the ISI in three months once sleep "
+        "has stabilised; provide a copy of this report to Dr Susan Ng and to Dr Nadia Haddad."
+    )
+    doc.save(path)
+
+
+# ---------------------------------------------------------------------------
+# Document 12: WorkCover certificate of capacity — claim number, insurer
+# ---------------------------------------------------------------------------
+def build_workcover_certificate(path):
+    doc = Document()
+    doc.add_heading("Certificate of Capacity — WorkCover", level=0)
+    _two_col_table(doc, [
+        ("Worker", "Jordan Elliot Whitfield"),
+        ("Date of birth", "12/04/1985"),
+        ("Address", "45 Kestrel Ave, Coburg VIC 3058"),
+        ("Mobile", "0412 887 234"),
+        ("Employer", "Coburg Logistics Pty Ltd"),
+        ("Claim number", "WC-2025-118342"),
+        ("Insurer", "Statewide Workers Insurance"),
+        ("Case manager", "Marcus Delaney  |  (03) 5551 4120"),
+        ("Date of injury", "14 October 2025"),
+        ("Certificate period", "05/03/2026 to 02/04/2026"),
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Diagnosis", level=2)
+    doc.add_paragraph(
+        "1. Healed closed fracture, right distal radius (14/10/2025), with residual wrist "
+        "stiffness and grip weakness. 2. Post-traumatic stress disorder arising from the same "
+        "incident, moderate and improving with treatment."
+    )
+    _heading(doc, "Capacity for Work", level=2)
+    _grid_table(doc, ["Component", "Assessment"], [
+        ["Current capacity", "Suitable for modified duties"],
+        ["Hours", "6 hours/day, 5 days/week, building to full-time over 4 weeks"],
+        ["Restrictions - physical", "No lifting > 5 kg with the right hand; no operating or working within 3 m of forklifts or reversing vehicles"],
+        ["Restrictions - psychological", "Graded, supervised re-introduction to the warehouse floor with a familiar colleague present; no solo floor shifts until reviewed"],
+        ["Review date", "02/04/2026"],
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Treatment", level=2)
+    doc.add_paragraph(
+        "Trauma-focused CBT weekly with Dr Amelia Ferro (Northgate Psychology Clinic); "
+        "psychiatric review with Dr Nadia Haddad; physiotherapy with Grace Tan for wrist "
+        "rehabilitation. Sertraline 50 mg mane commenced 18/03/2026."
+    )
+    _para(doc, "Certified by: Dr. Susan Ng, Riverside Family Medical Practice, "
+               "12 Wattle Street, Coburg VIC 3058. Provider No. 2481726A. "
+               "Date: 05/03/2026.", bold_label="")
+    doc.save(path)
+
+
+# ---------------------------------------------------------------------------
+# Document 13: Short GP progress note
+# ---------------------------------------------------------------------------
+def build_gp_progress_note(path):
+    doc = Document()
+    doc.add_heading("GP Consultation Note — Riverside Family Medical Practice", level=0)
+    _para(doc, "Patient: Jordan Elliot Whitfield  |  DOB 12/04/1985  |  Medicare 2934 5671 0  |  "
+               "Address: 45 Kestrel Ave, Coburg VIC 3058")
+    _para(doc, "Date: 25 March 2026  |  Seen by: Dr. Susan Ng  |  Item: 36 (standard consultation)")
+    doc.add_paragraph()
+
+    _para(doc, "S: ", bold_label="")
+    doc.add_paragraph(
+        "Review of mood and sleep. Reports sertraline 50 mg started by Dr Nadia Haddad one week "
+        "ago; some nausea in the first three days, now settled. Sleep onset improving. Wrist "
+        "less stiff since starting physio with Grace Tan. Wife Priya reports he is 'more himself'. "
+        "No suicidal ideation. Alcohol down to about 4 standard drinks per week."
+    )
+    _para(doc, "O: ", bold_label="")
+    doc.add_paragraph(
+        "BP 128/82, HR 74 regular, afebrile. Right wrist: full pronation/supination, mild "
+        "reduction in wrist extension, grip 26 kg right vs 44 kg left. Affect brighter, "
+        "reactive. No tremor."
+    )
+    _para(doc, "A: ", bold_label="")
+    doc.add_paragraph(
+        "PTSD - improving on sertraline and CBT. Post-fracture wrist stiffness - improving with "
+        "physiotherapy. Hazardous alcohol use - reducing."
+    )
+    _para(doc, "P: ", bold_label="")
+    doc.add_paragraph(
+        "Increase sertraline to 100 mg mane as advised by psychiatry. Continue physiotherapy. "
+        "Repeat LFTs and fasting lipids in 8 weeks (last done 05/03/2026 at Northside Pathology). "
+        "New Certificate of Capacity issued for the WorkCover claim (WC-2025-118342), modified "
+        "duties, review 02/04/2026. Follow-up with me in 3 weeks; sooner if mood worsens."
+    )
+    doc.save(path)
+
+
+# ---------------------------------------------------------------------------
+# Document 14: Radiology report — imaging accession number, prose findings
+# ---------------------------------------------------------------------------
+def build_imaging_report(path):
+    doc = Document()
+    doc.add_heading("Radiology Report — Northside Radiology", level=0)
+    _para(doc, "120 Bell Street, Coburg VIC 3058  |  Ph: (03) 5551 3300  |  Fax: (03) 5551 3301")
+    doc.add_paragraph()
+
+    _two_col_table(doc, [
+        ("Patient", "Jordan Elliot Whitfield"),
+        ("Date of birth", "12/04/1985"),
+        ("Medicare number", "2934 5671 0"),
+        ("Accession number", "RAD-2025-77120"),
+        ("Study", "XR Right Wrist (2 views); CT Right Wrist"),
+        ("Study date", "14 October 2025 (XR); 28 October 2025 (CT)"),
+        ("Referring doctor", "Emergency Department, Merri Creek District Hospital / Dr. Susan Ng (CT)"),
+        ("Reporting radiologist", "Dr. Owen Blackwood"),
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Clinical Details", level=2)
+    doc.add_paragraph(
+        "Fall against shelving at work on 14/10/2025, landing on the outstretched right hand. "
+        "Wrist pain and swelling. Query fracture. CT for surgical planning / healing assessment."
+    )
+    _heading(doc, "XR Right Wrist - 14 October 2025", level=2)
+    doc.add_paragraph(
+        "There is a minimally displaced transverse fracture through the distal radial "
+        "metaphysis, approximately 18 mm proximal to the radiocarpal joint, with less than "
+        "1 mm of dorsal angulation and no intra-articular extension. The distal radioulnar "
+        "joint is congruent. No scaphoid fracture identified. Soft tissue swelling over the "
+        "dorsal wrist."
+    )
+    _heading(doc, "CT Right Wrist - 28 October 2025", level=2)
+    doc.add_paragraph(
+        "Interval early callus formation at the distal radial fracture with maintained "
+        "alignment. No secondary displacement. No intra-articular step. Carpal alignment "
+        "preserved. Findings consistent with satisfactory conservative healing."
+    )
+    _heading(doc, "Impression", level=2)
+    doc.add_paragraph(
+        "Minimally displaced extra-articular distal radius fracture, healing satisfactorily "
+        "on the 28/10/2025 CT. No features to indicate a change in management. Report "
+        "forwarded to Dr. Susan Ng at Riverside Family Medical Practice."
+    )
+    doc.save(path)
+
+
+# ---------------------------------------------------------------------------
+# Document 15: Physiotherapy progress letter — measurement grid, provider no.
+# ---------------------------------------------------------------------------
+def build_physiotherapy_letter(path):
+    doc = Document()
+    doc.add_heading("Physiotherapy Progress Report — Coburg Sports & Spinal Physiotherapy", level=0)
+    _para(doc, "15 Munro Street, Coburg VIC 3058  |  Ph: (03) 5551 2210")
+    doc.add_paragraph()
+
+    _para(doc, "24 March 2026", bold_label="Date: ")
+    _para(doc, "Dr. Susan Ng, Riverside Family Medical Practice", bold_label="To: ")
+    _para(doc, "Marcus Delaney, Statewide Workers Insurance (claim WC-2025-118342)", bold_label="Cc: ")
+    doc.add_paragraph()
+
+    _two_col_table(doc, [
+        ("Client", "Jordan Elliot Whitfield"),
+        ("Date of birth", "12/04/1985"),
+        ("Treating physiotherapist", "Grace Tan"),
+        ("Provider number", "2810664R"),
+        ("Sessions to date", "6 (11/02/2026 to 24/03/2026)"),
+        ("Injury", "Right distal radius fracture, 14/10/2025 - conservatively managed"),
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Objective Measures", level=2)
+    _grid_table(doc, ["Measure", "Baseline (11/02)", "Current (24/03)", "Unaffected side"], [
+        ["Wrist extension", "32 deg", "58 deg", "72 deg"],
+        ["Wrist flexion", "40 deg", "66 deg", "80 deg"],
+        ["Grip strength (right)", "18 kg", "26 kg", "44 kg (left)"],
+        ["Pain (numeric rating, on load)", "6/10", "2/10", "-"],
+    ])
+    doc.add_paragraph()
+
+    _heading(doc, "Home Program", level=2)
+    _grid_table(doc, ["Exercise", "Dose"], [
+        ["Wrist flexion/extension active range", "3 x 15, three times daily"],
+        ["Putty grip and pinch", "3 x 20, twice daily"],
+        ["Forearm rotation with hammer", "3 x 12, once daily"],
+        ["Graded weight-bearing through the hand", "As tolerated, per handout"],
+    ])
+    doc.add_paragraph()
+
+    doc.add_paragraph(
+        "Mr Whitfield is progressing well. Range of motion and grip are approaching functional "
+        "levels for modified warehouse duties, and pain on load has reduced substantially. He "
+        "remains limited for heavy lifting and sustained gripping. I anticipate a further four "
+        "sessions to return him to pre-injury capacity for the right wrist, in parallel with "
+        "the graded return-to-work plan coordinated by Dr Susan Ng and Dr Amelia Ferro. Please "
+        "contact me on (03) 5551 2210 to discuss."
+    )
+    _para(doc, "Grace Tan, Physiotherapist  |  Provider No. 2810664R", bold_label="")
+    doc.save(path)
+
+
 if __name__ == "__main__":
     build_referral_letter(os.path.join(OUT_DIR, "01_gp_referral_letter.docx"))
     build_intake_notes(os.path.join(OUT_DIR, "02_biopsychosocial_intake_notes.docx"))
@@ -588,4 +1022,12 @@ if __name__ == "__main__":
     build_discharge_summary(os.path.join(OUT_DIR, "05_discharge_summary.docx"))
     build_risk_assessment(os.path.join(OUT_DIR, "06_risk_assessment.docx"))
     build_case_conference_note(os.path.join(OUT_DIR, "07_case_conference_note.docx"))
-    print("done:", os.listdir(OUT_DIR))
+    build_pathology_report(os.path.join(OUT_DIR, "08_pathology_report.docx"))
+    build_medication_chart(os.path.join(OUT_DIR, "09_medication_chart.docx"))
+    build_psychiatry_letter(os.path.join(OUT_DIR, "10_psychiatry_review_letter.docx"))
+    build_psychometric_report(os.path.join(OUT_DIR, "11_psychometric_report.docx"))
+    build_workcover_certificate(os.path.join(OUT_DIR, "12_workcover_certificate.docx"))
+    build_gp_progress_note(os.path.join(OUT_DIR, "13_gp_progress_note.docx"))
+    build_imaging_report(os.path.join(OUT_DIR, "14_imaging_report.docx"))
+    build_physiotherapy_letter(os.path.join(OUT_DIR, "15_physiotherapy_letter.docx"))
+    print("done:", sorted(os.listdir(OUT_DIR)))

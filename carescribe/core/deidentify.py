@@ -420,6 +420,14 @@ _MRN_LABELS = (
     r"Patient\s*ID|Hosp\s*No|NHS\s*Trust\s*No|Trust\s*(?:No|Number|ID)|"
     r"GMC\s*(?:No|Number)?|NMC\s*(?:No|Number|PIN)?|HCPC\s*(?:No|Number|Registration)?|"
     r"GPhC\s*(?:No|Number|Registration)?|Medicare(?:\s*Card)?\s*(?:No|Number)?|"
+    # "Clinic File" / "File No" is a private clinic's own patient-file number
+    # (a psychiatry rooms' "Clinic file: CPC-4471"); "Accession (No|Number)"
+    # labels a pathology or imaging report's specimen/study identifier
+    # ("Accession number: RAD-2025-77120"). Both sailed through untouched until
+    # the sample-document pipeline pass caught them — the value shape was
+    # already covered, only the label was missing.
+    r"Clinic\s*File(?:\s*(?:No|Number))?|File\s*(?:No|Number)|"
+    r"Accession(?:\s*(?:No|Number))?|"
     # "UR (No|Number)" is the Australian hospital Unit Record number — the local
     # equivalent of "Hospital No". "Provider (No|Number)" is a clinician's
     # Australian provider identifier, the same class of gap GMC/NMC/HCPC filled
@@ -852,11 +860,52 @@ _DATE_FIELD_LABEL = re.compile(
     re.IGNORECASE,
 )
 
+# A certificate of capacity / fit-note / leave or claim form states its validity
+# window as "Certificate period:", "Cover period:", "Period of cover:",
+# "Certificate expiry:" and the like — an identity field whose value is a date
+# or date range by construction. This is a *closed phrase set*, not bare
+# "period"/"cover": a clinical "Recovery period:", "Rest period:", "Incubation
+# period:" or "Post-operative period:" is followed by a duration, not a date,
+# and must not anchor.
+_COVER_PERIOD_LABEL = re.compile(
+    r"^[ \t]*(?:"
+    r"(?:certificate|cover(?:age)?|claim|policy|benefit|entitlement|leave|"
+    r"award|payment)[ \t]+(?:period|expiry|expiration|validity|start|end|dates?)"
+    r"|period[ \t]+of[ \t]+(?:cover(?:age)?|capacity|incapacity|validity|"
+    r"entitlement|leave|payment)"
+    r"|(?:certificate\s+)?(?:valid|in[ \t]force)[ \t]+(?:from|to|until|between)"
+    r"|expiry|expires|expiration"
+    r")[ \t]*(?:\([^)\n]{0,24}\))?[ \t]*:[ \t]*$",
+    re.IGNORECASE,
+)
+
+# The second date of a labelled range — "Certificate period: 05/03/2026 to
+# 02/04/2026" — sits behind the first date and a connector, so the bare
+# field-label test misses it. Strip a "<first date> to " tail and retry the
+# label test against what precedes it.
+_DATE_RANGE_TAIL = re.compile(
+    r"(?P<lead>.*:[ \t]*)"
+    r"\d[\w./\- ]*?[ \t]*(?:to|through|thru|until|till|[-–—])[ \t]*$",
+    re.IGNORECASE,
+)
+
 
 def _is_labelled_date_field(text: str, start: int) -> bool:
-    """True if the date sits in a labelled field ("Admission date: 11 May 2026")."""
+    """True if the date sits in a labelled field ("Admission date: 11 May 2026").
+
+    Also true for a certificate/cover validity field and for the tail date of a
+    labelled range, so both ends of "Certificate period: <date> to <date>" are
+    anchored, not just the first.
+    """
     line_start, _ = _line_bounds(text, start)
-    return bool(_DATE_FIELD_LABEL.match(text[line_start:start]))
+    prefix = text[line_start:start]
+    if _DATE_FIELD_LABEL.match(prefix) or _COVER_PERIOD_LABEL.match(prefix):
+        return True
+    tail = _DATE_RANGE_TAIL.match(prefix)
+    if tail is None:
+        return False
+    lead = tail.group("lead")
+    return bool(_DATE_FIELD_LABEL.match(lead) or _COVER_PERIOD_LABEL.match(lead))
 
 
 def _has_identity_anchor(text: str, start: int) -> bool:

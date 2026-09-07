@@ -23,14 +23,36 @@ SAMPLE_DIR = Path(__file__).resolve().parent.parent / "sample_documents"
 
 # identifier -> the sample docs (by numeric prefix) that contain it in the source
 PATIENT_IDENTIFIERS: dict[str, tuple[str, ...]] = {
-    "Jordan Elliot Whitfield": ("01", "02", "03", "04", "05", "06", "07"),
-    "12/04/1985": ("01", "02", "04", "05", "06", "07"),
-    "2934 5671 0": ("01", "05", "06", "07"),          # Medicare number
-    "MCDH-410287": ("05",),                            # hospital UR number
-    "2481726A": ("01",),                              # provider number
-    "Priya Whitfield": ("01", "02", "05", "06", "07"),  # relative
-    "45 Kestrel Ave": ("01", "05"),                   # patient home address
+    "Jordan Elliot Whitfield": (
+        "01", "02", "03", "04", "05", "06", "07",
+        "08", "09", "10", "11", "12", "13", "14", "15",
+    ),
+    "12/04/1985": (
+        "01", "02", "04", "05", "06", "07",
+        "08", "09", "10", "11", "12", "13", "14", "15",
+    ),
+    "2934 5671 0": ("01", "05", "06", "07", "08", "10", "13", "14"),  # Medicare number
+    "45 Kestrel Ave": ("01", "05", "08", "12", "13"),  # patient home address
+    "0412 887 234": ("01", "12"),                      # patient mobile
+    "0433 990 214": ("01", "06", "10"),                # relative mobile
+    "jordan.whitfield85@example.com": ("01",),         # patient email
+    "Priya Whitfield": ("01", "02", "05", "06", "07", "10"),  # relative
+    # Labelled record / provider / claim / accession numbers — the class that
+    # leaked undetected until a QA pass. Each is anchored to a label the
+    # deterministic layer recognises.
+    "RFMP-88213": ("01",),                             # referring practice UR
+    "MCDH-410287": ("05", "09"),                       # hospital UR number
+    "2481726A": ("01", "08", "12"),                    # Dr Ng, provider number
+    "25-0788-441907": ("08",),                         # pathology lab reference
+    "CPC-4471": ("10",),                               # psychiatry clinic file no.
+    "2559071T": ("10",),                               # Dr Haddad, provider number
+    "2705513Y": ("11",),                               # Dr Ferro, provider number
+    "WC-2025-118342": ("12", "13", "15"),              # WorkCover claim number
+    "RAD-2025-77120": ("14",),                         # imaging accession number
+    "2810664R": ("15",),                               # Grace Tan, provider number
 }
+
+ALL_PREFIXES = tuple(f"{n:02d}" for n in range(1, 16))
 
 DOC_BY_PREFIX = {p.name[:2]: p for p in sorted(SAMPLE_DIR.glob("*.docx"))}
 
@@ -63,9 +85,9 @@ def test_sample_document_residual_scan_is_clean(prefix: str) -> None:
     assert findings == [], (prefix, findings)
 
 
-def test_the_patient_surname_alone_is_also_gone() -> None:
+@pytest.mark.parametrize("prefix", ALL_PREFIXES)
+def test_the_patient_surname_alone_is_also_gone(prefix: str) -> None:
     """"Whitfield" on its own (not just the full name) must not survive anywhere."""
-    for prefix in ("01", "02", "03", "04", "05", "06", "07"):
-        raw, redacted = _redacted(prefix)
-        if "Whitfield" in raw:
-            assert "Whitfield" not in redacted, (prefix, "bare surname survived")
+    raw, redacted = _redacted(prefix)
+    if "Whitfield" in raw:
+        assert "Whitfield" not in redacted, (prefix, "bare surname survived")

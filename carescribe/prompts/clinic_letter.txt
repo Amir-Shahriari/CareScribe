@@ -2,7 +2,9 @@ Write an outpatient clinic letter to the patient's GP from the source text below
 
 Structure:
 
-    Re: [PATIENT]
+    Re: [PATIENT] (add any case number, hospital/record number, or similar
+    administrative identifier the source gives here, as placeholders only —
+    do not drop them just because they aren't a clinical fact)
     Diagnosis / problem list
     Reason for referral or review
     History and findings

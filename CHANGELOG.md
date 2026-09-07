@@ -15,6 +15,13 @@ This project follows Semantic Versioning.
   similar).
 - De-identification: labelled `UR No` (Australian Unit Record) and
   `Provider No` identifiers are now redacted.
+- De-identification: labelled `Clinic File` / `File No` record numbers and
+  pathology/imaging `Accession No` identifiers are now redacted (the value
+  shape was already handled, only the label was missing).
+- De-identification: `… period:` / `… cover:` / `… expiry:` / `… validity:`
+  date fields are treated as identity dates, and both ends of a labelled date
+  range (`Certificate period: <date> to <date>`) are redacted, not just the
+  first — a WorkCover certificate of capacity previously leaked its second date.
 - De-identification: public crisis and support lines (Lifeline, 1800RESPECT,
   Samaritans, Beyond Blue, Kids Helpline, and similar) are preserved via
   `carescribe/core/protected_terms.txt` instead of being over-redacted as
@@ -37,6 +44,13 @@ This project follows Semantic Versioning.
   `tests/test_letterhead_address_leak.py`, `tests/test_labelled_id_leaks.py`,
   `tests/test_crisis_lines_preserved.py`, and a `sample_documents/` identifier
   answer-key net in `tests/test_sample_document_identifiers.py`.
+- Eight more `sample_documents/` types (pathology report, medication chart,
+  psychiatry review letter, psychometric report, WorkCover certificate, GP
+  progress note, imaging report, physiotherapy letter — all for the same
+  fictional patient) so the pipeline is exercised against numeric result
+  tables, accession/claim/clinic-file numbers and range fields, not just
+  letters. `tests/test_patient_pipeline.py` drives all 15 end to end through
+  the per-patient store and asserts nothing identifying is filed.
 
 ## [0.1.0] - 2026-09-01
 
