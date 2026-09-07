@@ -25,8 +25,8 @@
     "semantic_hash": ""
   },
   "carescribe/core/deidentify.py": {
-    "mtime": 1788430586.580161,
-    "ast_hash": "b3a5dd7ace267b3589ed703907f38ce8",
+    "mtime": 1788470880.4291856,
+    "ast_hash": "a4c6982635a6d019f59b81e4e08d7a08",
     "semantic_hash": ""
   },
   "carescribe/core/ingest.py": {
@@ -145,9 +145,9 @@
     "semantic_hash": "bceed314733920405efc469670a957c4"
   },
   "tests/test_deid_regressions.py": {
-    "mtime": 1785928422.8801227,
-    "ast_hash": "4ad29551d3b25db517e6c2408b8a3856",
-    "semantic_hash": "4ad29551d3b25db517e6c2408b8a3856"
+    "mtime": 1788470914.331931,
+    "ast_hash": "29e00353a19ca9db85d1a971820c471e",
+    "semantic_hash": ""
   },
   "tests/test_docx_roundtrip.py": {
     "mtime": 1788376005.5968175,
@@ -415,13 +415,13 @@
     "semantic_hash": "638ab9e93b5f8d9da380f8a92896fa15"
   },
   "sample_documents/make_sample_docs.py": {
-    "mtime": 1788376005.5845573,
-    "ast_hash": "a554c9054941131040dcc2f5182b29ea",
+    "mtime": 1788469806.5666635,
+    "ast_hash": "d18c539b79e1555699e3db0c2b8b2953",
     "semantic_hash": ""
   },
   "sample_documents/README.md": {
-    "mtime": 1788376005.584045,
-    "ast_hash": "672da83791c6edecb0f2f5f570616372",
+    "mtime": 1788470588.9561687,
+    "ast_hash": "ac65b12d22d467cc2b2f58e3e9ae5a59",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-08-21-review-ux-redesign-design.md": {
@@ -590,8 +590,8 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1788453503.2273831,
-    "ast_hash": "3e6d0791fc5424aef004a425a309a0fd",
+    "mtime": 1788470698.297297,
+    "ast_hash": "eb7389bd31b82d05ed658cc936141278",
     "semantic_hash": ""
   },
   "docs/swarm-pipeline.md": {
@@ -1100,8 +1100,8 @@
     "semantic_hash": ""
   },
   "tests/test_sample_document_identifiers.py": {
-    "mtime": 1788430586.58375,
-    "ast_hash": "0d2fb71d70f9ba289b38fc69b1c87ce6",
+    "mtime": 1788470318.0469484,
+    "ast_hash": "15658985b0231260a4812cb304db1d22",
     "semantic_hash": ""
   },
   "tests/test_reasoning_strip.py": {
@@ -1122,6 +1122,11 @@
   "docs/superpowers/specs/2026-09-04-patient-records-store-design.md": {
     "mtime": 1788452902.6029623,
     "ast_hash": "a496fad154712f921e92a57252d005f1",
+    "semantic_hash": ""
+  },
+  "tests/test_patient_pipeline.py": {
+    "mtime": 1788470547.3302183,
+    "ast_hash": "19a1b755cf2691266da928f3853522cb",
     "semantic_hash": ""
   }
 }
