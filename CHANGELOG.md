@@ -5,6 +5,32 @@ This project follows Semantic Versioning.
 
 ## [Unreleased]
 
+### Added
+
+- **Local user accounts.** CareScribe now opens on a sign-in screen. Sign up
+  once, and the patients you create are filed under your account: another
+  account on the same computer sees its own roster and not yours. Accounts live
+  in `carescribe/core/users.py`, one opaque-id folder per user, with passwords
+  hashed using `hashlib.scrypt` and a per-account salt.
+
+  These accounts are **workspace separation, not a security control**. Both the
+  patient roster and the account roster are plaintext on disk, and anyone with
+  filesystem access to the app-data folder can read every name without signing
+  in. The sign-in screen says so in as many words; do not soften that copy.
+  Passwords are hashed so that a password reused from somewhere else is not
+  sitting in a file in the clear — that is the whole of the threat model.
+- **The first account inherits the existing roster.** Patients created before
+  accounts existed are moved into the first account created, so an established
+  user loses nothing on upgrade. Later accounts start empty. The move is
+  conservative: a folder whose destination already exists is left alone and
+  logged rather than merged or overwritten.
+- **A patient browser.** Below the patient bar, a searchable and scrollable
+  list of your patients, each showing how many documents are filed. Opening one
+  lists its filed artefacts grouped by kind, with de-identified text and review
+  records readable in place and Word documents offered as downloads.
+- Signing out clears every document, identity map, and draft from the session,
+  so the next person to sign in on the same machine inherits nothing.
+
 ### Fixed
 
 - De-identification: labelled Medicare card numbers (`Medicare No:` /

@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import html
 import io
+import json
 import sys
 import time
 from pathlib import Path
@@ -38,10 +39,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from carescribe.core import (  # noqa: E402
     applog, backends, batch, carenotes, deidentify, desktop, generation_status,
     ingest, mapping, model_setup, ollama_client, patients, review_checklist,
-    review_flags, review_spans, settings,
+    review_flags, review_spans, settings, users,
 )
 from carescribe.components.highlight_review import highlight_review  # noqa: E402
-from carescribe.ui import components as ui, theme as ui_theme  # noqa: E402
+from carescribe.ui import (  # noqa: E402
+    auth, components as ui, patient_browser as pb, theme as ui_theme,
+)
 
 st.set_page_config(page_title="CareScribe", page_icon="🩺", layout="wide")
 
@@ -86,6 +89,13 @@ DEFAULTS = {
     "patient_id": "",
     # Bumped after create/rename/delete so the patient-bar text inputs reset.
     "patient_nonce": 0,
+    # The signed-in account. "" means nobody, which the gate in main() turns
+    # into the login screen. Not PHI, and deliberately not in PHI_KEYS: a wipe
+    # must not silently sign the user out from under themselves.
+    "user_id": "",
+    "username": "",
+    # Free-text filter over the roster in the patient browser.
+    "patient_query": "",
 }
 
 
@@ -111,6 +121,9 @@ def wipe_phi() -> None:
         )):
             del st.session_state[key]
     st.session_state.pop("_patient_pending", None)
+    # Which patient the browser has open, and the roster filter typed into it.
+    st.session_state.pop("browse_patient_id", None)
+    st.session_state["patient_query"] = ""
     # Not PHI themselves, but stale UI state after a wipe.
     st.session_state.pop("form_type", None)
     st.session_state.pop("form_sources", None)
@@ -267,6 +280,10 @@ def render_sidebar() -> None:
         f'<div class="cs-brand"><span>{ui.icon("shield")}</span>CareScribe</div>',
         unsafe_allow_html=True,
     )
+
+    # 0. Who is this. Signing out wipes the session, so the wipe is handed in.
+    auth.render_account_panel(wipe_phi)
+    st.sidebar.divider()
 
     # 1. What am I working on — the most useful thing at a glance.
     st.sidebar.subheader("Session")
@@ -2178,6 +2195,150 @@ def render_filed_documents(patient_id: str) -> None:
         )
 
 
+def _document_bytes(patient_id: str, name: str) -> bytes | None:
+    try:
+        return (patients.patient_output_dir(patient_id) / name).read_bytes()
+    except OSError:
+        return None
+
+
+def render_document_viewer(patient_id: str, item) -> None:
+    """One filed artefact: preview what can be shown, download what cannot."""
+    data = _document_bytes(patient_id, item.name)
+    if data is None:
+        st.caption("This file could not be read from disk.")
+        return
+
+    left, right = st.columns([6, 2])
+    left.markdown(f"`{item.name}`")
+    left.caption(pb.document_label(item))
+    right.download_button(
+        "Download",
+        data=data,
+        file_name=item.name,
+        mime=_FILED_KIND_MIME.get(item.kind, "application/octet-stream"),
+        key=f"browse_dl_{patient_id}_{item.name}",
+        use_container_width=True,
+    )
+
+    # A .docx is a zip; there is nothing useful to show inline, so it stays a
+    # download. Text and the review record are readable here.
+    if item.kind == "text":
+        with st.expander("View", expanded=False):
+            st.text_area(
+                "De-identified text",
+                value=data.decode("utf-8", errors="replace"),
+                height=300,
+                key=f"browse_view_{patient_id}_{item.name}",
+                disabled=True,
+                label_visibility="collapsed",
+            )
+    elif item.kind == "audit":
+        with st.expander("View review record", expanded=False):
+            try:
+                st.json(json.loads(data.decode("utf-8")))
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                st.caption("This review record could not be read as JSON.")
+
+
+def render_patient_browser() -> None:
+    """Browse this account's patients and read what has been filed for each.
+
+    Separate from the patient bar on purpose. The bar answers "where does the
+    next approval get filed"; this answers "what do I already have on this
+    person" -- a reading view, with no create, rename, or delete in it.
+    """
+    try:
+        roster = patients.list_patients()
+    except patients.PatientError as exc:
+        st.warning(f"Patient store unavailable. ({exc})")
+        return
+
+    moved = st.session_state.pop("_migrated_count", 0)
+    if moved:
+        st.success(
+            f"{moved} patient record(s) already on this computer were moved "
+            "into your account."
+        )
+
+    st.subheader("Your patients")
+    if not roster:
+        st.caption(
+            "No patients yet. Create one in the patient bar above, then "
+            "approved documents are filed under them."
+        )
+        return
+
+    query = st.text_input(
+        "Search patients",
+        key="patient_query",
+        placeholder="Filter by name",
+        label_visibility="collapsed",
+    )
+    matches = pb.filter_patients(roster, query)
+    if not matches:
+        st.caption(f"No patient matches “{pb.normalise_query(query)}”.")
+        return
+
+    counts: dict[str, int] = {}
+    for person in matches:
+        try:
+            counts[person.id] = len(patients.filed_documents(person.id))
+        except patients.PatientError:
+            counts[person.id] = 0
+
+    st.caption(f"{len(matches)} of {len(roster)} shown")
+    opened = st.session_state.get("browse_patient_id", "")
+
+    # A fixed-height container scrolls once the roster outgrows it, so a long
+    # list never pushes the rest of the page away.
+    with st.container(height=min(320, 88 + 44 * len(matches))):
+        for person in matches:
+            row = st.columns([7, 2])
+            row[0].markdown(pb.patient_summary(person, counts[person.id]))
+            is_open = person.id == opened
+            if row[1].button(
+                "Close" if is_open else "Open",
+                key=f"browse_open_{person.id}",
+                use_container_width=True,
+            ):
+                st.session_state["browse_patient_id"] = "" if is_open else person.id
+                st.rerun()
+
+    opened = st.session_state.get("browse_patient_id", "")
+    if not opened:
+        return
+    if opened not in {p.id for p in roster}:
+        # The patient was deleted, or the account changed under us.
+        st.session_state["browse_patient_id"] = ""
+        return
+
+    person = next(p for p in roster if p.id == opened)
+    st.divider()
+    st.markdown(f"**{person.display_name}**")
+    try:
+        filed = patients.filed_documents(opened)
+    except patients.PatientError as exc:
+        st.caption(f"Could not read filed documents: {exc}")
+        return
+
+    if not filed:
+        st.caption("Nothing has been filed for this patient yet.")
+        return
+
+    grouped = pb.group_documents_by_kind(filed)
+    for kind in pb.ordered_kinds(grouped):
+        st.caption(pb.kind_label(kind))
+        for item in grouped[kind]:
+            with st.container(border=True):
+                render_document_viewer(opened, item)
+
+    st.caption(
+        "These are de-identified copies only. The original documents and the "
+        "identity map were never written here."
+    )
+
+
 def render_patient_bar() -> None:
     """Pick or create the patient whose folder approved output is filed into.
 
@@ -2310,6 +2471,13 @@ def render_patient_bar() -> None:
 
 def main() -> None:
     ui_theme.inject()
+
+    # The gate comes before everything: the sidebar, the model load, the hero.
+    # Nothing behind it may render for a visitor who is not signed in, and the
+    # store scope is re-asserted here on every rerun.
+    if not auth.render_gate():
+        return
+
     render_sidebar()
 
     st.markdown(
@@ -2338,6 +2506,8 @@ def main() -> None:
     with st.container(border=True):
         st.markdown('<span class="cs-card"></span>', unsafe_allow_html=True)
         render_patient_bar()
+        st.divider()
+        render_patient_browser()
 
     # Each numbered step gets its own card (see ui.theme.CSS). Sections still
     # guard themselves — the predicates here only decide whether to open a card,

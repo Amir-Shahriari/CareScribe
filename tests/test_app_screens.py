@@ -19,12 +19,14 @@ from streamlit.testing.v1 import AppTest  # noqa: E402
 from carescribe.core import batch  # noqa: E402
 from tests.fixtures import DISCHARGE_SUMMARY  # noqa: E402
 
+from tests.conftest import SIGNED_IN_SESSION  # noqa: E402
+
 APP = str(Path(__file__).resolve().parent.parent / "carescribe" / "app.py")
 
 
 def _run(**session) -> AppTest:
     app = AppTest.from_file(APP, default_timeout=120)
-    for key, value in session.items():
+    for key, value in {**SIGNED_IN_SESSION, **session}.items():
         app.session_state[key] = value
     app.run()
     assert not app.exception, [e.value for e in app.exception]

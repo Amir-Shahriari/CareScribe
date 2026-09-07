@@ -84,6 +84,19 @@ def models_dir() -> Path:
     return app_data_dir() / "models"
 
 
+def users_dir() -> Path:
+    """Root of the local account store.
+
+    One opaque-ID folder per account, each holding a ``user.json`` with the
+    username and a hashed password. Sits beside the patient store in app-data
+    for the same reason: it must not be written next to the executable, which
+    on Windows is often a directory the user cannot write to. Accounts are
+    workspace separation, not a security control -- see
+    :mod:`carescribe.core.users`.
+    """
+    return app_data_dir() / "users"
+
+
 def patients_dir() -> Path:
     """Root of the per-patient records store.
 
@@ -97,7 +110,7 @@ def patients_dir() -> Path:
 
 
 def ensure_dirs() -> None:
-    for path in (output_dir(), models_dir(), patients_dir()):
+    for path in (output_dir(), models_dir(), patients_dir(), users_dir()):
         path.mkdir(parents=True, exist_ok=True)
 
 

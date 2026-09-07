@@ -366,12 +366,32 @@ carescribe/output/deidentified/<filename>.deid.txt          # no patient selecte
 De-identified text only, either way. The identity mapping is never written — it has no code
 path to disk, and `write_approved()` has nowhere to accept it. Both locations are gitignored.
 
+**Accounts.** CareScribe opens on a sign-in screen. Create an account once and the
+patients you file are yours: another account on the same computer sees its own roster, not
+yours. The first account created on a machine inherits any patients that were saved before
+accounts existed, so nothing is lost on upgrade. Usernames are stored in
+`users/<id>/user.json` with a scrypt-hashed password; the folder is an opaque id, so the
+username is never in a path.
+
+Be clear about what this is. **Accounts separate workspaces; they are not a security
+control.** Both the patient roster and the account roster are plaintext on disk. Anyone who
+can read this machine's app-data folder can read every patient name in every account
+without signing in, and signing out does not lock anything. Passwords are hashed so that a
+password reused from elsewhere is not sitting in a file in the clear — that is all the
+hashing is for. If you need real protection at rest, use full-disk encryption and the
+operating system's own user accounts.
+
 **Patients.** The patient bar above the pipeline lets you file a batch's approved output
 under a named patient instead of the shared folder. The patient's display name is stored in
-`patients/<id>/patient.json`; the folder itself is an opaque id, so the real name is never
-in a path. Re-identification of a filed document is not possible in a later session — the
-map is gone once the session ends, and you keep the original document yourself. Selecting
-"No patient (scratch)" is the original behaviour.
+`patients/<user id>/<patient id>/patient.json`; both folders are opaque ids, so neither the
+real name nor the username is ever in a path. Re-identification of a filed document is not
+possible in a later session — the map is gone once the session ends, and you keep the
+original document yourself. Selecting "No patient (scratch)" is the original behaviour.
+
+Below the bar, the patient browser lists your roster with a search box and a document count
+per patient. Opening a patient shows what has been filed, grouped by kind: de-identified
+text and review records can be read in place, and Word documents are offered as downloads.
+Only de-identified copies are ever there.
 
 ### The safety sweep
 

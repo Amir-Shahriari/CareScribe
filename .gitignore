@@ -27,6 +27,9 @@ Thumbs.db
 # ---------------------------------------------------------------------------
 carescribe/output/
 carescribe/patients/
+# The local account store, when running from a source checkout. Usernames are
+# identifying data and must never be committed.
+carescribe/users/
 *.deid.txt
 *.deid.docx
 *.review.json

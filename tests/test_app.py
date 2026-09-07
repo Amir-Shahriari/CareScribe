@@ -18,12 +18,14 @@ from streamlit.testing.v1 import AppTest  # noqa: E402
 from carescribe.core import batch, carenotes, deidentify  # noqa: E402
 from tests.fixtures import DISCHARGE_SUMMARY  # noqa: E402
 
+from tests.conftest import SIGNED_IN_SESSION  # noqa: E402
+
 APP = str(Path(__file__).resolve().parent.parent / "carescribe" / "app.py")
 
 
 def run_app(**session) -> AppTest:
     app = AppTest.from_file(APP, default_timeout=120)
-    for key, value in session.items():
+    for key, value in {**SIGNED_IN_SESSION, **session}.items():
         app.session_state[key] = value
     app.run()
     assert not app.exception, [e.value for e in app.exception]
@@ -176,7 +178,7 @@ def test_a_batch_of_clean_documents_needs_roughly_one_click_each(tmp_path, monke
         )
     state = {"docs": docs, "order": list(docs), "selected": next(iter(docs))}
     app = AppTest.from_file(APP, default_timeout=120)
-    for key, value in state.items():
+    for key, value in {**SIGNED_IN_SESSION, **state}.items():
         app.session_state[key] = value
     app.run()
     assert not app.exception, [e.value for e in app.exception]
@@ -243,7 +245,8 @@ def test_batch_approve_leaves_an_unattested_document(tmp_path, monkeypatch):
     docs["c1.txt"].attested = True  # only one reviewer has ticked the box
 
     app = AppTest.from_file(APP, default_timeout=120)
-    for key, value in {"docs": docs, "order": list(docs), "selected": "c1.txt"}.items():
+    for key, value in {**SIGNED_IN_SESSION, "docs": docs,
+                       "order": list(docs), "selected": "c1.txt"}.items():
         app.session_state[key] = value
     app.run()
     app.button(key="approve_batch").click().run()

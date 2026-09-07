@@ -44,6 +44,22 @@ _ENV_VAR = "CARESCRIBE_PATIENTS_DIR"
 
 _ID_RE = re.compile(r"^p_[0-9a-f]{32}$")
 
+# A user folder inside the store. Distinct prefix from the patient id so an
+# unscoped ``list_patients`` walking the base skips user folders on shape alone,
+# and a scoped one can never mistake a sibling account for a patient.
+_USER_ID_RE = re.compile(r"^u_[0-9a-f]{32}$")
+
+# Which account's patients the store currently resolves to. ``None`` means the
+# flat, pre-accounts layout: patients sit directly in the base.
+#
+# This is module state, not a parameter, because it must reach every existing
+# call site (``create_patient``, ``filed_documents``, ...) without changing any
+# of their signatures — the scoping happens once, in ``patients_root()``, and
+# everything above it is untouched. Streamlit runs one script top-to-bottom per
+# rerun, and ``app.main()`` sets this before anything reads the store, so a
+# second browser session cannot observe the first one's value mid-read.
+_active_user: str | None = None
+
 ROSTER_FILENAME = "patient.json"
 DOCUMENTS_SUBDIR = "documents"
 
@@ -80,8 +96,8 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def patients_root() -> Path:
-    """Root of the records store.
+def store_base() -> Path:
+    """Root of the records store, before any per-account scoping.
 
     ``CARESCRIBE_PATIENTS_DIR`` if set, else ``<package>/patients`` — the same
     env-then-package-relative resolution ``batch`` uses for approved output.
@@ -89,6 +105,38 @@ def patients_root() -> Path:
     """
     override = (os.environ.get(_ENV_VAR) or "").strip()
     return Path(override) if override else _PACKAGE_ROOT / "patients"
+
+
+def set_active_user(user_id: str | None) -> None:
+    """Scope every subsequent store call to one account, or to none.
+
+    Passing ``None`` returns to the flat pre-accounts layout, which is what
+    tests and the migration path below want. A malformed id raises rather than
+    silently resolving somewhere unexpected — an id decides a directory.
+    """
+    global _active_user
+    if user_id is None or user_id == "":
+        _active_user = None
+        return
+    if not isinstance(user_id, str) or not _USER_ID_RE.match(user_id):
+        raise PatientError(f"Not a user id: {user_id!r}")
+    _active_user = user_id
+
+
+def active_user() -> str | None:
+    """The account the store is currently scoped to, or ``None``."""
+    return _active_user
+
+
+def patients_root() -> Path:
+    """Where the *current account's* patients live.
+
+    With no active user this is :func:`store_base` itself, so the pre-accounts
+    layout keeps working untouched and every existing caller of this function
+    stays correct without knowing accounts exist.
+    """
+    base = store_base()
+    return base / _active_user if _active_user else base
 
 
 def _valid_id(patient_id: str) -> str:
@@ -273,19 +321,80 @@ def filed_documents(patient_id: str) -> list[FiledDocument]:
     return [doc for _, doc in scored]
 
 
+def unscoped_patient_ids() -> list[str]:
+    """Patient folders sitting in the base, from before accounts existed.
+
+    These are invisible to a logged-in user, because a scoped
+    :func:`patients_root` never looks at the base. They are not lost — this is
+    what :func:`migrate_unscoped_into` moves.
+    """
+    base = store_base()
+    if not base.is_dir():
+        return []
+    try:
+        children = list(base.iterdir())
+    except OSError as exc:
+        applog.warn("could not list the patient store base: %s", exc)
+        return []
+    return sorted(c.name for c in children if c.is_dir() and _ID_RE.match(c.name))
+
+
+def migrate_unscoped_into(user_id: str) -> int:
+    """Move pre-accounts patients into ``user_id``'s scope. Returns the count.
+
+    Called once, when the first account is created: the person who has been
+    using this machine keeps the roster they already built. Later accounts see
+    nothing, because by then there is nothing left in the base to see.
+
+    Deliberately conservative. A folder whose destination already exists is
+    left where it is and logged, never merged or overwritten — the roster is
+    the one identifying thing CareScribe persists, and losing an entry to a
+    silent overwrite is worse than leaving a stray folder for a human to find.
+    """
+    if not isinstance(user_id, str) or not _USER_ID_RE.match(user_id):
+        raise PatientError(f"Not a user id: {user_id!r}")
+    ids = unscoped_patient_ids()
+    if not ids:
+        return 0
+    destination = store_base() / user_id
+    try:
+        destination.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        raise PatientError(f"Could not create the account folder: {exc}") from exc
+    moved = 0
+    for patient_id in ids:
+        target = destination / patient_id
+        if target.exists():
+            applog.warn("not migrating %s: already present for %s", patient_id, user_id)
+            continue
+        try:
+            shutil.move(str(store_base() / patient_id), str(target))
+        except OSError as exc:
+            applog.warn("could not migrate %s: %s", patient_id, exc)
+            continue
+        moved += 1
+    applog.log("migrated %d patient(s) into user=%s", moved, user_id)
+    return moved
+
+
 __all__ = [
     "DOCUMENTS_SUBDIR",
     "FiledDocument",
     "Patient",
     "PatientError",
     "ROSTER_FILENAME",
+    "active_user",
     "create_patient",
     "delete_patient",
     "filed_documents",
     "get_patient",
     "list_patients",
+    "migrate_unscoped_into",
     "patient_dir",
     "patient_output_dir",
     "patients_root",
     "rename_patient",
+    "set_active_user",
+    "store_base",
+    "unscoped_patient_ids",
 ]

@@ -83,6 +83,9 @@ def start_server(port: int) -> subprocess.Popen:
     environment["CARESCRIBE_OUTPUT_DIR"] = str(desktop.output_dir())
     # The per-patient records store lives there too.
     environment["CARESCRIBE_PATIENTS_DIR"] = str(desktop.patients_dir())
+    # As does the account store. Without this the packaged app would try to
+    # write accounts next to the .exe, which on Windows is usually read-only.
+    environment["CARESCRIBE_USERS_DIR"] = str(desktop.users_dir())
 
     return subprocess.Popen(
         server_command(port),
