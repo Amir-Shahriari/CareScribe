@@ -22,8 +22,6 @@ calls at all.
 
 **Automated de-identification is not a guarantee of HIPAA or UK GDPR compliance.**
 
-This tool is a drafting aid, not a compliance control. Specifically:
-
 - Every detection layer misses things. Regex only covers what a regex can express; NER
   misses names in unusual positions and invents entities in clinical prose. Their union is
   better than either alone, and still not complete.
