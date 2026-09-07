@@ -1,22 +1,22 @@
 # Graph Report - medgpt  (2026-09-07)
 
 ## Corpus Check
-- 187 files · ~156,091 words
+- 196 files · ~165,286 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2663 nodes · 5140 edges · 151 communities (126 shown, 25 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 106 edges (avg confidence: 0.63)
+- 2934 nodes · 5826 edges · 157 communities (134 shown, 23 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 108 edges (avg confidence: 0.63)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `fe8660fd`
+- Built from commit: `4dc4b490`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- core/__init__.py
-- write_approved_docx
+- candidate_residuals
+- extract_text
 - build_dataset.py
 - generation_status
 - EncounterType
@@ -28,7 +28,7 @@
 - test_generation.py
 - test_template_ingest.py
 - Local clinical LLM fine-tune — design
-- create_patient
+- patients.py
 - devDependencies
 - test_app_screens.py
 - model_setup.py
@@ -39,14 +39,14 @@
 - get_form_spec
 - test_cloud_client.py
 - Clinic reference library — design
-- render_approval
+- app.py
 - deidentify
-- components.py
+- render_sidebar
 - compilerOptions
-- structured_spans
+- check_placeholder_integrity
 - deidentify.py
-- assert_deidentified
-- extract_text
+- CareScribe (the application)
+- test_patient_browser.py
 - Architecture
 - test_stress_corpus.py
 - combine_sources
@@ -56,20 +56,20 @@
 - make_icon.py
 - expand_name_variants
 - exemplars.py
-- main
+- theme.py
 - ollama_client.py
-- run_app.py
+- test_auth_forms.py
 - test_buildinfo.py
 - docx_redact.py
 - highlight_review
 - test_combined_sources_generate_every_form_type_with_a_stub_backend
-- Jordan Whitfield (fictional test client)
+- auth.py
 - mapping.py
 - Model Card for phi35-v1
 - Installing CareScribe
 - EncounterFacts
 - Clinic-uploaded clinical form templates — design
-- Changelog
+- [Unreleased]
 - Report templates (SOAP / GP letter / discharge / custom)
 - Outpatient Respiratory Clinic Letter (doc03)
 - App.tsx
@@ -88,10 +88,10 @@
 - rthook_carescribe.py
 - tests/__init__.py
 - run_all.py
-- generate_document
+- carenotes.py
 - House-style exemplar retrieval — design
 - clinical_forms.py
-- desktop.py
+- load_settings
 - test_crisis_lines_preserved.py
 - Cloud generation transport (`CloudBackend`) — design
 - test_reference_library.py
@@ -112,10 +112,10 @@
 - load_documents
 - test_generation_setup.py
 - CareScribe clinical drafting model — model card
-- load_settings
+- generate_form_document
 - BM25
 - <id> — <title>
-- analyze
+- blocking_reason
 - backends.py
 - LLM backend flexibility + realistic test corpus + full-pipeline validation
 - verify_frozen.py
@@ -125,54 +125,60 @@
 - batch.py
 - Evaluation report
 - compilerOptions
-- stress_report.py
-- Generation backend selection order (Ollama > built-in GGUF > Cloud)
+- _build_analyzer
+- The desktop app (PyInstaller packaging)
 - AGENTS.md — rules for automated coding agents in this repo
 - Task board
 - Global Constraints
-- _RecordingBackend
+- test_full_pipeline_accounts.py
 - finetune/
-- resolve_placeholder
+- select_backend
 - load_protected_terms
 - reference_library.py
-- Pattern
-- RuntimeError
+- test_patient_pipeline.py
+- set_active_user
 - finetune/__init__.py
 - integrate/__init__.py
 - test_mapping.py
 - parse_fields
 - medgpt-finetune
 - test_letterhead_address_leak.py
-- plan
-- carenotes.py
+- test_app_clinical_forms.py
+- filed_documents
+- OllamaBackend
+- create_user
 - eval/__init__.py
 - is_model_present
 - CareScribe site
 - assemble/__init__.py
-- test_medicare_number_leak.py
-- _run
+- residual_scan
+- analyze
 - tsconfig.json
-- render_review
-- app.py
+- _FakeModel
+- render_refinement
 - render_draft
 - BackendError
-- reidentify_detailed
 - applog.py
-- rebuild
-- test_the_whole_deid_path_works_with_no_model_at_all
-- theme.py
+- users.py
+- test_auth_gate.py
+- desktop.py
+- run_app.py
+- wipe_phi
+- structured_spans
+- username_taken
+- create_patient
 
 ## God Nodes (most connected - your core abstractions)
-1. `deidentify()` - 89 edges
-2. `Document` - 50 edges
+1. `deidentify()` - 90 edges
+2. `create_user()` - 52 edges
 3. `EncounterFacts` - 49 edges
 4. `get_form_spec()` - 47 edges
-5. `FormType` - 43 edges
-6. `residual_scan()` - 37 edges
-7. `extract_text()` - 31 edges
-8. `generate_document()` - 30 edges
-9. `create_patient()` - 30 edges
-10. `write_approved()` - 27 edges
+5. `create_patient()` - 43 edges
+6. `FormType` - 43 edges
+7. `residual_scan()` - 39 edges
+8. `set_active_user()` - 35 edges
+9. `extract_text()` - 32 edges
+10. `Filed` - 30 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Stable per-entity placeholder scheme` --semantically_similar_to--> `build_prompt()`  [INFERRED] [semantically similar]
@@ -197,23 +203,23 @@
 - **Fictional patients sharing the same reused NHS number across documents** — stress_corpus_doc01_mohammed_al_rashid, stress_corpus_doc02_margaret_elizabeth_chen, stress_corpus_doc05_elspeth_mackenzie_ford, stress_corpus_doc06_priya_venkataraman, stress_corpus_doc09_tomasz_wisniewski, stress_corpus_shared_nhs_number [INFERRED 0.85]
 - **Documents sharing the recurring fictional staff roster (e.g. A. Whitfield, R. Patel)** — stress_corpus_doc01_community_mh_letter, stress_corpus_doc02_cardiology_discharge, stress_corpus_doc04_ward_handover, stress_corpus_doc07_cmht_family_review, stress_corpus_doc10_mha_assessment, stress_corpus_recurring_staff_roster [INFERRED 0.75]
 
-## Communities (151 total, 25 thin omitted)
+## Communities (157 total, 23 thin omitted)
 
-### Community 0 - "core/__init__.py"
-Cohesion: 0.18
-Nodes (8): Core logic: Ollama access, ingestion, de-identification, care notes, PHI…, Flag, _is_common(), _placeholder_ranges(), Residual-candidate highlighter — where the reviewer's eye should go first. This…, One span worth a second look, with its offsets in the redacted text., Identity for dismissal — per value, so one decision covers repeats., True if every word in the run is ordinary English or a month name.
+### Community 0 - "candidate_residuals"
+Cohesion: 0.12
+Nodes (20): candidate_residuals(), Flag, _is_common(), outstanding(), _placeholder_ranges(), Residual-candidate highlighter — where the reviewer's eye should go first. This…, One span worth a second look, with its offsets in the redacted text., Identity for dismissal — per value, so one decision covers repeats. (+12 more)
 
-### Community 1 - "write_approved_docx"
-Cohesion: 0.18
-Nodes (11): BatchError, RuntimeError, Redact the original .docx into the output folder, structure preserved. The same…, Raised for input-folder and output-write problems., write_approved_docx(), The Word path must clear the same bar as the text path., The residual safety-net scan must not be foolable by a stray \\r. A run's text…, test_write_approved_docx_needs_the_original() (+3 more)
+### Community 1 - "extract_text"
+Cohesion: 0.07
+Nodes (44): _extract_docx(), _extract_pdf(), extract_text(), _extract_txt(), IngestError, normalise_line_endings(), Any, RuntimeError (+36 more)
 
 ### Community 2 - "build_dataset.py"
 Cohesion: 0.10
 Nodes (40): build(), _fallback_inject(), _load_datagen_config(), main(), Path, End-to-end: sampled encounters -> validated SFT pairs + manifest. python -m…, Return ``{"pairs": [...], "kept": k, "dropped": d, "reasons": {...}}``.…, Fill ``[[TOKEN]]`` slots with simple fake values. Used only until… (+32 more)
 
 ### Community 3 - "generation_status"
-Cohesion: 0.12
-Nodes (18): cache_data, generation_status(), _llama_runtime_available(), missing_reason(), Is generation usable right now, and if not, what should the user do? Kept…, One plain sentence on why generation is not available yet., Which generation backends are usable at this moment., Which backend would actually be used, matching the backend ladder. (+10 more)
+Cohesion: 0.09
+Nodes (27): cache_data, _draft_state(), _form_draft_state(), Which backend will be used, and the fix if none is available., Shown instead of an empty panel when no model is available yet. An empty…, Option B. Ollama does the fetching; the request goes to loopback., Generate, refine, re-identify and export — for one approved document. Two…, Let a clinic add its own table-based .docx form to the selector. Parsing and… (+19 more)
 
 ### Community 4 - "EncounterType"
 Cohesion: 0.13
@@ -224,24 +230,24 @@ Cohesion: 0.10
 Nodes (20): carescribe/core/clinical_forms.py (module), Refine prompt (clinical form, marker-preserving), Refine prompt (free-form draft revision), Clinical Form Generation (APS Templates) Implementation Plan, Global Constraints, Reference: verified template structure, Self-Review Notes (for the implementer), Task 10: End-to-end generation glue (`generate_form_document`, `refine_form_document`, `render_preview`) (+12 more)
 
 ### Community 6 - "template_ingest.py"
-Cohesion: 0.14
-Nodes (28): Let a clinic add its own table-based .docx form to the selector. Parsing and…, _render_template_uploader(), slugify(), delete_template(), _find_grids(), _infer_header(), _is_blank_row(), load_user_spec() (+20 more)
+Cohesion: 0.13
+Nodes (29): ClinicalFormError, RuntimeError, Raised when a clinical form can't be built or filled., slugify(), delete_template(), _find_grids(), _infer_header(), _is_blank_row() (+21 more)
 
 ### Community 7 - "test_docx_roundtrip.py"
-Cohesion: 0.08
-Nodes (32): approved_map(), document_has_text_boxes(), The reviewer-approved ``{literal: placeholder}`` map for the Word pass. This is…, True if a .docx holds text this redaction pass cannot reach., extract_text(), has_unreachable_text(), True if the document holds text this module cannot reach. Text boxes,…, Flatten a docx to text (body + tables + headers/footers) for a residual scan. (+24 more)
+Cohesion: 0.09
+Nodes (31): approved_map(), document_has_text_boxes(), The reviewer-approved ``{literal: placeholder}`` map for the Word pass. This is…, True if a .docx holds text this redaction pass cannot reach., extract_text(), Flatten a docx to text (body + tables + headers/footers) for a residual scan., _build(), fixture (+23 more)
 
 ### Community 8 - "test_app.py"
 Cohesion: 0.10
-Nodes (40): analysed_batch(), _clean_auto_doc(), data_editors(), loaded_batch(), _NullBackend, AppTest, UI checks for the batch review app via Streamlit's AppTest. No server of any…, After the read-and-confirmed tick, a clean auto-confidence document has nothing… (+32 more)
+Nodes (41): analysed_batch(), _clean_auto_doc(), data_editors(), loaded_batch(), _NullBackend, AppTest, Document, UI checks for the batch review app via Streamlit's AppTest. No server of any… (+33 more)
 
 ### Community 9 - "schema.py"
 Cohesion: 0.09
 Nodes (35): BaseModel, field_validator, _blank_for(), expand(), Random, Turn vignettes into `EncounterFacts` instances with a seeded RNG. `expand`…, Yield ``n`` `EncounterFacts`, deterministic for a given ``seed``., Build one `EncounterFacts` from a vignette. With ``gap_probability`` > 0, each… (+27 more)
 
 ### Community 10 - "test_generation.py"
-Cohesion: 0.07
-Nodes (37): finalise(), Build the user prompt for one template with the source text embedded., Re-identify a draft locally and refuse to hand back a leaky document. Returns…, render_prompt(), check_placeholder_integrity(), Compare a draft's bracketed tokens against the placeholders it should use. An…, Local re-identification of a generated draft. Returns ``(text, unresolved)``.…, reidentify_document() (+29 more)
+Cohesion: 0.05
+Nodes (48): Build the user prompt for one template with the source text embedded., Prepend the review banner, without duplicating one already there., render_prompt(), with_banner(), parametrize, Local generation: the privacy contract, placeholder integrity, and the gate. No…, A 2-char mapping value must not refuse a clean draft just because those…, The boundary check must not weaken a real leak: a short value standing alone as… (+40 more)
 
 ### Community 11 - "test_template_ingest.py"
 Cohesion: 0.13
@@ -251,21 +257,21 @@ Nodes (21): available_forms(), (form_id, title) pairs — bundled forms first, t
 Cohesion: 0.06
 Nodes (30): 10. Workstream E — integration, 11. What needs a human / external resource, 12. Milestones (testable deliverables), 13. Testing strategy, 1. Goal, 2. Constraints inherited from CareScribe, 3. Approach (selected), 4. Base model (+22 more)
 
-### Community 13 - "create_patient"
-Cohesion: 0.05
-Nodes (84): _clean_name(), create_patient(), delete_patient(), filed_documents(), FiledDocument, get_patient(), list_patients(), _now() (+76 more)
+### Community 13 - "patients.py"
+Cohesion: 0.09
+Nodes (38): Pick or create the patient whose folder approved output is filed into. "No…, render_patient_bar(), active_user(), _clean_name(), delete_patient(), get_patient(), _now(), Patient (+30 more)
 
 ### Community 14 - "devDependencies"
 Cohesion: 0.06
 Nodes (35): lucide-react, oxlint, react, react-dom, dependencies, lucide-react, react, react-dom (+27 more)
 
 ### Community 15 - "test_app_screens.py"
-Cohesion: 0.12
-Nodes (28): deid(), ner_available(), fixture, Shared pytest fixtures. The spaCy model load costs several seconds, so the…, The full pipeline's output for the fixture document., True when a spaCy model loaded — layer 2 tests skip without one., raw_text(), redacted() (+20 more)
+Cohesion: 0.10
+Nodes (32): deid(), ner_available(), fixture, Shared pytest fixtures. The spaCy model load costs several seconds, so the…, The full pipeline's output for the fixture document., True when a spaCy model loaded — layer 2 tests skip without one., raw_text(), redacted() (+24 more)
 
 ### Community 16 - "model_setup.py"
-Cohesion: 0.15
-Nodes (20): Option A. The only outbound request the app makes, on an explicit click., run_model_download(), clear_partial_download(), download_model(), _free_bytes(), model_destination(), ModelSetupError, Progress (+12 more)
+Cohesion: 0.13
+Nodes (22): Option A. The only outbound request the app makes, on an explicit click., run_model_download(), clear_partial_download(), download_model(), _free_bytes(), model_destination(), ModelSetupError, Progress (+14 more)
 
 ### Community 17 - "test_train_and_grammar.py"
 Cohesion: 0.05
@@ -280,52 +286,52 @@ Cohesion: 0.14
 Nodes (22): _clear_cell(), _dedupe_row(), _fill_cell(), _fill_cell_after_label(), _fill_header_cell(), fill_template(), Remove every paragraph after the first, and every run in the first, leaving one…, Overwrite a dedicated value cell (label lives in a different cell). (+14 more)
 
 ### Community 20 - "test_desktop_packaging.py"
-Cohesion: 0.08
-Nodes (18): available_ram_gb(), ram_verdict(), Total system RAM in GB, or 0.0 if it cannot be determined., Whether this machine can run the bundled local model. Returns a verdict rather…, _cloud_off(), fixture, The packaging invariants: what the desktop app may and may not do. Packaging is…, No key may be committed, defaulted, or written anywhere. (+10 more)
+Cohesion: 0.10
+Nodes (14): available_ram_gb(), ram_verdict(), Total system RAM in GB, or 0.0 if it cannot be determined., Whether this machine can run the bundled local model. Returns a verdict rather…, _cloud_off(), fixture, The packaging invariants: what the desktop app may and may not do. Packaging is…, No key may be committed, defaulted, or written anywhere. (+6 more)
 
 ### Community 21 - "get_form_spec"
-Cohesion: 0.12
-Nodes (23): ClinicalFormError, get_form_spec(), RuntimeError, Raised when a clinical form can't be built or filled., Human-readable rendering for display only — the marker text in ``draft_state``…, render_preview(), Captures exactly what generation handed the model — mirrors the fixture in…, RecordingBackend (+15 more)
+Cohesion: 0.17
+Nodes (21): get_form_spec(), plan(), _load(), Generic table-row classification: which rows are fields, which are section…, test_biopsychosocial_spec_field_count_and_grid(), test_no_field_key_collides_within_a_spec(), test_session_notes_field_walk_finds_nine_fields(), test_session_notes_signature_row_is_excluded() (+13 more)
 
 ### Community 22 - "test_cloud_client.py"
-Cohesion: 0.10
-Nodes (25): CloudError, _config(), _post(), RuntimeError, Transport for the optional cloud generation backend. Reached only when a…, Yield the payload of each ``data:`` line in an SSE stream., Stream a completion from the configured cloud provider, yielding text. Raises…, A recoverable problem talking to the configured cloud provider. (+17 more)
+Cohesion: 0.07
+Nodes (34): CloudBackend, A remote provider, reachable only when explicitly configured. Receives approved…, CloudError, _config(), _post(), RuntimeError, Transport for the optional cloud generation backend. Reached only when a…, Yield the payload of each ``data:`` line in an SSE stream. (+26 more)
 
 ### Community 23 - "Clinic reference library — design"
 Cohesion: 0.17
 Nodes (11): `app.py`, Architecture, Clinic reference library — design, Decision, Follow-ups (not blocking), New `core/reference_library.py`, Privacy / safety, Problem (+3 more)
 
-### Community 24 - "render_approval"
-Cohesion: 0.15
-Nodes (19): active_output_dir(), active_patient_id(), document_flags(), flag_dismissals(), _model_card_path(), Path, One click to approve every document that comes back clean. Each is re-run…, The selected patient's id, or "" for scratch mode. (+11 more)
+### Community 24 - "app.py"
+Cohesion: 0.08
+Nodes (52): active_output_dir(), active_patient_id(), current(), document_flags(), documents(), ensure_engine_ready(), entity_confirmed(), entity_frame() (+44 more)
 
 ### Community 25 - "deidentify"
-Cohesion: 0.05
-Nodes (69): deidentify(), Run the full local pipeline over one document. CPU-only and offline: no model…, canonical_person_key(), keys_are_compatible(), A stable identity key for one person: full given name plus surname. This…, True if two canonical keys can denote the same person. Exact match, or one side…, _mrn_values(), parametrize (+61 more)
+Cohesion: 0.06
+Nodes (61): deidentify(), Run the full local pipeline over one document. CPU-only and offline: no model…, _mrn_values(), parametrize, Regression suite for the five leaks found on a second, non-fixture document.…, The precision guard that keeps clinical context intact., Layer 1 must carry this on its own — NER catching it is luck, not a guarantee., Regardless of REDACT_INPROSE_DATES, which stays False by default. (+53 more)
 
-### Community 26 - "components.py"
+### Community 26 - "render_sidebar"
 Cohesion: 0.10
-Nodes (30): _model_card_dialog(), Name the generation model with a readable label; the card opens in a dialog…, _render_generation_model(), chip(), detection_layer(), _esc(), hero(), icon() (+22 more)
+Nodes (32): _model_card_dialog(), Name the generation model with a readable label; the card opens in a dialog…, _render_generation_model(), render_sidebar(), chip(), detection_layer(), empty_state(), _esc() (+24 more)
 
 ### Community 27 - "compilerOptions"
 Cohesion: 0.08
 Nodes (23): DOM, src, vite/client, compilerOptions, allowArbitraryExtensions, allowImportingTsExtensions, erasableSyntaxOnly, jsx (+15 more)
 
-### Community 28 - "structured_spans"
-Cohesion: 0.10
-Nodes (23): _header_footer_bounds(), _plausible_surname(), True if the trailing token of an initial+surname reads like a real name.…, Layer 1: deterministic regex detections over ``text``., Character ranges of the document's opening and closing lines., structured_spans(), Layer 1 alone must still catch every purely structured identifier., A bare digit run is a lab value; only a labelled one is a record number. (+15 more)
+### Community 28 - "check_placeholder_integrity"
+Cohesion: 0.11
+Nodes (19): finalise(), Re-identify a draft locally and refuse to hand back a leaky document. Returns…, check_placeholder_integrity(), Issue, One placeholder problem found in a generated draft., Compare a draft's bracketed tokens against the placeholders it should use. An…, Local re-identification of a generated draft. Returns ``(text, unresolved)``.…, reidentify_document() (+11 more)
 
 ### Community 29 - "deidentify.py"
 Cohesion: 0.06
-Nodes (55): classify_person(), _collapse_facility_subsets(), _collapse_person_identities(), _collapse_person_subsets(), date_span_wanted(), engine_status(), get_gliner(), gliner_spans() (+47 more)
+Nodes (51): classify_person(), _collapse_facility_subsets(), _collapse_person_subsets(), date_span_wanted(), engine_status(), get_gliner(), gliner_spans(), _has_contact_anchor() (+43 more)
 
-### Community 30 - "assert_deidentified"
-Cohesion: 0.12
-Nodes (17): assert_deidentified(), Backend, CloudBackend (unwired seam), Protocol, True only when ``needle`` occurs in ``haystack`` as a whole token run. Both are…, Refuse to send anything carrying a value from the identity mapping. A cheap,…, One method wide: the seam a different provider would be swapped in at.…, _value_present() (+9 more)
+### Community 30 - "CareScribe (the application)"
+Cohesion: 0.20
+Nodes (10): CloudBackend (unwired seam), System prompt (anti-fabrication rules), Optional cloud generation path (off by default), Two required env vars (CARESCRIBE_CLOUD_PROVIDER / CARESCRIBE_CLOUD_API_KEY), CareScribe practitioner one-page guide, CareScribe (the application), Known limitations, Privacy invariants table (+2 more)
 
-### Community 31 - "extract_text"
+### Community 31 - "test_patient_browser.py"
 Cohesion: 0.07
-Nodes (44): _extract_docx(), _extract_pdf(), extract_text(), _extract_txt(), IngestError, normalise_line_endings(), Any, RuntimeError (+36 more)
+Nodes (49): _document_bytes(), One filed artefact: preview what can be shown, download what cannot., Browse this account's patients and read what has been filed for each. Separate…, render_document_viewer(), render_patient_browser(), FiledDocument, document_label(), filter_patients() (+41 more)
 
 ### Community 32 - "Architecture"
 Cohesion: 0.13
@@ -340,8 +346,8 @@ Cohesion: 0.21
 Nodes (13): combine_sources(), Concatenate several documents' de-identified text into one source. ``sources``…, Regression test for Finding 3: raw filename must not leak into model-facing…, Regression test for Finding 1: cap at 26 documents (A-Z)., Regression test for Finding 1: prefixed placeholders must match PLACEHOLDER_RE.…, Regression test for Finding 2: text and map rewrites must be consistent. A…, test_combine_sources_no_filename_in_output(), test_combine_sources_non_standard_placeholder_consistency() (+5 more)
 
 ### Community 35 - "write_approved"
-Cohesion: 0.11
-Nodes (25): list_folder(), Return the supported documents in ``folder``, sorted by name. Non-recursive on…, Findings from the safety sweep, minus the ones the reviewer has cleared. A…, Write approved de-identified text to the output folder. Re-runs the safety…, sweep(), write_approved(), parametrize, Batch loading and the approved-write path. The privacy invariant under test:… (+17 more)
+Cohesion: 0.10
+Nodes (28): BatchError, list_folder(), RuntimeError, Return the supported documents in ``folder``, sorted by name. Non-recursive on…, Findings from the safety sweep, minus the ones the reviewer has cleared. A…, Write approved de-identified text to the output folder. Re-runs the safety…, Raised for input-folder and output-write problems., sweep() (+20 more)
 
 ### Community 36 - "FormType"
 Cohesion: 0.14
@@ -356,32 +362,32 @@ Cohesion: 0.29
 Nodes (12): Image, _load_font(), main(), Path, Generate CareScribe's placeholder icon. A real icon is a design job; this…, The first usable bold face, or ``None`` if none of them load., A rounded square with "CS" centred on it., macOS only. Silently skipped elsewhere — the .app is built on a Mac. (+4 more)
 
 ### Community 39 - "expand_name_variants"
-Cohesion: 0.11
-Nodes (18): REDACT_INPROSE_DATES flag, expand_name_variants(), expand_org_variants (Layer 4 — variant expansion), _initial_letters(), name_core(), Split a name into its parts with any leading honorific removed. "Mrs Margaret…, Initials for a name, with hyphenated components contributing each part.…, Return every plausible written form of one person's name. Covers: the full… (+10 more)
+Cohesion: 0.09
+Nodes (24): _collapse_person_identities(), True for a person row whose role is known (patient / relative / clinician)., Collapse every written form of one person onto a single entity row.…, _specific_person_type(), canonical_person_key(), expand_name_variants(), _initial_letters(), keys_are_compatible() (+16 more)
 
 ### Community 40 - "exemplars.py"
-Cohesion: 0.14
-Nodes (25): add_exemplar(), count(), _dir(), _load(), _path(), Path, House-style exemplar retrieval for clinical-form generation. A clinic…, Top-``k`` stored values for ``field_key``, ranked by BM25 against ``query``. (+17 more)
+Cohesion: 0.13
+Nodes (24): add_exemplar(), count(), _dir(), _load(), _path(), Path, House-style exemplar retrieval for clinical-form generation. A clinic…, Top-``k`` stored values for ``field_key``, ranked by BM25 against ``query``. (+16 more)
 
-### Community 41 - "main"
-Cohesion: 0.10
-Nodes (24): current(), documents(), ingest_sources(), main(), PHI_KEYS (session-state PHI registry), _pipeline_step(), privacy_indicator(), _privacy_state() (+16 more)
+### Community 41 - "theme.py"
+Cohesion: 0.33
+Nodes (4): CareScribe UI layer — the visual identity, applied over Streamlit. `theme.CSS`…, inject(), CareScribe visual identity — one stylesheet, injected once per rerun. DIRECTION…, Apply the stylesheet. Import Streamlit lazily so the module stays cheap.
 
 ### Community 42 - "ollama_client.py"
-Cohesion: 0.14
-Nodes (19): default_model(), generate(), is_up(), list_models(), missing_model_message(), OllamaError, RuntimeError, Local Ollama client — pinned to the loopback interface. Generation is the first… (+11 more)
+Cohesion: 0.15
+Nodes (20): default_model(), generate(), is_up(), list_models(), missing_model_message(), OllamaError, RuntimeError, Local Ollama client — pinned to the loopback interface. Generation is the first… (+12 more)
 
-### Community 43 - "run_app.py"
-Cohesion: 0.16
-Nodes (17): Popen, close_splash(), _fatal(), free_port(), main(), _no_window_kwargs(), CareScribe desktop launcher — the app's entry point. Starts the Streamlit…, Dismiss the bootloader splash, if this is a frozen build that has one.… (+9 more)
+### Community 43 - "test_auth_forms.py"
+Cohesion: 0.11
+Nodes (27): normalise_username(), password_confirmation_error(), password_error(), Collapse internal whitespace and strip the ends. Never raises., ``None`` if the username is acceptable, else why not., ``None`` if the password is acceptable, else why not. Length is the only rule.…, ``None`` if the two match, else why not., Every problem at once. An empty dict means the form is submittable. (+19 more)
 
 ### Community 44 - "test_buildinfo.py"
 Cohesion: 0.24
 Nodes (10): build_info(), Build information for CareScribe., Return standard HTTP User-Agent string., Return application identity and version., user_agent(), Tests for buildinfo module., Test that user_agent returns correct format., Test that build_info returns correct name and version. (+2 more)
 
 ### Community 45 - "docx_redact.py"
-Cohesion: 0.19
-Nodes (15): apply_redactions(), _delete_prefix(), _iter_groups(), _iter_paragraphs(), _norm(), Structure-preserving .docx redaction. apply_redactions(path_in, path_out,…, Redact a literal split across a paragraph boundary (wrapped name)., Delete the leading text of a paragraph matching normalized_prefix (ws-… (+7 more)
+Cohesion: 0.16
+Nodes (17): apply_redactions(), _delete_prefix(), has_unreachable_text(), _iter_groups(), _iter_paragraphs(), _norm(), Structure-preserving .docx redaction. apply_redactions(path_in, path_out,…, Redact a literal split across a paragraph boundary (wrapped name). (+9 more)
 
 ### Community 46 - "highlight_review"
 Cohesion: 0.24
@@ -391,13 +397,13 @@ Nodes (9): highlight_review(), Click-to-redact highlighted text. Renders already
 Cohesion: 0.32
 Nodes (6): skipif, parametrize, Deterministic stand-in for a real generation backend., _StubBackend, test_combined_sources_generate_every_form_type_with_a_stub_backend(), test_ingest_and_deidentify_every_sample_document()
 
-### Community 48 - "Jordan Whitfield (fictional test client)"
-Cohesion: 0.31
-Nodes (9): 01_gp_referral_letter.docx, 02_biopsychosocial_intake_notes.docx, 03_session_log_progress_notes.docx, 04_treatment_review_source.docx, Biopsychosocial Assessment form, Client Session Notes form, Client Treatment Review form, Clinical-Forms Pipeline (upload -> de-identify -> approve -> combine sources -> generate form) (+1 more)
+### Community 48 - "auth.py"
+Cohesion: 0.20
+Nodes (16): apply_scope(), current_user_id(), _honesty_caption(), is_signed_in(), The sign-in gate, and the account panel in the sidebar. CareScribe now opens on…, Leave the account, and take every trace of the session's work with it. ``wipe``…, Re-assert the store scope for this rerun. ``patients`` keeps the active account…, Show the sign-in screen. ``True`` when the app may carry on. Called before… (+8 more)
 
 ### Community 49 - "mapping.py"
-Cohesion: 0.10
-Nodes (26): expand_facility_variants(), find_known_as(), find_spans(), _form_pattern(), Issue, Pattern, In-memory PII <-> placeholder mapping. This module is deliberately pure: it…, Return the full organisation name plus short forms. "St. Aidan's General… (+18 more)
+Cohesion: 0.09
+Nodes (27): _edit_distance(), expand_facility_variants(), find_known_as(), find_spans(), _form_pattern(), Pattern, In-memory PII <-> placeholder mapping. This module is deliberately pure: it…, Return the full organisation name plus short forms. "St. Aidan's General… (+19 more)
 
 ### Community 50 - "Model Card for phi35-v1"
 Cohesion: 0.33
@@ -415,9 +421,9 @@ Nodes (49): build_target(), _care_plan(), _field_content(), _handover(), _histor
 Cohesion: 0.18
 Nodes (10): Architecture, Clinic-uploaded clinical form templates — design, Follow-ups (not blocking), New module `core/template_ingest.py`, Persistence, Problem, Registry integration (`core/clinical_forms.py`), Scope (+2 more)
 
-### Community 54 - "Changelog"
-Cohesion: 0.29
-Nodes (6): [0.1.0] - 2026-09-01, Added, Added, Changelog, Fixed, [Unreleased]
+### Community 54 - "[Unreleased]"
+Cohesion: 0.25
+Nodes (7): [0.1.0] - 2026-09-01, Added, Added, Added, Changelog, Fixed, [Unreleased]
 
 ### Community 55 - "Report templates (SOAP / GP letter / discharge / custom)"
 Cohesion: 0.40
@@ -444,28 +450,28 @@ Cohesion: 0.15
 Nodes (26): _collect(), _date(), _dob(), inject(), _make(), _mrn(), _name(), nhs_number() (+18 more)
 
 ### Community 63 - "Document"
-Cohesion: 0.34
-Nodes (22): Document, One document's state for the whole review pass. Everything here except…, build_case_conference_note(), build_discharge_summary(), build_gp_progress_note(), build_imaging_report(), build_intake_notes(), build_medication_chart() (+14 more)
+Cohesion: 0.20
+Nodes (31): Document, One document's state for the whole review pass. Everything here except…, build_case_conference_note(), build_discharge_summary(), build_gp_progress_note(), build_imaging_report(), build_intake_notes(), build_medication_chart() (+23 more)
 
 ### Community 64 - "test_clinical_form_templates.py"
 Cohesion: 0.50
 Nodes (3): parametrize, The three bundled APS templates load and match the structure this feature's…, test_bundled_template_shape()
 
-### Community 73 - "generate_document"
-Cohesion: 0.08
-Nodes (38): assert_no_residual_identifiers(), CareNoteError, generate_document(), load_prompt(), RuntimeError, The shared preamble — role, anti-fabrication rules, placeholder rules., Refuse to send text the residual sweep still flags. :func:`assert_deidentified`…, Stream a drafted document from approved de-identified text. ``phi_values`` is… (+30 more)
+### Community 73 - "carenotes.py"
+Cohesion: 0.10
+Nodes (32): assert_deidentified(), assert_no_residual_identifiers(), Backend, CareNoteError, _ends_mid_tag(), generate_care_note(), generate_document(), load_prompt() (+24 more)
 
 ### Community 74 - "House-style exemplar retrieval — design"
 Cohesion: 0.18
 Nodes (10): `app.py`, Architecture, `core/clinical_forms.py`, Follow-ups (not blocking), House-style exemplar retrieval — design, New module `core/exemplars.py`, Privacy, Problem (+2 more)
 
 ### Community 76 - "clinical_forms.py"
-Cohesion: 0.20
-Nodes (19): _biopsychosocial_spec(), build_prompt(), _form_grammar(), FormField, FormSpec, generate_form_document(), _grid_fields(), HeaderField (+11 more)
+Cohesion: 0.17
+Nodes (20): _biopsychosocial_spec(), build_prompt(), _form_grammar(), FormField, FormSpec, _grid_fields(), HeaderField, _paragraph_texts() (+12 more)
 
-### Community 77 - "desktop.py"
-Cohesion: 0.14
-Nodes (27): app_data_dir(), bundle_root(), ensure_dirs(), find_local_model(), is_frozen(), _model_search_dirs(), models_dir(), output_dir() (+19 more)
+### Community 77 - "load_settings"
+Cohesion: 0.25
+Nodes (15): load_settings(), _path(), Persisted app settings — which generation backend/model/temperature to use.…, Read persisted settings. A missing or unreadable file yields defaults., Persist non-secret settings, creating the app data dir if needed., save_settings(), Settings, test_load_settings_coerces_stringy_temperature() (+7 more)
 
 ### Community 78 - "test_crisis_lines_preserved.py"
 Cohesion: 0.33
@@ -476,8 +482,8 @@ Cohesion: 0.20
 Nodes (9): Architecture, Cloud generation transport (`CloudBackend`) — design, `core/backends.py`, Follow-ups (not blocking), New module `core/cloud_client.py`, Privacy properties (unchanged, inherited), Problem, Scope (+1 more)
 
 ### Community 81 - "test_reference_library.py"
-Cohesion: 0.14
-Nodes (24): Verbatim reference passages, retrieved per field at the granularity the planner…, _render_reference_panel(), add_file(), is_empty(), ``(filename, paragraph_count)`` per loaded reference file., Top-``k`` reference passages for ``query`` at ``granularity``. BM25, ``score >…, Store an uploaded reference file. Returns the stored filename., ReferenceHit (+16 more)
+Cohesion: 0.15
+Nodes (21): add_file(), is_empty(), ``(filename, paragraph_count)`` per loaded reference file., Top-``k`` reference passages for ``query`` at ``granularity``. BM25, ``score >…, Store an uploaded reference file. Returns the stored filename., ReferenceHit, search(), sources() (+13 more)
 
 ### Community 84 - "run_eval.py"
 Cohesion: 0.07
@@ -488,20 +494,20 @@ Cohesion: 0.14
 Nodes (13): 1. Confidence tiering (drives what gets a click at all), 2. One primary review view, not three, 3. The click-to-redact component, 4. Attestation & audit trail, 5. Crash-risk fixes, Architecture, Current state (for reference), Goals (+5 more)
 
 ### Community 88 - "test_deid_pipeline.py"
-Cohesion: 0.05
-Nodes (44): Re-scan ALREADY-REDACTED text for anything that still looks identifying. Runs…, residual_scan(), parametrize, Regression suite for the layered de-identification pipeline. Two guarantees,…, With REDACT_INPROSE_DATES False, a procedure date is clinical, not identity., DOB and admission/discharge dates carry identity, so they go., spaCy labels "ECG" and "NSTEMI" as organisations; the filter must drop them., Placeholders are the point of the exercise, not leaks. (+36 more)
+Cohesion: 0.04
+Nodes (62): add_manual_entity(), DeidentificationError, DeidResult, RuntimeError, Re-derive redacted text and the PHI map from a reviewer-edited table. Called…, Add an identifier the tools missed and immediately re-redact. The new value…, Raised when de-identification can't run at all., Everything the de-identification stage produces for one document. (+54 more)
 
 ### Community 89 - "review_spans"
-Cohesion: 0.20
-Nodes (18): _entity_spans(), Unifies the two things a reviewer might still need to act on in one document's…, Every clickable span in ``redacted_text``, in reading order. ``confirmed`` is…, One clickable span in a document's redacted text., Placeholder occurrences for low-confidence, not-yet-confirmed entities., _residual_spans(), review_spans(), ReviewSpan (+10 more)
+Cohesion: 0.21
+Nodes (17): _entity_spans(), Unifies the two things a reviewer might still need to act on in one document's…, Every clickable span in ``redacted_text``, in reading order. ``confirmed`` is…, One clickable span in a document's redacted text., Placeholder occurrences for low-confidence, not-yet-confirmed entities., _residual_spans(), review_spans(), ReviewSpan (+9 more)
 
 ### Community 90 - "query_tokens"
 Cohesion: 0.20
 Nodes (10): Protocol, Per-field retrieval planning for clinical-form generation. Roadmap item E…, Deterministic planner driven by a keyword taxonomy over field labels., RetrievalPlan, RetrievalPlanner, RuleBasedPlanner, query_tokens(), Okapi BM25 over a small in-memory document set — standard library only. Shared… (+2 more)
 
 ### Community 91 - "NoEgress"
-Cohesion: 0.12
-Nodes (13): NoEgress, Fails the test if anything opens a non-loopback socket. Loopback is allowed:…, Stands in for a model so the egress test does not need one installed., Load → de-identify → approve → generate, with egress forbidden., Re-identification is pure Python — it must not phone anywhere., StubBackend, test_reidentification_opens_no_socket(), test_the_whole_flow_opens_no_outbound_socket() (+5 more)
+Cohesion: 0.11
+Nodes (13): NoEgress, Fails the test if anything opens a non-loopback socket. Loopback is allowed:…, Stands in for a model so the egress test does not need one installed., Re-identification is pure Python — it must not phone anywhere., StubBackend, test_reidentification_opens_no_socket(), The load that used to hang on a captive portal must not exist., Reset the cache so the guard covers a genuine first load. (+5 more)
 
 ### Community 92 - "Patient records store — design"
 Cohesion: 0.11
@@ -512,28 +518,28 @@ Cohesion: 0.11
 Nodes (19): GeneratorBackend, get_backend(), OllamaBackend, OpenAICompatibleBackend, TemplateBackend, Test that TemplateBackend properly renders facts in proforma style, Test that TemplateBackend properly renders facts in prose style, Test that TemplateBackend is deterministic - same input gives same output (+11 more)
 
 ### Community 94 - "test_review_gate.py"
-Cohesion: 0.07
-Nodes (36): blocking_reason(), The approval gate. Only the **authoritative safety sweep** blocks approval. A…, Why Approve is disabled, in one short line. Empty string means it isn't.…, candidate_residuals(), outstanding(), Spans in already-redacted text that could still hide an identifier. Permissive…, Flags the reviewer has neither redacted away nor dismissed., _flag_values() (+28 more)
+Cohesion: 0.15
+Nodes (13): _flag_values(), fixture, parametrize, The reviewer gate: candidate highlighting, the adaptive checklist, and the no-…, The real test: nothing the corpus calls an identifier may appear., A dismissal key holds the span text, so it must be wiped with the rest., record(), test_a_planted_residual_is_flagged() (+5 more)
 
 ### Community 95 - "test_backend_overrides.py"
-Cohesion: 0.10
-Nodes (25): Pick a backend. Returns ``(kind, backend, label)``. ``prefer`` lets the UI…, select_backend(), OllamaBackend, Local generation through the loopback-pinned Ollama daemon., _backend_with_fake_model(), _FakeModel, _raising_stream(), The happy path must keep working: finish_reason 'stop' yields the text with no… (+17 more)
+Cohesion: 0.23
+Nodes (12): _backend_with_fake_model(), _raising_stream(), The happy path must keep working: finish_reason 'stop' yields the text with no…, The streaming path gets finish_reason only on its final, contentless chunk…, Mimics llama-cpp-python: create_chat_completion() returns a lazy generator, and…, A prompt that doesn't fit n_ctx raises a raw ValueError from inside llama-cpp-…, A completion dict with finish_reason 'length' must not be handed back as a…, test_local_gguf_non_streaming_raises_when_cut_off_by_token_limit() (+4 more)
 
 ### Community 96 - "load_documents"
-Cohesion: 0.16
-Nodes (15): analyze_document(), load_documents(), Extract text from uploads or paths. Returns ``(documents, errors)``. One…, Run the de-identification layers over one document, in place., FakeUpload, Stands in for a Streamlit UploadedFile., test_analyze_document_populates_state(), test_duplicate_filenames_are_reported() (+7 more)
+Cohesion: 0.13
+Nodes (19): analyze_document(), load_documents(), Extract text from uploads or paths. Returns ``(documents, errors)``. One…, Run the de-identification layers over one document, in place., FakeUpload, Stands in for a Streamlit UploadedFile., test_analyze_document_populates_state(), test_duplicate_filenames_are_reported() (+11 more)
 
 ### Community 97 - "test_generation_setup.py"
-Cohesion: 0.08
-Nodes (18): _cloud_off(), _fresh_generation_status_cache(), mapping_module(), fixture, First-run generation setup: never an empty panel, and the egress line held. The…, The one outbound path must not be reachable from the de-id flow., A captive portal returns HTML with a plausible size., generation_status() is now @st.cache_data(ttl=5) — a process-global cache keyed… (+10 more)
+Cohesion: 0.06
+Nodes (26): _cloud_off(), _fresh_generation_status_cache(), mapping_module(), _nothing_available(), fixture, First-run generation setup: never an empty panel, and the egress line held. The…, A second call within the TTL must not re-probe Ollama., No module may fetch a model as a side effect of being imported. (+18 more)
 
 ### Community 98 - "CareScribe clinical drafting model — model card"
 Cohesion: 0.40
 Nodes (4): CareScribe clinical drafting model — model card, Evaluation, Known limitations, Training data
 
-### Community 99 - "load_settings"
-Cohesion: 0.25
-Nodes (15): load_settings(), _path(), Persisted app settings — which generation backend/model/temperature to use.…, Read persisted settings. A missing or unreadable file yields defaults., Persist non-secret settings, creating the app data dir if needed., save_settings(), Settings, test_load_settings_coerces_stringy_temperature() (+7 more)
+### Community 99 - "generate_form_document"
+Cohesion: 0.20
+Nodes (11): generate_form_document(), Human-readable rendering for display only — the marker text in ``draft_state``…, render_preview(), Captures exactly what generation handed the model — mirrors the fixture in…, RecordingBackend, test_generate_form_document_refuses_a_real_identifier(), test_generate_form_document_sends_the_field_marker_prompt(), test_refine_form_document_preserves_markers_instruction() (+3 more)
 
 ### Community 100 - "BM25"
 Cohesion: 0.18
@@ -543,13 +549,13 @@ Nodes (9): ExemplarError, RuntimeError, Raised when an exemplar cannot be stored
 Cohesion: 0.29
 Nodes (6): Acceptance criteria, Do NOT touch, Files in scope, Goal, <id> — <title>, Notes
 
-### Community 102 - "analyze"
-Cohesion: 0.11
-Nodes (18): analyze(), _crosses_paragraph_break(), flatten_lines(), ner_spans(), Layer 2: Presidio/spaCy detections, mapped onto CareScribe entity types.…, Run every enabled layer over ``text`` and return reviewable entities. Each…, Return ``text`` with every line break collapsed to one space, plus an offset…, True if the ORIGINAL-text span ``text[start:end]`` contains a blank line. (+10 more)
+### Community 102 - "blocking_reason"
+Cohesion: 0.17
+Nodes (11): blocking_reason(), The approval gate. Only the **authoritative safety sweep** blocks approval. A…, Why Approve is disabled, in one short line. Empty string means it isn't.…, Low-confidence redactions are already in place; the permissive flags are…, The streamlined gate: a permissive flag the reviewer left untouched does not…, test_advisory_spans_do_not_block_approval(), test_an_advisory_flag_alone_no_longer_blocks_approval(), test_approval_is_blocked_while_the_sweep_has_findings() (+3 more)
 
 ### Community 103 - "backends.py"
-Cohesion: 0.14
-Nodes (18): cloud_enabled(), cloud_key_present(), cloud_provider(), CloudBackend, describe_backends(), Generation backends, layered so the app works with nothing installed. Selection…, The configured provider name, or "" when cloud generation is off., Cloud generation exists only with BOTH an explicit provider and a key. Two… (+10 more)
+Cohesion: 0.21
+Nodes (12): privacy_indicator(), A persistent, honest statement of where data goes. It must change when cloud…, cloud_enabled(), cloud_key_present(), cloud_provider(), describe_backends(), Generation backends, layered so the app works with nothing installed. Selection…, The configured provider name, or "" when cloud generation is off. (+4 more)
 
 ### Community 104 - "LLM backend flexibility + realistic test corpus + full-pipeline validation"
 Cohesion: 0.20
@@ -568,20 +574,20 @@ Cohesion: 0.18
 Nodes (15): _degrade(), _header(), _lines(), _med(), Random, `EncounterFacts` -> a realistic, messy clinician note (the INPUT side of a…, (section label, lines) in a fixed clinical order, skipping empty sections., A little OCR/casing/spacing noise, sampled. (+7 more)
 
 ### Community 109 - "batch.py"
-Cohesion: 0.14
-Nodes (23): approved_docx_path(), approved_path(), _default_output_dir(), Path, Batch input and approved-output handling. The single module in CareScribe that…, Reduce a filename to a safe output stem — no paths, no surprises., The folder a write lands in — an explicit override, or the default.…, Where the approved de-identified text for ``name`` will be written. (+15 more)
+Cohesion: 0.11
+Nodes (30): approved_docx_path(), approved_path(), _default_output_dir(), Path, Batch input and approved-output handling. The single module in CareScribe that…, Reduce a filename to a safe output stem — no paths, no surprises., The folder a write lands in — an explicit override, or the default.…, Where the approved de-identified text for ``name`` will be written. (+22 more)
 
 ### Community 111 - "compilerOptions"
 Cohesion: 0.10
 Nodes (19): node, vite.config.ts, compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, lib, module, moduleDetection (+11 more)
 
-### Community 112 - "stress_report.py"
-Cohesion: 0.67
-Nodes (3): main(), normalise(), Per-document pass/fail report for the stress corpus. python…
+### Community 112 - "_build_analyzer"
+Cohesion: 0.15
+Nodes (14): cache_resource, load_detection_engine(), Load the NER model once per session, not once per rerun. Streamlit re-runs the…, available_models(), _build_analyzer(), get_analyzer(), is_frozen_build(), Where a spaCy model package actually lives, or ``None`` if absent. Resolved… (+6 more)
 
-### Community 113 - "Generation backend selection order (Ollama > built-in GGUF > Cloud)"
-Cohesion: 0.18
-Nodes (11): core/model_setup.py (model download, isolated), packaging/build_macos.sh, packaging/build_windows.ps1, packaging/carescribe.iss (Inno Setup script), packaging/make_icon.py, The desktop app (PyInstaller packaging), Generation backend selection order (Ollama > built-in GGUF > Cloud), run_app.py entry point (+3 more)
+### Community 113 - "The desktop app (PyInstaller packaging)"
+Cohesion: 0.25
+Nodes (8): packaging/build_macos.sh, packaging/build_windows.ps1, packaging/carescribe.iss (Inno Setup script), packaging/make_icon.py, The desktop app (PyInstaller packaging), run_app.py entry point, Path A — you have the built app, Path B — building from source
 
 ### Community 114 - "AGENTS.md — rules for automated coding agents in this repo"
 Cohesion: 0.40
@@ -595,25 +601,37 @@ Nodes (17): App bug the user hit (2026-09-01) — FIXED in `e9bcc3b`, Fine-tune 
 Cohesion: 0.18
 Nodes (10): Global Constraints, LLM Backend Flexibility + Realistic Test Corpus Implementation Plan, Task 1: Settings persistence module, Task 2: `select_backend()` explicit model/temperature overrides + Ollama temperature fix, Task 3: Settings panel UI + wiring generation call sites through it, Task 4: Stress corpus expansion — batch 1 (5 documents), Task 5: Stress corpus expansion — batch 2 (5 documents), Task 6: Sample documents expansion (full-pipeline generation exercise) (+2 more)
 
+### Community 117 - "test_full_pipeline_accounts.py"
+Cohesion: 0.12
+Nodes (34): _approve_document(), _every_file(), Filed, AppTest, fixture, Path, The whole pipeline, end to end, through accounts.…, Two accounts sign up, each files documents under their own patient. (+26 more)
+
 ### Community 118 - "finetune/"
 Cohesion: 0.40
 Nodes (4): Environment, finetune/, Layout, Milestones
 
-### Community 119 - "resolve_placeholder"
-Cohesion: 0.29
-Nodes (7): _edit_distance(), Levenshtein distance, short-circuiting once it exceeds ``cap``., Map a possibly-corrupted placeholder onto a known one. Returns the exact token…, resolve_placeholder(), Guessing between [MRN_1] and [MRN_2] would attach the wrong identity., test_ambiguous_placeholder_is_refused_not_guessed(), test_edit_distance_caps_out()
+### Community 119 - "select_backend"
+Cohesion: 0.18
+Nodes (11): Pick a backend. Returns ``(kind, backend, label)``. ``prefer`` lets the UI…, select_backend(), The default (no prefer/model/temperature) path is unchanged., test_select_backend_falls_back_when_requested_model_not_installed(), test_select_backend_honours_explicit_ollama_model(), test_select_backend_threads_temperature_override_to_local_gguf(), test_select_backend_threads_temperature_override_to_ollama(), test_select_backend_with_no_overrides_still_works() (+3 more)
 
 ### Community 120 - "load_protected_terms"
 Cohesion: 0.29
-Nodes (8): _build_protected_pattern(), load_protected_terms(), Path, Read the editable allow-list. Blank lines and ``#`` comments are ignored., Re-read the allow-list from disk (the file is meant to be edited by hand)., reload_protected_terms(), Pattern, test_the_allow_list_is_an_editable_file()
+Nodes (8): _build_protected_pattern(), load_protected_terms(), Path, Pattern, Read the editable allow-list. Blank lines and ``#`` comments are ignored., Re-read the allow-list from disk (the file is meant to be edited by hand)., reload_protected_terms(), test_the_allow_list_is_an_editable_file()
 
 ### Community 121 - "reference_library.py"
-Cohesion: 0.22
-Nodes (14): Add clinic reference files (formulary, pathways, protocols) to a local library.…, _render_reference_uploader(), _all_chunks(), _bounded(), Chunk, _dir(), _files(), _paragraphs() (+6 more)
+Cohesion: 0.24
+Nodes (13): _all_chunks(), _bounded(), Chunk, _dir(), _files(), _paragraphs(), Path, Clinic reference material — formularies, care pathways, local protocols — as a… (+5 more)
+
+### Community 122 - "test_patient_pipeline.py"
+Cohesion: 0.15
+Nodes (25): _approve_document(), filed(), FiledCase, fixture, parametrize, Path, End-to-end evaluation of the patient records pipeline, one stage of the user…, Drive the whole pipeline once: two patients, 15 documents filed under one. (+17 more)
+
+### Community 123 - "set_active_user"
+Cohesion: 0.11
+Nodes (34): warn(), list_patients(), migrate_unscoped_into(), Scope every subsequent store call to one account, or to none. Passing ``None``…, Every readable patient, sorted by name (case-insensitive) then id. A folder…, Patient folders sitting in the base, from before accounts existed. These are…, Move pre-accounts patients into ``user_id``'s scope. Returns the count. Called…, set_active_user() (+26 more)
 
 ### Community 126 - "test_mapping.py"
-Cohesion: 0.09
-Nodes (27): assign_placeholders(), dedupe_entities(), normalise_type(), Coerce a model-supplied type string onto the canonical list., Drop blank and duplicate entities, keeping first-seen order and casing.…, Attach a stable placeholder to each unique entity. A type with exactly one…, Swap placeholders back to their original values. Thin wrapper over…, reidentify() (+19 more)
+Cohesion: 0.08
+Nodes (31): assign_placeholders(), dedupe_entities(), normalise_type(), Coerce a model-supplied type string onto the canonical list., Drop blank and duplicate entities, keeping first-seen order and casing.…, Attach a stable placeholder to each unique entity. A type with exactly one…, Swap placeholders back to originals, repairing mangled tokens. Never raises on…, Swap placeholders back to their original values. Thin wrapper over… (+23 more)
 
 ### Community 127 - "parse_fields"
 Cohesion: 0.44
@@ -623,13 +641,21 @@ Nodes (9): parse_fields(), Turn the model's marker-delimited output into ``{fiel
 Cohesion: 0.31
 Nodes (8): _letterhead_line(), parametrize, Regression: an unlabelled letterhead street address leaks in the clear. Found…, The de-identified form of the address/phone letterhead line., The new letterhead rule must not fire on a street word in a sentence., test_a_letterhead_street_address_line_is_taken_whole(), test_street_words_in_prose_are_not_over_redacted(), test_the_sample_letterhead_address_is_fully_redacted()
 
-### Community 133 - "plan"
-Cohesion: 0.32
-Nodes (10): plan(), _field(), Per-field retrieval planning (roadmap item E). The shipped planner is rule-…, test_diagnoses_field_wants_section_reference(), test_medication_field_wants_sentence_level_reference(), test_mood_field_wants_no_reference(), test_plan_covers_every_field_and_wants_exemplars_for_all(), test_planner_is_pluggable() (+2 more)
+### Community 132 - "test_app_clinical_forms.py"
+Cohesion: 0.29
+Nodes (7): _form_draft_key(), _header_values_complete(), Pure-logic pieces of the clinical-form UI: the session-state key used to key a…, test_form_draft_key_differs_by_form_or_selection(), test_form_draft_key_is_stable_for_the_same_selection(), test_header_values_complete_requires_every_non_reason_field(), test_invalidate_form_export_drops_stale_resolved_values()
 
-### Community 134 - "carenotes.py"
-Cohesion: 0.16
-Nodes (13): _ends_mid_tag(), generate_care_note(), Care note generation — local, on approved de-identified text only. The contract…, True if ``text`` ends part-way through what could be a reasoning tag., Filter a token stream so a reasoning prefix never reaches the consumer. Buffers…, Prepend the review banner, without duplicating one already there., Draft a care note from ALREADY DE-IDENTIFIED text, returning it whole. The…, with_banner() (+5 more)
+### Community 133 - "filed_documents"
+Cohesion: 0.22
+Nodes (9): Read-only list of what has been filed for this patient., render_filed_documents(), filed_documents(), Approved artefacts filed for this patient, newest first., Runs last of the store tests: it mutates Blake's roster., test_deleting_one_accounts_patient_leaves_the_other_intact(), test_every_document_is_filed_as_three_artefacts(), test_filed_documents_come_back_newest_first() (+1 more)
+
+### Community 134 - "OllamaBackend"
+Cohesion: 0.29
+Nodes (6): OllamaBackend, Local generation through the loopback-pinned Ollama daemon., core/model_setup.py (model download, isolated), Generation backend selection order (Ollama > built-in GGUF > Cloud), Which model to use (built-in 3B vs Ollama 8B), test_ollama_backend_default_temperature_is_zero()
+
+### Community 135 - "create_user"
+Cohesion: 0.11
+Nodes (36): any_users(), authenticate(), create_user(), list_users(), Create an account. Raises :class:`UserError` if it cannot., The account for these credentials, or ``None``. One return value for every…, Every readable account, sorted by username (case-insensitive) then id., Is there at least one account? Decides signup-first vs login-first. (+28 more)
 
 ### Community 137 - "is_model_present"
 Cohesion: 0.50
@@ -639,21 +665,17 @@ Nodes (4): is_model_present(), True if a usable model file is already on this co
 Cohesion: 0.50
 Nodes (3): CareScribe site, Local, Notes
 
-### Community 140 - "test_medicare_number_leak.py"
-Cohesion: 0.25
-Nodes (10): _mrn_values(), parametrize, Regression: an Australian Medicare number left in the clear. Found by a cockpit…, The number after a Medicare label is taken, like any other MRN., A Medicare mention with no number attached is not a record-number hit., Safety-net: if a Medicare number ever reaches redacted text, approval blocks., test_a_medicare_labelled_number_is_detected_as_a_record_number(), test_residual_scan_catches_a_leaked_medicare_number() (+2 more)
+### Community 140 - "residual_scan"
+Cohesion: 0.10
+Nodes (24): Re-scan ALREADY-REDACTED text for anything that still looks identifying. Runs…, residual_scan(), main(), normalise(), Per-document pass/fail report for the stress corpus. python…, Placeholders are the point of the exercise, not leaks., A .txt file read off a Windows disk arrives with CRLF endings. NER tokenises…, test_crlf_and_lf_documents_behave_identically() (+16 more)
 
-### Community 141 - "_run"
-Cohesion: 0.60
-Nodes (4): AppTest, _run(), test_saving_settings_persists_and_survives_reload(), test_settings_expander_renders_without_error()
-
-### Community 143 - "render_review"
-Cohesion: 0.16
-Nodes (15): entity_confirmed(), entity_frame(), Re-derive the preview and map from an edited entity list., The primary review surface: the redacted text, second-look items marked.…, Clear each class of second-look item in one click. Low-confidence entity spans…, refresh(), render_bulk_actions(), render_entity_table() (+7 more)
-
-### Community 145 - "app.py"
+### Community 141 - "analyze"
 Cohesion: 0.08
-Nodes (41): _active_backend(), _draft_state(), _form_draft_key(), _form_draft_state(), _header_values_complete(), _invalidate_form_export(), CareScribe — local, privacy-preserving de-identification and review. Run with:…, Drop any previously re-identified/exportable content — called whenever the… (+33 more)
+Nodes (24): analyze(), _crosses_paragraph_break(), flatten_lines(), ner_spans(), Layer 2: Presidio/spaCy detections, mapped onto CareScribe entity types.…, Run every enabled layer over ``text`` and return reviewable entities. Each…, Return ``text`` with every line break collapsed to one space, plus an offset…, True if the ORIGINAL-text span ``text[start:end]`` contains a blank line. (+16 more)
+
+### Community 145 - "render_refinement"
+Cohesion: 0.13
+Nodes (19): _active_backend(), _invalidate_form_export(), Drop any previously re-identified/exportable content — called whenever the…, Resolve the backend to generate with, honouring saved settings. Centralises…, A concrete "it works", rather than asking the clinician to trust a flag., Render a stream token by token so a slow local model looks alive., First-pass generation. The model receives de-identified text only., Follow-up instructions, on de-identified text only. (+11 more)
 
 ### Community 146 - "render_draft"
 Cohesion: 0.40
@@ -663,25 +685,41 @@ Nodes (6): _as_docx(), The de-identified draft, refinement, re-identification, a
 Cohesion: 0.18
 Nodes (10): BackendError, LocalGGUFBackend, RuntimeError, True if the runtime and a model file are both present., Raised when a backend cannot be used, with the fix in the message., Shared message for a completion cut off by the token/context budget. A half-…, CPU-only generation from a bundled GGUF via ``llama-cpp-python``. The model is…, _truncation_error() (+2 more)
 
-### Community 148 - "reidentify_detailed"
-Cohesion: 0.33
-Nodes (6): Outcome of a re-identification pass., Swap placeholders back to originals, repairing mangled tokens. Never raises on…, reidentify_detailed(), ReidentifyResult, test_invented_placeholder_is_left_alone(), test_mangled_placeholder_is_repaired()
-
 ### Community 149 - "applog.py"
-Cohesion: 0.08
-Nodes (34): BaseException, cache_resource, ensure_engine_ready(), load_detection_engine(), Load the NER model once per session, not once per rerun. Streamlit re-runs the…, Load the model at startup, behind a visible spinner. Deliberately not lazy. If…, The last line of defence: a calm message instead of a stack trace. A clinician…, render_unexpected_error() (+26 more)
+Cohesion: 0.17
+Nodes (15): BaseException, The last line of defence: a calm message instead of a stack trace. A clinician…, render_unexpected_error(), exception(), get_logger(), log(), log_path(), Path (+7 more)
 
-### Community 150 - "rebuild"
-Cohesion: 0.09
-Nodes (23): add_manual_entity(), DeidentificationError, DeidResult, Re-derive redacted text and the PHI map from a reviewer-edited table. Called…, Add an identifier the tools missed and immediately re-redact. The new value…, Raised when de-identification can't run at all., Everything the de-identification stage produces for one document., rebuild() (+15 more)
+### Community 150 - "users.py"
+Cohesion: 0.11
+Nodes (33): _as_user(), change_password(), _check_password(), _clean_username(), _derive(), get_user(), _now(), Path (+25 more)
 
-### Community 151 - "test_the_whole_deid_path_works_with_no_model_at_all"
+### Community 151 - "test_auth_gate.py"
+Cohesion: 0.21
+Nodes (20): isolated_store(), AppTest, fixture, The sign-in gate, end to end through the real app. Two things are being pinned…, Accounts and patients both land in tmp, never in the checkout., Everything the screen said, for coarse assertions., run(), test_a_new_account_sees_none_of_another_accounts_patients() (+12 more)
+
+### Community 152 - "desktop.py"
+Cohesion: 0.12
+Nodes (30): app_data_dir(), bundle_root(), ensure_dirs(), find_local_model(), is_frozen(), _model_search_dirs(), models_dir(), output_dir() (+22 more)
+
+### Community 154 - "run_app.py"
+Cohesion: 0.16
+Nodes (17): Popen, close_splash(), _fatal(), free_port(), main(), _no_window_kwargs(), CareScribe desktop launcher — the app's entry point. Starts the Streamlit…, Poll the loopback port until Streamlit answers. (+9 more)
+
+### Community 155 - "wipe_phi"
+Cohesion: 0.67
+Nodes (4): PHI_KEYS (session-state PHI registry), Drop every document, identifier table, and identity map from memory., wipe_phi(), Bug: form_drafts never registered with PHI_KEYS/wipe_phi
+
+### Community 156 - "structured_spans"
+Cohesion: 0.10
+Nodes (23): _header_footer_bounds(), _plausible_surname(), True if the trailing token of an initial+surname reads like a real name.…, Layer 1: deterministic regex detections over ``text``., Character ranges of the document's opening and closing lines., structured_spans(), Layer 1 alone must still catch every purely structured identifier., A bare digit run is a lab value; only a labelled one is a record number. (+15 more)
+
+### Community 168 - "username_taken"
 Cohesion: 0.40
-Nodes (5): _nothing_available(), A fresh PC must still de-identify, review and approve., A fresh PC: no Ollama, no model file, no cloud., test_cloud_alone_counts_as_ready(), test_the_whole_deid_path_works_with_no_model_at_all()
+Nodes (5): The comparison form: whitespace-collapsed and casefolded. ``casefold`` rather…, Case-insensitively, is this username already in use?, _username_key(), username_taken(), test_username_taken()
 
-### Community 154 - "theme.py"
-Cohesion: 0.33
-Nodes (4): CareScribe UI layer — the visual identity, applied over Streamlit. `theme.CSS`…, inject(), CareScribe visual identity — one stylesheet, injected once per rerun. DIRECTION…, Apply the stylesheet. Import Streamlit lazily so the module stays cheap.
+### Community 170 - "create_patient"
+Cohesion: 0.15
+Nodes (21): create_patient(), patient_output_dir(), Where this patient's approved de-identified artefacts are filed., Create a patient folder and roster entry. Returns the new record., test_filed_documents_are_scoped(), fixture, parametrize, The per-patient records store. `patients.py` owns no detection logic — it is… (+13 more)
 
 ## Ambiguous Edges - Review These
 - `stress_corpus/README.md` → `Psychological Medicine Clinic Letter (doc06)`  [AMBIGUOUS]
@@ -696,9 +734,9 @@ Nodes (4): CareScribe UI layer — the visual identity, applied over Streamlit. 
   stress_corpus/README.md · relation: references
 
 ## Knowledge Gaps
-- **304 isolated node(s):** `Fixed`, `Added`, `Added`, `medgpt-finetune`, `merge_and_convert.sh script` (+299 more)
+- **305 isolated node(s):** `Do`, `Never`, `Task spec shape`, `Added`, `Fixed` (+300 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **25 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **23 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -713,7 +751,7 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
 - **What is the exact relationship between `stress_corpus/README.md` and `Mental Health Act Assessment Record (doc10)`?**
   _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
-- **Why does `deidentify()` connect `deidentify` to `build_dataset.py`, `test_letterhead_address_leak.py`, `test_app.py`, `test_medicare_number_leak.py`, `create_patient`, `test_app_screens.py`, `applog.py`, `rebuild`, `structured_spans`, `deidentify.py`, `extract_text`, `test_stress_corpus.py`, `write_approved`, `test_combined_sources_generate_every_form_type_with_a_stub_backend`, `mapping.py`, `test_crisis_lines_preserved.py`, `test_deid_pipeline.py`, `NoEgress`, `load_documents`, `test_generation_setup.py`, `analyze`, `batch.py`, `stress_report.py`?**
-  _High betweenness centrality (0.046) - this node is a cross-community bridge._
-- **Why does `Document` connect `Document` to `load_documents`, `test_docx_roundtrip.py`, `test_app.py`, `main`, `test_generation.py`, `batch.py`, `docx_redact.py`, `render_review`, `test_app_screens.py`, `app.py`, `render_draft`, `render_approval`?**
-  _High betweenness centrality (0.031) - this node is a cross-community bridge._
+- **Why does `deidentify()` connect `deidentify` to `extract_text`, `build_dataset.py`, `test_letterhead_address_leak.py`, `test_app.py`, `residual_scan`, `analyze`, `test_app_screens.py`, `applog.py`, `structured_spans`, `deidentify.py`, `test_stress_corpus.py`, `write_approved`, `create_patient`, `test_combined_sources_generate_every_form_type_with_a_stub_backend`, `mapping.py`, `test_crisis_lines_preserved.py`, `test_deid_pipeline.py`, `NoEgress`, `load_documents`, `test_generation_setup.py`, `batch.py`, `_build_analyzer`, `test_full_pipeline_accounts.py`, `test_patient_pipeline.py`, `set_active_user`?**
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+- **Why does `residual_scan()` connect `residual_scan` to `load_documents`, `extract_text`, `test_stress_corpus.py`, `write_approved`, `test_letterhead_address_leak.py`, `test_docx_roundtrip.py`, `exemplars.py`, `carenotes.py`, `create_patient`, `analyze`, `test_combined_sources_generate_every_form_type_with_a_stub_backend`, `EncounterFacts`, `test_full_pipeline_accounts.py`, `desktop.py`, `test_patient_pipeline.py`, `structured_spans`, `deidentify.py`, `CareScribe (the application)`?**
+  _High betweenness centrality (0.030) - this node is a cross-community bridge._
