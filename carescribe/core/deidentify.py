@@ -591,8 +591,15 @@ CPA_BARE = re.compile(r"\b(CPA[-\s]\d{2,6}(?:[-\s]?[A-Z0-9]{1,4})?)\b")
 # A labelled address line is taken whole: "14 Leeds Road, Harrogate, LS9 4TT".
 # Grabbing the entire value is what lets the NER layer stay strict about bare
 # place names, which is how "visiting family in Leeds" survives.
+#
+# The qualifier list matters more than it looks. A line the pattern does not
+# recognise as an address field loses the whole-line guarantee silently: on a
+# court report's "Firm address: 4 Chancery Row, Leeds, LS1 4BT" the postcode
+# was still caught by the structured rule, so the line looked partly redacted
+# while the street number and name rode out intact.
 ADDRESS_LINE = re.compile(
-    r"^[ \t]*(?:Home\s+|Postal\s+|Correspondence\s+)?Addr(?:ess)?"
+    r"^[ \t]*(?:Home\s+|Postal\s+|Correspondence\s+|Firm\s+|Practice\s+"
+    r"|Clinic\s+|Work\s+|Business\s+|Registered\s+)?Addr(?:ess)?"
     r"(?:\s*(?:line)?\s*\d)?[ \t]*:[ \t]*(\S.*?)[ \t]*$",
     re.IGNORECASE | re.MULTILINE,
 )
