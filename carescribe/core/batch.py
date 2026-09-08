@@ -25,6 +25,7 @@ import io
 import json
 import os
 import re
+import zipfile
 from datetime import datetime, timezone
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -375,6 +376,100 @@ def approved_docx_path(name: str, output_dir: Path | str | None = None) -> Path:
     return _resolve_output_dir(output_dir) / (safe_stem(name) + APPROVED_DOCX_SUFFIX)
 
 
+# Document properties that carry a person, a place or a date. Word fills these
+# in from the machine that authored the file, so they arrive already populated
+# and the reviewer never sees them: the chip table is built from the document's
+# text, and File > Properties is not part of the text. A discharge summary
+# authored in Word routinely ships dc:creator and cp:lastModifiedBy holding
+# clinician names, and dc:title holding a heading like "Discharge summary for
+# <patient>" -- the patient's name, in the approved file, after every visible
+# trace of it has been redacted.
+#
+# Matched on local name so both docProps/core.xml (Dublin Core plus the cp:
+# extensions) and docProps/app.xml (Company, Manager) are covered without
+# hard-coding namespace URIs.
+_METADATA_TEXT_FIELDS = frozenset({
+    "title", "subject", "creator", "keywords", "description", "lastModifiedBy",
+    "category", "contentStatus", "identifier", "version", "manager", "Company",
+    "Manager", "lastPrinted",
+})
+
+# created/modified cannot simply be blanked -- the schema types them as
+# timestamps and Word will not open a file whose dcterms:created is empty. A
+# document's authoring time is the same class of fact as a service date, which
+# this app redacts everywhere else, so it is normalised to a fixed neutral
+# instant rather than left telling the reader when the patient was seen.
+_METADATA_TIMESTAMP_FIELDS = frozenset({"created", "modified"})
+_NEUTRAL_TIMESTAMP = "1970-01-01T00:00:00Z"
+
+_METADATA_PARTS = ("docProps/core.xml", "docProps/app.xml")
+
+
+def _strip_document_properties(data: bytes) -> bytes:
+    """Blank the .docx metadata fields that carry names, places and dates.
+
+    Rewrites only the two docProps parts and copies every other entry through
+    byte-for-byte, so the redaction that has already been applied to the body is
+    untouched and no second serialisation of the document can perturb it.
+    """
+    try:
+        from lxml import etree
+    except Exception:  # noqa: BLE001 -- never block a write on the probe
+        return data
+
+    output = io.BytesIO()
+    with zipfile.ZipFile(io.BytesIO(data)) as source:
+        with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as target:
+            for item in source.infolist():
+                blob = source.read(item.filename)
+                if item.filename in _METADATA_PARTS:
+                    try:
+                        blob = _blanked_properties(etree, blob)
+                    except Exception:  # noqa: BLE001 -- keep the original part
+                        pass
+                target.writestr(item, blob)
+    return output.getvalue()
+
+
+def _blanked_properties(etree, blob: bytes) -> bytes:
+    root = etree.fromstring(blob)
+    for element in root.iter():
+        name = etree.QName(element).localname
+        if name in _METADATA_TEXT_FIELDS:
+            element.text = None
+        elif name in _METADATA_TIMESTAMP_FIELDS:
+            element.text = _NEUTRAL_TIMESTAMP
+    return etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
+
+
+def _document_property_text(data: bytes) -> str:
+    """Every scrap of text in the .docx property parts, for the residual sweep.
+
+    Read back from the finished file rather than trusted to have been blanked:
+    the field list above is a list, and a Word version that files a name
+    somewhere not on it should still refuse the write rather than ride out.
+    """
+    try:
+        from lxml import etree
+    except Exception:  # noqa: BLE001 -- never block a write on the probe
+        return ""
+
+    lines: list[str] = []
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            present = set(archive.namelist())
+            for part in _METADATA_PARTS:
+                if part not in present:
+                    continue
+                root = etree.fromstring(archive.read(part))
+                for element in root.iter():
+                    text = (element.text or "").strip()
+                    if text:
+                        lines.append(text)
+    except Exception:  # noqa: BLE001 -- an unreadable probe is not a finding
+        return ""
+    return "\n".join(lines)
+
 def _text_the_body_walk_misses(data: bytes) -> str:
     """Header, footer and text-box content -- what ``_extract_docx`` never reads.
 
@@ -493,6 +588,14 @@ def write_approved_docx(
     # normalisation for free; without it, a raw \r left in a run's text (real
     # XML content, not a paragraph break) can hide an identifier from the
     # \n-anchored patterns this scan relies on.
+    # Word fills the document properties in from the authoring machine, so a
+    # clinician's name arrives in dc:creator and the patient's can arrive in
+    # dc:title. None of it is in the document text, so the reviewer never saw
+    # it and redaction never touched it. Blank it before the sweep -- and the
+    # sweep then reads the properties too, so a field this misses still
+    # refuses the write rather than riding out.
+    staged = io.BytesIO(_strip_document_properties(staged.getvalue()))
+
     scan_text = ingest.normalise_line_endings(ingest._extract_docx(staged.getvalue()))
 
     # ...plus the header and footer, which the body walk above never reads. A
@@ -502,6 +605,12 @@ def write_approved_docx(
     # them either, so an approved .docx rode out with all of them still on it.
     scan_text += "\n" + ingest.normalise_line_endings(
         _text_the_body_walk_misses(staged.getvalue())
+    )
+
+    # ...and the document properties, so a name left in dc:creator or dc:title
+    # is refused exactly like one left in the body.
+    scan_text += "\n" + ingest.normalise_line_endings(
+        _document_property_text(staged.getvalue())
     )
     residual = sweep(scan_text, acknowledged)
     if residual:
