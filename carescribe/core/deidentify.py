@@ -528,9 +528,21 @@ PATIENT_LINE = re.compile(
     re.IGNORECASE | re.MULTILINE,
 )
 
+# The value ends at the name, not at the end of the line. A record almost never
+# writes "Next of kin: Priya Whitfield" and stops -- it writes
+# "Next of kin: Priya Whitfield (spouse) - 0433 990 214", and the old "$" anchor
+# meant any trailing relationship, phone number or age defeated the whole rule.
+# Measured against eight realistic shapes it matched two. The lookahead keeps
+# the value bounded without requiring the line to end: a name is followed by
+# end-of-line, an opening bracket, a comma or a dash, and by nothing else.
+#
+# "People who can help" and "Support person" are the strengths-based phrasings
+# of the same field; both appear in sample_documents/ naming the same spouse.
 RELATIVE_LINE = re.compile(
     rf"^[ \t]*(?:Next[ \t]+of[ \t]+kin|NOK|Emergency[ \t]+contact|Carer|"
-    rf"Nearest[ \t]+relative|{_KINSHIP})[ \t]*:[ \t]*" + _NAME_VALUE + r"[ \t]*$",
+    rf"Nearest[ \t]+relative|People[ \t]+who[ \t]+can[ \t]+help|"
+    rf"Support[ \t]+person|{_KINSHIP})[ \t]*:[ \t]*" + _NAME_VALUE
+    + r"(?=[ \t]*(?:$|[(,\-–—]))",
     re.IGNORECASE | re.MULTILINE,
 )
 
