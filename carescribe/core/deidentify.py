@@ -900,7 +900,12 @@ _DATE_ANCHORS = (
     r"Reviewed\s+on|Clinic\s+date|Visit\s+date|"
     r"Date\s+typed|Typed\s+on|Typed|Dictated(?:\s+on)?|Transcribed(?:\s+on)?|"
     r"Next\s+review|Review\s+date|Date\s+seen|Letter\s+date|Date\s+of\s+letter|"
-    r"Date\s+of\s+admission|Date\s+of\s+assessment|Assessment\s+date"
+    r"Date\s+of\s+admission|Date\s+of\s+assessment|Assessment\s+date|"
+    # A death date is identity, not narrative, and it belongs here rather than
+    # with the birth anchors: it must be typed [DATE], never [DOB]. "Date of
+    # death" is listed before the shorter alternatives so the full phrase wins.
+    r"Date\s+of\s+death|Deceased(?:\s+on)?|Died(?:\s+on)?|"
+    r"Date\s+of\s+demise|D\.O\.D\.?|DOD"
 )
 
 # The subset that specifically means "this is a birth date". A numeric date is
