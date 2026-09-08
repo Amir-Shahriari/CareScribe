@@ -375,8 +375,8 @@ def approved_docx_path(name: str, output_dir: Path | str | None = None) -> Path:
     return _resolve_output_dir(output_dir) / (safe_stem(name) + APPROVED_DOCX_SUFFIX)
 
 
-def _header_footer_text(data: bytes) -> str:
-    """Header and footer text from a .docx -- the part ``_extract_docx`` never reads.
+def _text_the_body_walk_misses(data: bytes) -> str:
+    """Header, footer and text-box content -- what ``_extract_docx`` never reads.
 
     ``ingest._extract_docx`` walks the body and its tables, which is the view
     detection ran on. A letterhead is not in the body: the clinic name, the
@@ -419,7 +419,39 @@ def _header_footer_text(data: bytes) -> str:
                         parts.append(f"{label}: {value}" if label and value else label or value)
                     else:
                         parts.append(" | ".join(cells))
+
+    # Text boxes and drawing shapes, wherever they sit. python-docx's paragraph
+    # walk does not descend into a <w:txbxContent>, so a referrer's name, an MRN
+    # or a phone number typed into a floating box was missed exactly the way the
+    # letterhead was. document_has_text_boxes() already warns the user such text
+    # exists, but a warning is not the guarantee this function's docstring makes,
+    # and the file was still written with the box's contents intact. Both VML
+    # (<v:textbox>) and DrawingML (<wps:txbx>) wrap their text in w:txbxContent,
+    # so iterating that one tag covers both.
+    try:
+        from docx.oxml.ns import qn
+
+        seen: set[int] = set()
+        for part in (document.element, *(
+            area._element
+            for section in document.sections
+            for area in (
+                section.header, section.first_page_header, section.even_page_header,
+                section.footer, section.first_page_footer, section.even_page_footer,
+            )
+            if area is not None
+        )):
+            for box in part.iter(qn("w:txbxContent")):
+                if id(box) in seen:
+                    continue
+                seen.add(id(box))
+                boxed = "".join(node.text or "" for node in box.iter(qn("w:t")))
+                if boxed.strip():
+                    parts.append(boxed)
+    except Exception:  # noqa: BLE001 -- an unreadable shape must not block a write
+        pass
     return "\n".join(parts)
+
 
 def write_approved_docx(
     name: str,
@@ -469,7 +501,7 @@ def write_approved_docx(
     # approved map and were never redacted -- and this sweep could not catch
     # them either, so an approved .docx rode out with all of them still on it.
     scan_text += "\n" + ingest.normalise_line_endings(
-        _header_footer_text(staged.getvalue())
+        _text_the_body_walk_misses(staged.getvalue())
     )
     residual = sweep(scan_text, acknowledged)
     if residual:
