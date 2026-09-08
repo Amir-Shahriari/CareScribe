@@ -39,6 +39,20 @@ def isolated_logger(monkeypatch, tmp_path):
     logger.propagate = saved_propagate
 
 
+def _app_handlers(logger):
+    """The handlers applog installed, ignoring the ones pytest attaches.
+
+    get_logger() sets propagate=False, and from then on pytest's logging plugin
+    attaches its own LogCaptureHandlers directly to this logger at each phase
+    boundary rather than to the root. So a bare len(logger.handlers) is 1 when
+    this file runs alone and 3 inside the full suite -- count only the handlers
+    the module under test put there.
+    """
+    from _pytest.logging import LogCaptureHandler
+
+    return [h for h in logger.handlers if not isinstance(h, LogCaptureHandler)]
+
+
 def _log_text() -> str:
     for handler in logging.getLogger(applog.LOGGER_NAME).handlers:
         handler.flush()
@@ -57,13 +71,14 @@ def test_get_logger_configures_once_and_does_not_stack_handlers(isolated_logger)
     second = applog.get_logger()
     assert first is second
     assert first is logging.getLogger(applog.LOGGER_NAME)
-    assert len(first.handlers) == 1
+    assert len(_app_handlers(first)) == 1
 
 
 def test_handler_is_rotating_bounded_and_does_not_propagate(isolated_logger):
     applog.get_logger()
-    assert len(isolated_logger.handlers) == 1
-    handler = isolated_logger.handlers[0]
+    handlers = _app_handlers(isolated_logger)
+    assert len(handlers) == 1
+    handler = handlers[0]
     assert isinstance(handler, logging.handlers.RotatingFileHandler)
     assert handler.maxBytes == applog.MAX_BYTES
     assert handler.backupCount == applog.BACKUPS
@@ -78,8 +93,9 @@ def test_unwritable_log_directory_does_not_stop_the_app(isolated_logger, monkeyp
     monkeypatch.setattr(applog.logging.handlers, "RotatingFileHandler", boom)
     logger = applog.get_logger()
     assert logger is logging.getLogger(applog.LOGGER_NAME)
-    assert len(logger.handlers) == 1
-    assert isinstance(logger.handlers[0], logging.NullHandler)
+    handlers = _app_handlers(logger)
+    assert len(handlers) == 1
+    assert isinstance(handlers[0], logging.NullHandler)
     applog.log("hi")
     applog.warn("still alive")
 
