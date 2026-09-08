@@ -486,7 +486,13 @@ MRN_CONTEXT = re.compile(
     r"(?:[ \t]*\([^)\n]{0,24}\))?"   # optional gloss: "(MRN)", "(hospital)"
     # "Case No.:" carries both a full stop and a colon, so the separator run has
     # to allow several punctuation marks, not one.
-    r"[ \t]*[:#.]*[ \t]*"
+    # An opening bracket is a separator too. "the WorkCover claim
+    # (WC-2025-118342)" puts the value itself in brackets rather than a gloss
+    # before it, and without "(" here the value could not be reached at all.
+    # The gloss group above still wins where there is a real gloss --
+    # "Hospital No (MRN): 4471982" is unaffected, because the regex backtracks
+    # out of the gloss when no value follows it.
+    r"[ \t]*[:#.(]*[ \t]*"
     # Value: an optional facility/scheme prefix (up to 5 letters, e.g.
     # "MCDH-410287"), 4-10 grouped digits, and an optional single check letter
     # ("2481726A").
