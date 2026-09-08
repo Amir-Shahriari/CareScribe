@@ -748,6 +748,20 @@ DOTTED_DATE = re.compile(
     r"\b(?:0[1-9]|[12]\d|3[01])\.(?:0[1-9]|1[0-2])\.(?:19|20)\d{2}\b"
 )
 
+# "15-Mar-2026" -- the shape Oracle, most EMR exports and most pathology feeds
+# emit. PROSE_DATE requires whitespace between the day and the month, so a
+# hyphen-separated month name matched nothing at all: in doc11 of the stress
+# corpus "Visit date: 15/03/2026" and "Date typed: 15th March 2026" were both
+# redacted while "Next review: 15-Mar-2026" on the line between them was left
+# standing. The label was never the problem; the value format was.
+#
+# The four-digit year is the guard, exactly as it is for DOTTED_DATE: it keeps
+# this off anything that merely contains a hyphen and three letters.
+HYPHEN_MONTH_DATE = re.compile(
+    rf"\b(?:0?[1-9]|[12]\d|3[01])[-/](?:{_MONTHS})[-/](?:19|20)\d{{2}}\b",
+    re.IGNORECASE,
+)
+
 # "19700201". Deliberately NOT in the pattern run in structured_spans(): an
 # eight-digit run is also the shape of an MRN, an NHS number and an accession
 # number, so this one is a date only when a date label says so - it requires an
@@ -899,6 +913,7 @@ CLOCK_TIME = re.compile(r"\b(?:[01]?\d|2[0-3]):[0-5]\d\s*(?:am|pm|hrs)?\b", re.I
 # within reach of the duration and redacted the clinical detail.
 _CALENDAR_SHAPE = re.compile(
     rf"^(?:\d{{1,2}}[/-]\d{{1,2}}[/-]\d{{2,4}}"
+    rf"|(?:0?[1-9]|[12]\d|3[01])[-/](?:{_MONTHS})[-/](?:19|20)\d{{2}}"
     rf"|\d{{1,2}}(?:st|nd|rd|th)?(?:\s+of)?\s+(?:{_MONTHS})(?:\s+\d{{4}})?"
     rf"|(?:{_MONTHS})\s+\d{{1,2}}(?:st|nd|rd|th)?(?:,?\s+\d{{4}})?"
     rf"|(?:[01]?\d|2[0-3]):[0-5]\d\s*(?:am|pm|hrs)?)$",
@@ -1191,7 +1206,9 @@ def structured_spans(text: str) -> list[Span]:
         # what NER returns and variant expansion regenerates every title form.
         spans.append(Span(match.start(1), match.end(1), "PROVIDER_NAME"))
 
-    for pattern in (NUMERIC_DATE, ISO_DATE, DOTTED_DATE, PROSE_DATE, WORD_DATE):
+    for pattern in (
+        NUMERIC_DATE, ISO_DATE, DOTTED_DATE, HYPHEN_MONTH_DATE, PROSE_DATE, WORD_DATE
+    ):
         for match in pattern.finditer(text):
             if not date_span_wanted(text, match.start(), match.end()):
                 continue
