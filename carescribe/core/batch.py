@@ -470,6 +470,67 @@ def _document_property_text(data: bytes) -> str:
         return ""
     return "\n".join(lines)
 
+# Parts whose text the body walk never loads at all. Comments, footnotes and
+# endnotes are separate parts in the package; python-docx does not read them,
+# apply_redactions cannot reach them, and a supervisor's review comment naming
+# the patient is entirely ordinary in a clinical document.
+_UNREAD_PARTS = (
+    "word/comments.xml",
+    "word/commentsExtended.xml",
+    "word/footnotes.xml",
+    "word/endnotes.xml",
+)
+
+# The document body IS walked, so it must not be re-flattened here -- doing that
+# is what made the sweep misjudge body-table dates and refuse 63 good documents.
+# Only the one tag the walk cannot see is taken from it: a tracked-change
+# deletion keeps its text in w:delText rather than w:t, so a name deleted with
+# track changes on is still in the file and invisible to every other pass.
+_BODY_PART = "word/document.xml"
+_DELETED_TEXT_TAG = "delText"
+
+# Revision and comment marks carry the editor's name in an attribute rather than
+# in text -- w:author on every <w:del>, <w:ins> and <w:comment>.
+_AUTHOR_ATTRIBUTE = "author"
+
+
+def _revision_and_note_text(data: bytes) -> str:
+    """Text in a .docx that no other pass reads: deletions, comments, notes.
+
+    All of it is unreachable by ``apply_redactions``, so there is nothing to
+    redact and the only safe outcome is for the sweep to see it and refuse the
+    write -- the same call made for text boxes.
+    """
+    try:
+        from lxml import etree
+    except Exception:  # noqa: BLE001 -- never block a write on the probe
+        return ""
+
+    found: list[str] = []
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            present = set(archive.namelist())
+            for part in (_BODY_PART, *_UNREAD_PARTS):
+                if part not in present:
+                    continue
+                body_only = part == _BODY_PART
+                root = etree.fromstring(archive.read(part))
+                for element in root.iter():
+                    name = etree.QName(element).localname
+                    if not body_only or name == _DELETED_TEXT_TAG:
+                        text = (element.text or "").strip()
+                        if text:
+                            found.append(text)
+                    for key, value in element.attrib.items():
+                        if etree.QName(key).localname != _AUTHOR_ATTRIBUTE:
+                            continue
+                        value = (value or "").strip()
+                        if value:
+                            found.append(value)
+    except Exception:  # noqa: BLE001 -- an unreadable probe is not a finding
+        return ""
+    return "\n".join(found)
+
 def _text_the_body_walk_misses(data: bytes) -> str:
     """Header, footer and text-box content -- what ``_extract_docx`` never reads.
 
@@ -611,6 +672,12 @@ def write_approved_docx(
     # is refused exactly like one left in the body.
     scan_text += "\n" + ingest.normalise_line_endings(
         _document_property_text(staged.getvalue())
+    )
+
+    # ...and tracked-change deletions, comments and notes, none of which any
+    # other pass can see or redact.
+    scan_text += "\n" + ingest.normalise_line_endings(
+        _revision_and_note_text(staged.getvalue())
     )
     residual = sweep(scan_text, acknowledged)
     if residual:
