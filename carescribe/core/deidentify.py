@@ -518,6 +518,42 @@ RELATIVE_LINE = re.compile(
     re.IGNORECASE | re.MULTILINE,
 )
 
+_PERSON_TITLE = r"(?:Mr|Mrs|Ms|Miss|Mx|Master|Dr|Prof)"
+
+# "Re: Mr Jonathan Blake" is how a referral or clinic letter names its subject,
+# and it was the one label the patient-line list never grew. Every other
+# identifier on a probed letterhead was caught and the patient's own name rode
+# out, because the list was built from documents that happened to write
+# "Patient:" instead.
+#
+# The value stays case-sensitive even though the label does not. Capitalisation
+# is the only thing separating "Re: Jonathan Blake" from "Re: medication
+# review", and re.IGNORECASE over the whole pattern throws that away -- with the
+# flag applied globally, "Referral for medication review" matches _NAME_VALUE in
+# full. Hence the scoped (?i:Re).
+RE_LINE = re.compile(
+    r"^[ \t]*(?i:Re)[ \t]*:[ \t]*(?:" + _PERSON_TITLE + r"\.?[ \t]+)?"
+    + _NAME_VALUE + r"[ \t]*$",
+    re.MULTILINE,
+)
+
+# A subject line reads like a name until you notice every word is a document or
+# a clinical activity. These are the words that mean "this is what the letter is
+# about", never "this is who the letter is about" -- capitalisation alone cannot
+# tell "Jonathan Blake" from "Discharge Summary".
+_SUBJECT_WORDS = frozenset("""
+referral review assessment discharge summary appointment results result
+follow followup follow-up outcome report letter medication medications
+treatment care plan admission attendance clinic consultation opinion
+advice request update progress notes note history investigation
+""".split())
+
+
+def _is_person_subject(value: str) -> bool:
+    """True unless a token is a subject-line word rather than part of a name."""
+    tokens = [token.strip(".,'’-").lower() for token in value.split()]
+    return bool(tokens) and not any(token in _SUBJECT_WORDS for token in tokens)
+
 # Ward names. Anchored either on a "Ward:" field or on the "<Name> Ward" form, so
 # the bare word "ward" in prose ("reviewed on the ward") is never touched.
 WARD_PATTERN = re.compile(
