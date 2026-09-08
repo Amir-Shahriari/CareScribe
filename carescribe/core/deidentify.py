@@ -382,7 +382,26 @@ def warm_up() -> dict:
 STRUCTURED = {
     "NHS_NUMBER": r"\b\d{3}[\s-]?\d{3}[\s-]?\d{4}\b",
     "EMAIL": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
-    "PHONE": r"\b0\d{2,4}[\s-]?\d{3,4}[\s-]?\d{2,4}\b",
+    # A phone number is not always a UK trunk number. The original shape
+    # required a literal 0 followed by 2-4 more digits in one group, so an
+    # international "+61 412 345 678", a bracketed "(03) 9876 5432" and a
+    # two-digit area code "03 9876 5433" all matched nothing at all -- a real
+    # leak on a machine with no spaCy model, where the rules layer is the only
+    # thing standing between a contact number and the written file.
+    #
+    # Every branch below is built to require at least eight digits. That is the
+    # guard that keeps the pattern off lab values, doses and dates: "135-145",
+    # "120/80" and "12/03/2026" cannot reach eight digits in one run, so they
+    # are never taken. The "+" and the "(" sit inside the match so the
+    # placeholder replaces them too, rather than leaving "+61 [PHONE]" behind.
+    "PHONE": (
+        r"(?<![\w+])(?:"
+        r"\+\d{1,3}[ \t-]?(?:\(0\)[ \t-]?)?\d(?:[ \t-]?\d){6,13}"
+        r"|\(0\d{1,4}\)[ \t-]?\d(?:[ \t-]?\d){5,11}"
+        r"|0\d{1,4}[ \t-]\d(?:[ \t-]?\d){5,11}"
+        r"|0\d{2,4}[\s-]?\d{3,4}[\s-]?\d{2,4}"
+        r")(?!\w)"
+    ),
     "ADDRESS": r"\b[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}\b",  # UK postcode
 }
 
