@@ -375,6 +375,52 @@ def approved_docx_path(name: str, output_dir: Path | str | None = None) -> Path:
     return _resolve_output_dir(output_dir) / (safe_stem(name) + APPROVED_DOCX_SUFFIX)
 
 
+def _header_footer_text(data: bytes) -> str:
+    """Header and footer text from a .docx -- the part ``_extract_docx`` never reads.
+
+    ``ingest._extract_docx`` walks the body and its tables, which is the view
+    detection ran on. A letterhead is not in the body: the clinic name, the
+    clinician, the address and the phone number sit in a header or footer, so
+    they were invisible both to detection and to the residual sweep that is
+    supposed to be the last line of defence. This returns only the part the body
+    walk misses, shaped with the same "label: value" convention
+    ``_extract_docx`` uses for a two-column row, so the sweep's label-anchored
+    rules read it the same way. Only the header/footer, deliberately: flattening
+    the whole document a second way makes the sweep misjudge body tables whose
+    dates are anchored by a label in the first view.
+    """
+    try:
+        import docx
+
+        document = docx.Document(io.BytesIO(data))
+    except Exception:  # noqa: BLE001 -- an unreadable probe must not block a write
+        return ""
+
+    parts: list[str] = []
+    for section in document.sections:
+        for area in (
+            section.header, section.first_page_header, section.even_page_header,
+            section.footer, section.first_page_footer, section.even_page_footer,
+        ):
+            if area is None:
+                continue
+            try:
+                paragraphs, tables = area.paragraphs, area.tables
+            except Exception:  # noqa: BLE001
+                continue
+            parts.extend(p.text for p in paragraphs if p.text.strip())
+            for table in tables:
+                for row in table.rows:
+                    cells = [cell.text.strip() for cell in row.cells]
+                    if not any(cells):
+                        continue
+                    if len(cells) == 2:
+                        label, value = cells
+                        parts.append(f"{label}: {value}" if label and value else label or value)
+                    else:
+                        parts.append(" | ".join(cells))
+    return "\n".join(parts)
+
 def write_approved_docx(
     name: str,
     source_bytes: bytes,
@@ -416,6 +462,15 @@ def write_approved_docx(
     # XML content, not a paragraph break) can hide an identifier from the
     # \n-anchored patterns this scan relies on.
     scan_text = ingest.normalise_line_endings(ingest._extract_docx(staged.getvalue()))
+
+    # ...plus the header and footer, which the body walk above never reads. A
+    # letterhead lives there: the clinic name, the clinician, the address and
+    # the phone. Those were invisible to detection, so they never entered the
+    # approved map and were never redacted -- and this sweep could not catch
+    # them either, so an approved .docx rode out with all of them still on it.
+    scan_text += "\n" + ingest.normalise_line_endings(
+        _header_footer_text(staged.getvalue())
+    )
     residual = sweep(scan_text, acknowledged)
     if residual:
         raise BatchError(
