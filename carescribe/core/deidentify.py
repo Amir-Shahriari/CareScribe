@@ -516,15 +516,21 @@ PATIENT_LINE = re.compile(
     r"^[ \t]*(?:Patient(?:[ \t]+name)?|Client(?:[ \t]+name)?|Service[ \t]+user|"
     # "Full name" and a bare "Name" are what an intake form and a clinic letter
     # header call the same field; "Worker" is the WorkCover term for the injured
-    # person, who on a workers-compensation certificate is the patient. All
-    # three appear in sample_documents/ and none was anchored, so the patient's
-    # name rode out of four of the fifteen shipped documents.
+    # person, who on a workers-compensation certificate is the patient.
     #
     # A bare "Name" is safe only because the label must start the line: "Drug
     # name: Sertraline" and "File name: report.docx" begin with another word and
     # are not matched.
     r"Resident|Referral[ \t]+for|Full[ \t]+name|Name|Worker)[ \t]*:[ \t]*"
-    + _NAME_VALUE + r"[ \t]*$",
+    # The value ends at the name, not at the end of the line. A record writes
+    # "Client: Jordan Elliot Whitfield (DOB 12/04/1985, Medicare 2934 5671 0)",
+    # and the old "$" anchor meant the trailing details defeated the whole rule
+    # and the patient's own name rode out. Measured against six realistic shapes
+    # it matched two. The lookahead keeps the value bounded without requiring
+    # the line to end: a name is followed by end-of-line, a bracket, a comma, a
+    # table pipe or a dash, and by nothing else. RELATIVE_LINE carries the same
+    # lookahead for the same reason.
+    + _NAME_VALUE + r"(?=[ \t]*(?:$|[(,|\-–—]))",
     re.IGNORECASE | re.MULTILINE,
 )
 
