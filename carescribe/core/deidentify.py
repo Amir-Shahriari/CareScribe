@@ -675,6 +675,34 @@ _MONTHS = (
 
 NUMERIC_DATE = re.compile(r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b")
 
+# ISO 8601 - the format clinical systems export by default (HL7 segments, EMR
+# CSV dumps, pathology feeds). NUMERIC_DATE above is day-first and requires a
+# 1-2 digit leading field, so a year-first date slipped past the rules layer
+# entirely. That only ever showed up as a wrong *label* while a spaCy model was
+# loaded, because NER caught the date and typed it DATE; with no model
+# installed - a state this app supports - an ISO date of birth was not redacted
+# at all. An optional time is part of the same span: half a redacted timestamp
+# is still a timestamp.
+ISO_DATE = re.compile(
+    r"\b(?:19|20)\d{2}[-/](?:0[1-9]|1[0-2])[-/](?:0[1-9]|[12]\d|3[01])"
+    r"(?:[T ](?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?"
+    r"(?:Z|[+-](?:[01]\d|2[0-3]):?[0-5]\d)?)?\b"
+)
+
+# "01.02.1970". The full 4-digit year is the guard that keeps this off dose
+# strings and version numbers - "increase to 1.2.5 mg" must not become a date.
+DOTTED_DATE = re.compile(
+    r"\b(?:0[1-9]|[12]\d|3[01])\.(?:0[1-9]|1[0-2])\.(?:19|20)\d{2}\b"
+)
+
+# "19700201". Deliberately NOT in the pattern run in structured_spans(): an
+# eight-digit run is also the shape of an MRN, an NHS number and an accession
+# number, so this one is a date only when a date label says so - it requires an
+# identity anchor whatever REDACT_INPROSE_DATES is set to.
+COMPACT_DATE = re.compile(
+    r"\b(?:19|20)\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\b"
+)
+
 PROSE_DATE = re.compile(
     rf"\b\d{{1,2}}(?:st|nd|rd|th)?(?:\s+of)?\s+(?:{_MONTHS})\b(?:\s+\d{{4}})?",
     re.IGNORECASE,
@@ -1107,7 +1135,7 @@ def structured_spans(text: str) -> list[Span]:
         # what NER returns and variant expansion regenerates every title form.
         spans.append(Span(match.start(1), match.end(1), "PROVIDER_NAME"))
 
-    for pattern in (NUMERIC_DATE, PROSE_DATE, WORD_DATE):
+    for pattern in (NUMERIC_DATE, ISO_DATE, DOTTED_DATE, PROSE_DATE, WORD_DATE):
         for match in pattern.finditer(text):
             if not date_span_wanted(text, match.start(), match.end()):
                 continue
@@ -1117,6 +1145,20 @@ def structured_spans(text: str) -> list[Span]:
             window = text[max(0, match.start() - _DATE_ANCHOR_WINDOW) : match.start()]
             is_dob = bool(_BIRTH_ANCHOR_BEFORE.search(window))
             spans.append(Span(match.start(), match.end(), "DOB" if is_dob else "DATE"))
+
+    # An eight-digit run is also how an MRN, an NHS number and an accession
+    # number look, so a compact date is only a date when a date label says so.
+    # The anchor is required whatever REDACT_INPROSE_DATES says -- turning
+    # every 8-digit number into a date would swallow the identifiers the
+    # number rules are there to catch.
+    for match in COMPACT_DATE.finditer(text):
+        if not _has_identity_anchor(text, match.start()):
+            continue
+        if _is_clinical_measurement(text, match.start(), match.end()):
+            continue
+        window = text[max(0, match.start() - _DATE_ANCHOR_WINDOW) : match.start()]
+        is_dob = bool(_BIRTH_ANCHOR_BEFORE.search(window))
+        spans.append(Span(match.start(), match.end(), "DOB" if is_dob else "DATE"))
 
     for match in CLOCK_TIME.finditer(text):
         if _time_span_wanted(text, match.start(), match.end()):
@@ -1870,10 +1912,52 @@ def merge_spans(text: str, *span_lists: list[Span], known_as: str | None = None)
         )
     ]
 
+    # A guessed organisation that swallowed a date is an NER artefact: a clinic
+    # name does not have a date of birth inside it. Without this, "DOB
+    # 01/01/1970" (no colon after the label) came back as a single FACILITY
+    # span covering anchor and date together, and won the longest-match-wins
+    # contest below against the 10-character DOB span -- so a birth date was
+    # reported to the reviewer as [CLINIC] and the "DOB" field label was
+    # deleted. The date itself was still redacted, so this was a labelling and
+    # reviewability defect rather than a leak, and the fix must keep it that
+    # way: the facility span is trimmed back to the text before the date, not
+    # dropped, so a genuine letterhead organisation followed by a date
+    # ("St Mary's Hospital 01/01/1970") keeps its redaction. Only when nothing
+    # but the date and its label is left is the span discarded, and the DOB
+    # span underneath then covers the date on its own.
+    date_ranges = [
+        (span.start, span.end)
+        for span in spans
+        if span.entity_type in ("DATE", "DOB") and span.source == "regex"
+    ]
+
+    def _without_swallowed_date(span: Span) -> Span | None:
+        if span.entity_type not in mapping.FACILITY_TYPES or span.source == "regex":
+            return span
+        inner = [
+            (d_start, d_end)
+            for d_start, d_end in date_ranges
+            if span.start <= d_start and d_end <= span.end
+        ]
+        if not inner:
+            return span
+        head_end = min(d_start for d_start, _ in inner)
+        head = text[span.start : head_end]
+        # What is left has to look like a name, not a bare field label.
+        if not re.search(r"[A-Za-z]{3,}", _DATE_ANCHOR_BEFORE.sub("", head)):
+            return None
+        trimmed = _trim_span(text, span.start, span.start + len(head.rstrip()), span.entity_type)
+        if trimmed is None:
+            return None
+        return Span(trimmed[0], trimmed[1], span.entity_type, span.source, span.score)
+
     # Trim, classify, and filter before overlap resolution, so a rejected
     # mis-span doesn't block the good span underneath it.
     prepared: list[Span] = []
     for span in spans:
+        span = _without_swallowed_date(span)
+        if span is None:
+            continue
         if is_protected(span):
             continue
         trimmed = _trim_span(text, span.start, span.end, span.entity_type)
