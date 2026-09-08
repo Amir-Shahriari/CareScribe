@@ -434,6 +434,10 @@ _MRN_LABELS = (
     # for the UK registers. Both require the No/Number word: bare "provider" and
     # "ur" are ordinary text.
     r"UR\s*(?:No|Number)|Provider\s*(?:No|Number)|"
+    # "Passport" labels a government identity-document number — at least as
+    # identifying as an MRN. The value shape (letter prefix + digit run) was
+    # already covered, so only the anchor was missing.
+    r"Passport\s*(?:No|Number)?|"
     # "Our ref: MCDH-410287" is the business-letter reference field, and on a
     # clinical letterhead it is where the practice's own case number lives. It
     # only surfaced once headers and footers started being read: until then the
@@ -458,6 +462,16 @@ MRN_CONTEXT = re.compile(
     # "MCDH-410287"), 4-10 grouped digits, and an optional single check letter
     # ("2481726A").
     r"([A-Z]{0,5}[-\s]?\d(?:[ \t-]?\d){3,9}[A-Za-z]?)\b",
+    re.IGNORECASE,
+)
+
+# An Individual Healthcare Identifier is the Australian national patient
+# number: 16 digits, conventionally four groups of four. MRN_CONTEXT's value
+# tops out at ten digits, so an IHI needs its own shape -- anchored on the
+# label, because a bare 16-digit run is not something to redact on sight.
+IHI_NUMBER = re.compile(
+    r"\b(?:IHI|Individual\s+Healthcare\s+Identifier)\b[ \t]*[:#.]*[ \t]*"
+    r"(\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4})\b",
     re.IGNORECASE,
 )
 
@@ -1080,6 +1094,9 @@ def structured_spans(text: str) -> list[Span]:
             spans.append(Span(match.start(), match.end(), entity_type))
 
     for match in MRN_CONTEXT.finditer(text):
+        spans.append(Span(match.start(1), match.end(1), "MRN"))
+
+    for match in IHI_NUMBER.finditer(text):
         spans.append(Span(match.start(1), match.end(1), "MRN"))
 
     # Labelled identity fields, taken deterministically. Leaving these to NER
