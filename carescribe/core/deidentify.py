@@ -1187,6 +1187,15 @@ def structured_spans(text: str) -> list[Span]:
                 continue
             spans.append(Span(match.start(1), match.end(1), entity_type))
 
+    # Same idea as the labelled patient line, with one extra guard: "Re:" is a
+    # generic business-letter field, so the value has to look like a person
+    # before it is taken.
+    for match in RE_LINE.finditer(text):
+        value = match.group(1)
+        if not _is_person_subject(value):
+            continue
+        spans.append(Span(match.start(1), match.end(1), "PATIENT_NAME"))
+
     for match in WARD_PATTERN.finditer(text):
         group = "field" if match.group("field") else "named"
         spans.append(Span(match.start(group), match.end(group), "WARD"))
