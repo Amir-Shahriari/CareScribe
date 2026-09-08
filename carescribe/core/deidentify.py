@@ -447,6 +447,12 @@ _MRN_LABELS = (
     # already covered, only the label was missing.
     r"Clinic\s*File(?:\s*(?:No|Number))?|File\s*(?:No|Number)|"
     r"Accession(?:\s*(?:No|Number))?|"
+    # "Claim number: WC-2025-118342" is the insurer's own case identifier on a
+    # workers-compensation certificate -- as identifying as an MRN and tied to
+    # the same person across every document in the claim. The value shape was
+    # already covered; only the anchor was missing. Bare "claim" is not an
+    # anchor: "the claim was denied" is ordinary prose.
+    r"Claim\s*(?:No|Number)|"
     # "UR (No|Number)" is the Australian hospital Unit Record number — the local
     # equivalent of "Hospital No". "Provider (No|Number)" is a clinician's
     # Australian provider identifier, the same class of gap GMC/NMC/HCPC filled
@@ -508,7 +514,17 @@ _NAME_VALUE = r"([A-Z][\w'’\-]*(?:[ \t]+[A-Z][\w'’\-]*){0,3})"
 
 PATIENT_LINE = re.compile(
     r"^[ \t]*(?:Patient(?:[ \t]+name)?|Client(?:[ \t]+name)?|Service[ \t]+user|"
-    r"Resident|Referral[ \t]+for)[ \t]*:[ \t]*" + _NAME_VALUE + r"[ \t]*$",
+    # "Full name" and a bare "Name" are what an intake form and a clinic letter
+    # header call the same field; "Worker" is the WorkCover term for the injured
+    # person, who on a workers-compensation certificate is the patient. All
+    # three appear in sample_documents/ and none was anchored, so the patient's
+    # name rode out of four of the fifteen shipped documents.
+    #
+    # A bare "Name" is safe only because the label must start the line: "Drug
+    # name: Sertraline" and "File name: report.docx" begin with another word and
+    # are not matched.
+    r"Resident|Referral[ \t]+for|Full[ \t]+name|Name|Worker)[ \t]*:[ \t]*"
+    + _NAME_VALUE + r"[ \t]*$",
     re.IGNORECASE | re.MULTILINE,
 )
 
