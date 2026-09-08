@@ -433,7 +433,19 @@ _MRN_LABELS = (
     # Australian provider identifier, the same class of gap GMC/NMC/HCPC filled
     # for the UK registers. Both require the No/Number word: bare "provider" and
     # "ur" are ordinary text.
-    r"UR\s*(?:No|Number)|Provider\s*(?:No|Number)"
+    r"UR\s*(?:No|Number)|Provider\s*(?:No|Number)|"
+    # "Our ref: MCDH-410287" is the business-letter reference field, and on a
+    # clinical letterhead it is where the practice's own case number lives. It
+    # only surfaced once headers and footers started being read: until then the
+    # letterhead was never extracted, so the label was never needed.
+    #
+    # Bare "Ref" and bare "Reference" are deliberately NOT anchors, for the same
+    # reason bare "ur" and "provider" are not. "Reference range: 135-145" is an
+    # ordinary pathology line whose value matches the digit shape exactly, and
+    # redacting a lab reference range would destroy the clinical meaning of the
+    # report while leaking nothing. The possessive ("Our"/"Your") or an explicit
+    # No/Number is what makes it an identifier field rather than prose.
+    r"(?:Our|Your)\s*Ref(?:erence)?(?:\s*(?:No|Number))?|Ref(?:erence)?\s*(?:No|Number)"
 )
 
 MRN_CONTEXT = re.compile(
@@ -543,7 +555,15 @@ PERSON_TITLE_PATTERN = re.compile(
 # capitalised phrases separated by a comma, in the first or last few lines of
 # the document. Clinical prose never takes that shape, so the precision cost is
 # close to nil while the letterhead case is caught deterministically.
-HEADER_FOOTER_LINES = 6
+# The opening and closing lines of a document, where a letterhead sits. Since
+# _extract_docx started reading the .docx header and footer, the extracted text
+# literally begins with the header block and ends with the footer block, so the
+# window has to cover that block *plus* the opening body lines it always
+# covered -- the dedupe in ingest keeps a header to a line or three. Sized for
+# that: too small and a letterhead line one row below a real header stops being
+# treated as a letterhead, which is how a "Town, County" line hidden behind a
+# raw CR slipped past the residual scan.
+HEADER_FOOTER_LINES = 9
 
 _PLACE_PHRASE = r"[A-Z][\w'’\-]*(?:[ \t]+[A-Z][\w'’\-]*){0,3}"
 

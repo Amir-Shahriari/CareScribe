@@ -79,29 +79,79 @@ def _extract_pdf(data: bytes) -> str:
         raise IngestError(f"Could not read the PDF: {exc}") from exc
 
 
+def _block_text(paragraphs, tables) -> list[str]:
+    """One region's text: paragraphs, then table rows as the reader sees them."""
+    parts = [p.text for p in paragraphs]
+
+    for table in tables:
+        for row in table.rows:
+            cells = [cell.text.strip() for cell in row.cells]
+            if not any(cells):
+                continue
+            # A two-column table is a details grid — "Hospital No" in one
+            # cell, the number in the next. Rendering it as "label: value"
+            # is how it reads, and is what lets the label-anchored rules see
+            # the pair at all: joined with " | ", or split across lines, the
+            # anchor cannot reach the value and a labelled MRN sails through.
+            if len(cells) == 2:
+                label, value = cells
+                parts.append(f"{label}: {value}" if label and value else label or value)
+            else:
+                parts.append(" | ".join(cells))
+
+    return parts
+
+
+def _header_footer_parts(document, *, footers: bool) -> list[str]:
+    """Text from every header (or every footer) in the document, de-duplicated.
+
+    A letterhead lives here — the clinic name, the clinician, the address, the
+    phone — so leaving it out of the extracted text meant those identifiers were
+    never detected, never shown to the reviewer and never redacted. The
+    redaction pass itself does reach headers and footers, so once they are
+    detected they are handled like any other identifier.
+
+    The three variants (default, first-page, even-page) usually carry the same
+    letterhead, and a section that inherits from the previous one repeats it
+    again, so identical blocks are collapsed: the reviewer should see one row per
+    identifier, not one per page-layout variant.
+    """
+    if footers:
+        names = ("footer", "first_page_footer", "even_page_footer")
+    else:
+        names = ("header", "first_page_header", "even_page_header")
+
+    parts: list[str] = []
+    seen: set[str] = set()
+    for section in document.sections:
+        for name in names:
+            area = getattr(section, name, None)
+            if area is None:
+                continue
+            block = [line for line in _block_text(area.paragraphs, area.tables) if line.strip()]
+            key = "\n".join(block)
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            parts.extend(block)
+    return parts
+
+
 def _extract_docx(data: bytes) -> str:
-    """DOCX text: paragraphs plus table cells (clinical forms lean on tables)."""
+    """DOCX text: header, then paragraphs and table cells, then footer.
+
+    Clinical forms lean on tables, and clinical letters lean on letterhead, so
+    both are read. Header first and footer last is the order the page is read
+    in, which also keeps the label-anchored rules working: an identifier and the
+    label above it stay adjacent.
+    """
     try:
         import docx
 
         document = docx.Document(io.BytesIO(data))
-        parts = [p.text for p in document.paragraphs]
-
-        for table in document.tables:
-            for row in table.rows:
-                cells = [cell.text.strip() for cell in row.cells]
-                if not any(cells):
-                    continue
-                # A two-column table is a details grid — "Hospital No" in one
-                # cell, the number in the next. Rendering it as "label: value"
-                # is how it reads, and is what lets the label-anchored rules see
-                # the pair at all: joined with " | ", or split across lines, the
-                # anchor cannot reach the value and a labelled MRN sails through.
-                if len(cells) == 2:
-                    label, value = cells
-                    parts.append(f"{label}: {value}" if label and value else label or value)
-                else:
-                    parts.append(" | ".join(cells))
+        parts = _header_footer_parts(document, footers=False)
+        parts += _block_text(document.paragraphs, document.tables)
+        parts += _header_footer_parts(document, footers=True)
 
         return "\n".join(parts).strip()
     except IngestError:
