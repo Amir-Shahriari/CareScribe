@@ -452,7 +452,11 @@ _MRN_LABELS = (
     # the same person across every document in the claim. The value shape was
     # already covered; only the anchor was missing. Bare "claim" is not an
     # anchor: "the claim was denied" is ordinary prose.
-    r"Claim\s*(?:No|Number)|"
+    # The No/Number word is optional because MRN_CONTEXT still requires a
+    # digit-shaped value: "the claim was denied" has nothing to take, while
+    # "(claim WC-2025-118342)" on a letter's Cc line does. Same reasoning as
+    # "Clinic File" and "Accession" above.
+    r"Claim\s*(?:No|Number)?|"
     # "UR (No|Number)" is the Australian hospital Unit Record number — the local
     # equivalent of "Hospital No". "Provider (No|Number)" is a clinician's
     # Australian provider identifier, the same class of gap GMC/NMC/HCPC filled
