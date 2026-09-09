@@ -102,7 +102,6 @@ def run(model: Completer, items: Iterable[EvalItem]) -> RunResult:
                 item.facts,
                 item.form,
                 known_placeholders=item.known_placeholders,
-                style_target=item.target,
             )
         )
     durations.sort()

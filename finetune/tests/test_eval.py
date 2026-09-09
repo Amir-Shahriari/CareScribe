@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from finetune.datagen.schema import FormType
-from finetune.eval.metrics import aggregate, score_draft, style_match
+from finetune.eval.metrics import aggregate, score_draft
 from finetune.eval.regression import regressed, regression_items, score_regression
 from finetune.eval.report import build_report
 from finetune.eval.run_eval import (
@@ -64,12 +64,6 @@ def test_compare_ship_gate():
     verdict_down = compare(base=good, tuned=bad)
     assert verdict_down["ship"] is False
     assert "format" in verdict_down["regressions"]
-
-
-def test_style_match_is_one_for_identical_text():
-    t = "**A**\n- x\n\n**B**\n- y"
-    assert style_match(t, t) == 1.0
-    assert style_match("**B**\n- y\n\n**A**\n- x", t) < 1.0
 
 
 def test_report_renders_and_states_the_verdict():

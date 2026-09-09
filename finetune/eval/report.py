@@ -50,12 +50,10 @@ def build_report(
     ]
     for m in TARGET_METRICS:
         lines.append(_row(m, base.metrics, tuned.metrics, m))
-    if "style_match" in base.metrics or "style_match" in tuned.metrics:
-        lines.append(_row("style_match", base.metrics, tuned.metrics, "style_match"))
     lines.append("")
     lines.append(
-        "Ship gate: tuned ≥ base on every metric above the style row, no "
-        "regression on the regression set, and latency ratio ≤ 1.15."
+        "Ship gate: tuned ≥ base on every metric above, no regression on the "
+        "regression set, and latency ratio ≤ 1.15."
     )
 
     payload = {
