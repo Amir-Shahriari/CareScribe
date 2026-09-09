@@ -50,6 +50,11 @@ class EvalItem:
     def messages(self) -> list[dict[str, str]]:
         return build_messages(self.form, self.document)
 
+    def messages_pair(self) -> tuple[str, str]:
+        """``(system, user)`` for a :class:`Completer` call."""
+        msgs = self.messages()
+        return msgs[0]["content"], msgs[1]["content"]
+
 
 def make_eval_set(
     n: int,
@@ -255,6 +260,47 @@ class HFCompleter:
         return self.tok.decode(out[0][prompt_len:], skip_special_tokens=True)
 
 
+def _overlap_for(args, items) -> dict | None:
+    """Nearest-train-neighbour similarity for the evaluated targets.
+
+    Reported so a reader can tell whether the scores above it were measured on
+    text the model had effectively already seen.
+    """
+    from pathlib import Path
+
+    from finetune.eval.overlap import overlap_report
+
+    if args.resample:
+        return None
+    train_path = Path(args.train_jsonl) if args.train_jsonl else (
+        Path(args.test_jsonl).with_name("train.jsonl")
+    )
+    if not train_path.exists():
+        return None
+    train_targets = [i.target for i in load_eval_items(train_path)]
+    return overlap_report(train_targets, [i.target for i in items])
+
+
+def _confabulation_for(args, base, tuned) -> dict | None:
+    """Confabulation rate on adversarial "Not documented." probes."""
+    from finetune.eval.gap_probe import confabulation_rate, make_gap_probes
+
+    if not args.gap_probes:
+        return None
+    probes = make_gap_probes(args.gap_probes, seed=2000)
+    if not probes:
+        return None
+    return {
+        "base": confabulation_rate(
+            probes, [base.complete(*p.messages_pair()) for p in probes]
+        ),
+        "tuned": confabulation_rate(
+            probes, [tuned.complete(*p.messages_pair()) for p in probes]
+        ),
+        "n": len(probes),
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     import argparse
 
@@ -267,9 +313,24 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--n", type=int, default=300)
     ap.add_argument("--seed", type=int, default=1000)
     ap.add_argument("--out", default="finetune/eval/out")
+    ap.add_argument("--test-jsonl", default="finetune/data/full/test.jsonl",
+                    help="committed held-out split to evaluate on")
+    ap.add_argument("--train-jsonl", default="",
+                    help="training split, for the train/test overlap report "
+                         "(defaults to test-jsonl's sibling train.jsonl)")
+    ap.add_argument("--gap-probes", type=int, default=40,
+                    help="adversarial 'Not documented.' probes; 0 disables")
+    ap.add_argument("--resample", action="store_true",
+                    help="re-sample instead of reading the held-out split "
+                         "(NOT held out; smoke tests only)")
     args = ap.parse_args(argv)
 
-    items = make_eval_set(args.n, seed=args.seed)
+    if args.resample:
+        print("WARNING: --resample is not a held-out evaluation — a different "
+              "seed re-draws the same vignette skeletons.")
+        items = make_eval_set(args.n, seed=args.seed)
+    else:
+        items = load_eval_items(args.test_jsonl)
     base = GgufCompleter(args.base_gguf)
     tuned = GgufCompleter(args.tuned_gguf)
 
@@ -280,8 +341,18 @@ def main(argv: list[str] | None = None) -> int:
     reg_tuned = score_regression(tuned, reg_items)
     reg_fail = regressed(reg_base, reg_tuned)
 
-    ship = write_report(base_run, tuned_run, args.out)
+    overlap = _overlap_for(args, items)
+    confab = _confabulation_for(args, base, tuned)
+
+    ship = write_report(
+        base_run, tuned_run, args.out, overlap=overlap, confabulation=confab
+    )
     print(f"eval items: {len(items)}   regression docs: {len(reg_items)}")
+    if overlap and overlap.get("median") is not None:
+        print(f"train/test overlap: median {overlap['median']:.3f}, "
+              f"{overlap['n_above_0_6']} of {overlap['n']} above 0.6")
+    if confab:
+        print(f"confabulation: base {confab['base']}, tuned {confab['tuned']}")
     print(f"regression failures: {reg_fail or 'none'}")
     print(f"SHIP GATE: {'PASS' if ship and not reg_fail else 'FAIL'}  -> {args.out}/")
     return 0 if (ship and not reg_fail) else 1
