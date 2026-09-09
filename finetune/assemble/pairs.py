@@ -52,6 +52,7 @@ def make_pair(
             "styled": style_exemplar is not None,
             "polished": polished,
             "documented_gaps": list(facts.documented_gaps),
+            "vignette_id": facts.vignette_id,
         },
     )
 
@@ -82,6 +83,7 @@ def make_template_pair(
             "polished": False,
             "form_id": form_spec.form_id,
             "documented_gaps": list(facts.documented_gaps),
+            "vignette_id": facts.vignette_id,
         },
     )
 

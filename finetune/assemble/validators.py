@@ -93,7 +93,9 @@ def _field_is_empty(facts: EncounterFacts, name: str) -> bool:
 
 
 def _numbers_in_facts(facts: EncounterFacts) -> set[str]:
-    blob = " ".join(_flatten_strings(facts.model_dump()))
+    # vignette_id is bookkeeping, not a clinical fact. A skeleton named
+    # "cardio_hf_02" would otherwise make "02" a number the draft may state.
+    blob = " ".join(_flatten_strings(facts.model_dump(exclude={"vignette_id"})))
     return set(_NUM_RE.findall(blob))
 
 
