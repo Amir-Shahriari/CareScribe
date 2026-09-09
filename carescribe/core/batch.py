@@ -447,8 +447,17 @@ def _strip_document_properties(data: bytes) -> bytes:
     """
     try:
         from lxml import etree
-    except Exception:  # noqa: BLE001 -- never block a write on the probe
-        return data
+    except Exception as exc:  # noqa: BLE001
+        # Returning `data` here would hand back the UNSCRUBBED bytes while the
+        # caller believed the metadata had been blanked -- and the two sweep
+        # helpers below would simultaneously report "found nothing", because
+        # they fail the same way. A metadata scrub that cannot run must stop
+        # the write, not pass the document through untouched.
+        raise BatchError(
+            "Cannot scrub the .docx metadata: lxml is unavailable "
+            f"({exc}). Refusing to write, because document properties such as "
+            "the author name would ride out unredacted."
+        ) from exc
 
     output = io.BytesIO()
     with zipfile.ZipFile(io.BytesIO(data)) as source:
@@ -484,8 +493,15 @@ def _document_property_text(data: bytes) -> str:
     """
     try:
         from lxml import etree
-    except Exception:  # noqa: BLE001 -- never block a write on the probe
-        return ""
+    except Exception as exc:  # noqa: BLE001
+        # "" means "swept, found nothing". Without lxml this function cannot
+        # look at all, and reporting a clean sweep it never performed is how a
+        # header, a document property or a tracked-change deletion rides out.
+        raise BatchError(
+            "Cannot sweep the .docx internals: lxml is unavailable "
+            f"({exc}). Refusing to write rather than report a sweep that did "
+            "not run."
+        ) from exc
 
     lines: list[str] = []
     try:
@@ -536,8 +552,15 @@ def _revision_and_note_text(data: bytes) -> str:
     """
     try:
         from lxml import etree
-    except Exception:  # noqa: BLE001 -- never block a write on the probe
-        return ""
+    except Exception as exc:  # noqa: BLE001
+        # "" means "swept, found nothing". Without lxml this function cannot
+        # look at all, and reporting a clean sweep it never performed is how a
+        # header, a document property or a tracked-change deletion rides out.
+        raise BatchError(
+            "Cannot sweep the .docx internals: lxml is unavailable "
+            f"({exc}). Refusing to write rather than report a sweep that did "
+            "not run."
+        ) from exc
 
     found: list[str] = []
     try:

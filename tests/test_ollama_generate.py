@@ -85,10 +85,12 @@ def test_non_streaming(wired):
         ollama_client.generate("llama3.1:8b", "system", "prompt", stream=False)
     ) == ["hello"]
 
+    # An empty response used to yield [] here. That reads downstream as a
+    # finished-but-empty draft: app.py banked it as the generated note and
+    # showed no error. An empty generation is a failure, so it now raises.
     wired.response = FakeResponse(body=json.dumps({"response": ""}).encode())
-    assert list(
-        ollama_client.generate("llama3.1:8b", "system", "prompt", stream=False)
-    ) == []
+    with pytest.raises(ollama_client.OllamaError, match="no output"):
+        list(ollama_client.generate("llama3.1:8b", "system", "prompt", stream=False))
 
 
 def test_streaming_happy_path(wired):

@@ -26,6 +26,10 @@ class _Response(io.BytesIO):
 
 
 def _patch(monkeypatch, payload: dict):
+    # generate() preflights the daemon and the model list before it ever issues
+    # the request, so both have to be stubbed to reach the response handling.
+    monkeypatch.setattr(ollama_client, "is_up", lambda *a, **k: True)
+    monkeypatch.setattr(ollama_client, "list_models", lambda *a, **k: ["m"])
     monkeypatch.setattr(
         ollama_client,
         "_request",
