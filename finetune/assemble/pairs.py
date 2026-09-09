@@ -133,6 +133,52 @@ def stratified_split(
     return out
 
 
+def split_by_vignette(
+    pairs: Sequence[Pair],
+    *,
+    dev_frac: float = 0.1,
+    test_frac: float = 0.1,
+    seed: int = 0,
+) -> dict[str, list[Pair]]:
+    """Split so that no vignette skeleton appears in more than one split.
+
+    Row-level splitting cannot answer "does this generalise" when a handful of
+    skeletons each produce hundreds of rows: the test rows are re-renderings of
+    stories the model trained on. The unit of holdout is therefore the vignette.
+
+    Raises ValueError when there are too few vignettes for an honest holdout —
+    an empty test split that reads as a pass is the failure this guards against.
+    """
+    import random
+
+    by_vignette: dict[str, list[Pair]] = {}
+    for p in pairs:
+        vid = str(p.meta.get("vignette_id", ""))
+        if not vid:
+            raise ValueError("pair has no vignette_id; rebuild the dataset")
+        by_vignette.setdefault(vid, []).append(p)
+
+    ids = sorted(by_vignette)
+    n_test = max(1, round(len(ids) * test_frac))
+    n_dev = max(1, round(len(ids) * dev_frac))
+    if len(ids) < n_test + n_dev + 1:
+        raise ValueError(
+            f"{len(ids)} vignettes cannot yield a disjoint train/dev/test split "
+            f"(need at least {n_test + n_dev + 1}); author more vignettes"
+        )
+
+    random.Random(seed).shuffle(ids)
+    assign = {
+        "test": ids[:n_test],
+        "dev": ids[n_test : n_test + n_dev],
+        "train": ids[n_test + n_dev :],
+    }
+    return {
+        name: [p for vid in sorted(group) for p in by_vignette[vid]]
+        for name, group in assign.items()
+    }
+
+
 def write_jsonl(pairs: Iterable[Pair], path: str | Path) -> int:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -148,6 +194,7 @@ __all__ = [
     "Pair",
     "make_pair",
     "make_template_pair",
+    "split_by_vignette",
     "stratified_split",
     "write_jsonl",
 ]
