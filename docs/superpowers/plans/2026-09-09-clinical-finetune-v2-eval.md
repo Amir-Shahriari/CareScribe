@@ -40,7 +40,7 @@ Nothing can be held out by vignette until the vignette is recorded. `Vignette.id
 **Files:**
 - Modify: `finetune/datagen/schema.py` (add field to `EncounterFacts`, ~line 150)
 - Modify: `finetune/datagen/sampler.py:36-85` (`expand`)
-- Modify: `finetune/assemble/validators.py:96` (exclude from the supported blob)
+- Modify: `finetune/assemble/validators.py` (`_numbers_in_facts`, exclude the id)
 - Modify: `finetune/assemble/pairs.py:33-88` (`make_pair`, `make_template_pair`)
 - Test: `finetune/tests/test_vignette_id.py`
 
@@ -74,18 +74,21 @@ def test_pair_meta_carries_the_vignette_id():
     assert pair.meta["vignette_id"] == VIGNETTES[0].id
 
 
-def test_vignette_id_is_not_treated_as_a_supported_clinical_fact():
-    """The id is bookkeeping. It must not widen the faithfulness blob."""
-    from finetune.assemble.validators import _supported_blob
+def test_digits_in_the_vignette_id_are_not_supported_numbers():
+    """The id is bookkeeping. A skeleton named cardio_hf_02 must not make
+    "02" a number the draft is allowed to state."""
+    from finetune.assemble.validators import _numbers_in_facts
 
-    facts = expand(VIGNETTES[0], random.Random(0))
-    assert facts.vignette_id.lower() not in _supported_blob(facts).lower()
+    facts = expand(VIGNETTES[0], random.Random(0)).model_copy(
+        update={"vignette_id": "cardio_hf_0299"}
+    )
+    assert "0299" not in _numbers_in_facts(facts)
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `python -m pytest finetune/tests/test_vignette_id.py -v`
-Expected: FAIL — `AttributeError: 'EncounterFacts' object has no attribute 'vignette_id'` (and `ImportError` for `_supported_blob` if it is currently inlined; if so, extract it in Step 3).
+Expected: FAIL — `AttributeError: 'EncounterFacts' object has no attribute 'vignette_id'`.
 
 - [ ] **Step 3: Implement**
 
@@ -104,19 +107,18 @@ In `finetune/datagen/sampler.py`, inside `expand()`, add to the `fields` dict:
         vignette_id=vignette.id,
 ```
 
-In `finetune/assemble/validators.py`, replace line 96 with a named helper so the exclusion is testable:
+In `finetune/assemble/validators.py`, exclude the id from the supported-numbers
+set. The function there is `_numbers_in_facts` (it collects numbers, not a
+general text blob — an earlier draft of this plan called it `_supported_blob`,
+which does not exist):
 
 ```python
-def _supported_blob(facts) -> str:
-    """Every string the facts support, as one blob for substring checks.
-
-    ``vignette_id`` is bookkeeping, not a clinical claim, so it is excluded —
-    leaving it in would let a draft "support" itself by quoting the skeleton name.
-    """
-    return " ".join(_flatten_strings(facts.model_dump(exclude={"vignette_id"})))
+def _numbers_in_facts(facts: EncounterFacts) -> set[str]:
+    # vignette_id is bookkeeping, not a clinical fact. A skeleton named
+    # "cardio_hf_02" would otherwise make "02" a number the draft may state.
+    blob = " ".join(_flatten_strings(facts.model_dump(exclude={"vignette_id"})))
+    return set(_NUM_RE.findall(blob))
 ```
-
-and change the original call site to `blob = _supported_blob(facts)`.
 
 In `finetune/assemble/pairs.py`, add to the `meta=` dict of **both** `make_pair` and `make_template_pair`:
 
@@ -1223,9 +1225,9 @@ Add this helper to `EvalItem` in `run_eval.py` so a completer can be called dire
 
 - [ ] **Step 3: Run the honest evaluation**
 
-Run:
+Run (entry point is `finetune.eval`; `finetune.eval.run_eval` had no `__main__` guard and exited 0 having done nothing -- a guard has since been added, but this is the documented entry point):
 ```bash
-python -m finetune.eval.run_eval \
+python -m finetune.eval \
   --base-gguf finetune/runs/base-gguf/Phi-3.5-mini-instruct-Q4_K_M.gguf \
   --tuned-gguf models/carescribe-clinical-phi35-v1.Q4_K_M.gguf \
   --test-jsonl finetune/data/full_v2/test.jsonl \

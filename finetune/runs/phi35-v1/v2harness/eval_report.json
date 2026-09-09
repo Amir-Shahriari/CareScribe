@@ -1,0 +1,60 @@
+{
+  "base": {
+    "median_seconds": 14.578000000008615,
+    "metrics": {
+      "faithfulness": 0.72,
+      "format": 0.32,
+      "n": 50,
+      "placeholder_integrity": 1.0,
+      "residual_clean": 0.98
+    }
+  },
+  "confabulation": {
+    "base": 1.0,
+    "n": 20,
+    "tuned": 0.0
+  },
+  "overlap": {
+    "median": 0.1885,
+    "n": 50,
+    "n_above_0_6": 0,
+    "p95": 0.5517
+  },
+  "ship": true,
+  "tuned": {
+    "median_seconds": 8.937999999994645,
+    "metrics": {
+      "faithfulness": 0.96,
+      "format": 0.8,
+      "n": 50,
+      "placeholder_integrity": 1.0,
+      "residual_clean": 1.0
+    }
+  },
+  "verdict": {
+    "base": {
+      "faithfulness": 0.72,
+      "format": 0.32,
+      "n": 50,
+      "placeholder_integrity": 1.0,
+      "residual_clean": 0.98
+    },
+    "deltas": {
+      "faithfulness": 0.24,
+      "format": 0.48,
+      "placeholder_integrity": 0.0,
+      "residual_clean": 0.02
+    },
+    "latency_ok": true,
+    "latency_ratio": 0.613,
+    "regressions": [],
+    "ship": true,
+    "tuned": {
+      "faithfulness": 0.96,
+      "format": 0.8,
+      "n": 50,
+      "placeholder_integrity": 1.0,
+      "residual_clean": 1.0
+    }
+  }
+}
