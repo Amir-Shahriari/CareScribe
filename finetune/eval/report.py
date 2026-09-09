@@ -30,6 +30,8 @@ def build_report(
     *,
     base_name: str = "base",
     tuned_name: str = "tuned",
+    overlap: dict | None = None,
+    confabulation: dict | None = None,
 ) -> tuple[str, dict]:
     verdict = compare(base, tuned)
     ship = verdict["ship"]
@@ -56,8 +58,36 @@ def build_report(
         "regression set, and latency ratio ≤ 1.15."
     )
 
+    if confabulation is not None:
+        lines += ["", "## Confabulation (adversarial gap probes)", ""]
+        for name, rate in ((base_name, confabulation.get("base")),
+                           (tuned_name, confabulation.get("tuned"))):
+            shown = "not computable" if rate is None else f"{rate:.3f}"
+            lines.append(f"- {name}: {shown}")
+        lines += [
+            "",
+            "Fraction of probes where the model stated content under a heading "
+            "the source leaves undocumented. Lower is better.",
+        ]
+
+    if overlap is not None:
+        lines += ["", "## Train/test overlap", ""]
+        if overlap.get("median") is None:
+            lines.append("Not computable (no training targets supplied).")
+        else:
+            lines += [
+                f"- median nearest-train similarity: {overlap['median']:.3f}",
+                f"- p95: {overlap['p95']:.3f}",
+                f"- test targets above 0.6: {overlap['n_above_0_6']} of {overlap['n']}",
+                "",
+                "High overlap voids the scores above: a near-copy of a training "
+                "target measures recall of the corpus, not capability.",
+            ]
+
     payload = {
         "ship": ship,
+        "overlap": overlap,
+        "confabulation": confabulation,
         "verdict": verdict,
         "base": {"metrics": base.metrics, "median_seconds": base.median_seconds},
         "tuned": {"metrics": tuned.metrics, "median_seconds": tuned.median_seconds},
