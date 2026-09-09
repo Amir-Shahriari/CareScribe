@@ -81,3 +81,8 @@ CareScribe.ico
 # Subagent-driven-development scratch workspace (ledgers, briefs, review
 # packages) — the git history is the durable record, not this directory.
 .superpowers/
+
+# coverage artefacts
+.coverage
+.coverage.*
+htmlcov/

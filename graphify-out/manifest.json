@@ -5,7 +5,7 @@
     "semantic_hash": "533e72a4166008742fe4d6516435cf00"
   },
   "carescribe/app.py": {
-    "mtime": 1788779156.1945434,
+    "mtime": 1788783558.7201953,
     "ast_hash": "bfc34767b40d50f8bc711379afd5139c",
     "semantic_hash": ""
   },
@@ -15,8 +15,8 @@
     "semantic_hash": "636336c3fa332fba5764f7906032f96b"
   },
   "carescribe/core/batch.py": {
-    "mtime": 1788453081.0799398,
-    "ast_hash": "d646eca5c13d448f17d09e9624d4a4a7",
+    "mtime": 1788854909.1247551,
+    "ast_hash": "8ff585fe307fc88a75d7a7d053261f95",
     "semantic_hash": ""
   },
   "carescribe/core/carenotes.py": {
@@ -25,13 +25,13 @@
     "semantic_hash": ""
   },
   "carescribe/core/deidentify.py": {
-    "mtime": 1788470880.4291856,
-    "ast_hash": "a4c6982635a6d019f59b81e4e08d7a08",
+    "mtime": 1788853337.9266846,
+    "ast_hash": "2f1b9480a4c04961a88ee483eadefe82",
     "semantic_hash": ""
   },
   "carescribe/core/ingest.py": {
-    "mtime": 1788376005.5472574,
-    "ast_hash": "07b0e954992a2a8fdcaa5487bfbc6fdb",
+    "mtime": 1788853253.918629,
+    "ast_hash": "ff555cfa9af63d7603b36b4136b2a675",
     "semantic_hash": ""
   },
   "carescribe/core/mapping.py": {
@@ -65,7 +65,7 @@
     "semantic_hash": "e3924f6e31383ae67aa383e3618f9298"
   },
   "tests/conftest.py": {
-    "mtime": 1788780471.2198603,
+    "mtime": 1788783558.736341,
     "ast_hash": "16db0aeb9dd59f9c6f47c2d3df81aa7d",
     "semantic_hash": ""
   },
@@ -80,7 +80,7 @@
     "semantic_hash": "b17fc9d83133ecd962fc1ae3d53c0115"
   },
   "tests/test_app.py": {
-    "mtime": 1788778246.7916353,
+    "mtime": 1788783558.736341,
     "ast_hash": "b7fff0f2c69f5221dd1a1b7b8d176fd9",
     "semantic_hash": ""
   },
@@ -105,7 +105,7 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1788779835.7741985,
+    "mtime": 1788783558.7196925,
     "ast_hash": "9e297bee582477efb564f3ed0e557fc0",
     "semantic_hash": ""
   },
@@ -275,7 +275,7 @@
     "semantic_hash": ""
   },
   "carescribe/core/desktop.py": {
-    "mtime": 1788778559.294219,
+    "mtime": 1788783558.7201953,
     "ast_hash": "948acfed0b2b9b0dc2f2f0d945b29f5e",
     "semantic_hash": ""
   },
@@ -320,7 +320,7 @@
     "semantic_hash": "3546f712b49ef3500e516a4891c5f6e6"
   },
   "run_app.py": {
-    "mtime": 1788778532.5565782,
+    "mtime": 1788783558.736341,
     "ast_hash": "88db1eac4bcb482198977281433fa898",
     "semantic_hash": ""
   },
@@ -555,7 +555,7 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1788778492.4895768,
+    "mtime": 1788783558.7176654,
     "ast_hash": "edb826f5afb67d4c101012ce37fdba82",
     "semantic_hash": ""
   },
@@ -590,7 +590,7 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1788779216.327588,
+    "mtime": 1788783558.7191763,
     "ast_hash": "46f3e7f1552666002e7727a84c975026",
     "semantic_hash": ""
   },
@@ -925,7 +925,7 @@
     "semantic_hash": ""
   },
   "tests/test_app_screens.py": {
-    "mtime": 1788778246.785058,
+    "mtime": 1788783558.7378516,
     "ast_hash": "1821d10c858ffa09984f4f38223fc6e0",
     "semantic_hash": ""
   },
@@ -960,7 +960,7 @@
     "semantic_hash": ""
   },
   "tests/test_settings_panel_screen.py": {
-    "mtime": 1788778246.785058,
+    "mtime": 1788783558.7393599,
     "ast_hash": "647eed24ef349940a9a3f25b2dbe483a",
     "semantic_hash": ""
   },
@@ -1110,7 +1110,7 @@
     "semantic_hash": ""
   },
   "carescribe/core/patients.py": {
-    "mtime": 1788776232.6824546,
+    "mtime": 1788783558.7201953,
     "ast_hash": "5fd5b22bcf4e7b825a8fe0f4a9804a97",
     "semantic_hash": ""
   },
@@ -1130,48 +1130,98 @@
     "semantic_hash": ""
   },
   "carescribe/core/users.py": {
-    "mtime": 1788777798.6436474,
+    "mtime": 1788783558.7217052,
     "ast_hash": "43661994b3cd2bcc70cbf183c21a4778",
     "semantic_hash": ""
   },
   "carescribe/ui/auth.py": {
-    "mtime": 1788780471.2203665,
+    "mtime": 1788783558.7217052,
     "ast_hash": "abc14734815a1592e4fcd0e7f5671ec8",
     "semantic_hash": ""
   },
   "carescribe/ui/patient_browser.py": {
-    "mtime": 1788777840.7063735,
-    "ast_hash": "2113e2c30173347ddd3fb1b8c62140ef",
+    "mtime": 1788783558.7217052,
+    "ast_hash": "358bb32dbed97f6d6e33c892bc8a47f9",
     "semantic_hash": ""
   },
   "tests/test_auth_forms.py": {
-    "mtime": 1788778437.5067594,
-    "ast_hash": "713f8cbf3b8f4ba11cc6bdfd8b90560d",
+    "mtime": 1788783558.7378516,
+    "ast_hash": "ed91e8719e54b44587883d5ed667e4f1",
     "semantic_hash": ""
   },
   "tests/test_auth_gate.py": {
-    "mtime": 1788778413.655409,
+    "mtime": 1788783558.7378516,
     "ast_hash": "55bf1c91f539ded66f0515d21bf9103d",
     "semantic_hash": ""
   },
   "tests/test_full_pipeline_accounts.py": {
-    "mtime": 1788781865.622377,
+    "mtime": 1788783558.7378516,
     "ast_hash": "98f169f25ca62356993a395171e58637",
     "semantic_hash": ""
   },
   "tests/test_patient_browser.py": {
-    "mtime": 1788778159.8116872,
-    "ast_hash": "5471e4d26dcdb028688a07ab3715c700",
+    "mtime": 1788783558.7378516,
+    "ast_hash": "258ae8637e4734ce4d88f91e47c2ef89",
     "semantic_hash": ""
   },
   "tests/test_patient_scoping.py": {
-    "mtime": 1788776269.4721856,
-    "ast_hash": "3ad2dcbcaf0c6d5b67e825dba66885b3",
+    "mtime": 1788783558.7393599,
+    "ast_hash": "df6329dcbd56978dd967bcc42b2c50a9",
     "semantic_hash": ""
   },
   "tests/test_users.py": {
-    "mtime": 1788777762.4342384,
-    "ast_hash": "00cfc267df2839ba9f4a698fea717abb",
+    "mtime": 1788783558.739876,
+    "ast_hash": "c6323d1474f25092534d69f01af2aafc",
+    "semantic_hash": ""
+  },
+  "tests/test_dob_facility_mislabel.py": {
+    "mtime": 1788849455.0207827,
+    "ast_hash": "b4fa91eb6f2a695bc10eb79948119b2a",
+    "semantic_hash": ""
+  },
+  "tests/test_iso_date_formats.py": {
+    "mtime": 1788849190.1745358,
+    "ast_hash": "cb41cef76433e2b857cfde053e247047",
+    "semantic_hash": ""
+  },
+  "tests/test_applog_edge_cases.py": {
+    "mtime": 1788851233.0770142,
+    "ast_hash": "d2fbaa8979cb4f68c847f19a6ef6276e",
+    "semantic_hash": ""
+  },
+  "tests/test_docx_letterhead_leak.py": {
+    "mtime": 1788853626.8417816,
+    "ast_hash": "5638e78f23678bd639c05a88686678af",
+    "semantic_hash": ""
+  },
+  "tests/test_write_guard_acknowledged.py": {
+    "mtime": 1788851735.3375554,
+    "ast_hash": "822dbee72f280b9c60a00b0151cc2fed",
+    "semantic_hash": ""
+  },
+  "tests/test_docx_metadata_leak.py": {
+    "mtime": 1788854495.9788296,
+    "ast_hash": "15edb6024d4d8f3df5d947573e7ab3fc",
+    "semantic_hash": ""
+  },
+  "tests/test_ollama_client_pin.py": {
+    "mtime": 1788853836.4319954,
+    "ast_hash": "b309c81758b560d1b53d312c3fa7ccc1",
+    "semantic_hash": ""
+  },
+  "tests/test_ollama_default_model.py": {
+    "mtime": 1788853836.5095754,
+    "ast_hash": "8146fb696c40de2294c78d2ef44260b2",
+    "semantic_hash": ""
+  },
+  "tests/test_docx_revision_leak.py": {
+    "mtime": 1788855153.0110478,
+    "ast_hash": "97a6c246a706069457b40abc18ec26db",
+    "semantic_hash": ""
+  },
+  "tests/test_ingest_read_and_encodings.py": {
+    "mtime": 1788854725.3729444,
+    "ast_hash": "d8ef7b83834f00ecebe13efc0779717a",
     "semantic_hash": ""
   }
 }
