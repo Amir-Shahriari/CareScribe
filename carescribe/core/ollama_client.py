@@ -177,9 +177,18 @@ def generate(
     with response:
         if not stream:
             body = json.loads(response.read().decode("utf-8"))
+            if body.get("error"):
+                raise OllamaError(str(body["error"]))
             text = str(body.get("response", ""))
-            if text:
-                yield text
+            if not text:
+                # Yielding nothing here reads downstream as a successful but
+                # empty draft. An empty generation is a failure, and saying so
+                # is the only way the caller can tell the difference.
+                raise OllamaError(
+                    "The model returned no output. It may have run out of "
+                    "context, or the model may have stopped immediately."
+                )
+            yield text
             return
 
         for raw_line in response:
