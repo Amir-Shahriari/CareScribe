@@ -53,9 +53,15 @@ def build_manifest(
         (p.meta["form_type"], p.meta["specialty"], p.meta["styled"])
         for p in all_pairs
     )
+    split_vignettes = {
+        name: sorted({str(p.meta.get("vignette_id", "")) for p in group})
+        for name, group in splits.items()
+    }
     return {
         "content_sha256": content_hash(all_pairs),
         "counts": {name: len(group) for name, group in splits.items()},
+        "split_mode": "vignette_disjoint",
+        "split_vignettes": split_vignettes,
         "total": len(all_pairs),
         "strata": {" / ".join(map(str, k)): n for k, n in sorted(strata.items())},
         "generator_backend": generator_backend,
