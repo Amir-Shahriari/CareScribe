@@ -102,6 +102,39 @@ class Document:
     error: str = ""
 
 
+def document_from_deidentified(name: str, redacted_text: str) -> Document:
+    """A :class:`Document` standing for text de-identified in an earlier session.
+
+    This is how a *filed* patient document re-enters the pipeline. It is already
+    de-identified, so drafting from it is safe and needs no re-detection.
+
+    What it deliberately does NOT carry:
+
+    * ``raw_text`` is blank — the original was never written to disk, and
+      inventing a stand-in would put un-reviewed text where the reviewer expects
+      the source.
+    * ``phi_map`` is empty — the identity map lives only in the session that
+      produced it. Nothing can resolve this document's placeholders back to real
+      values, so re-identification stays disabled (the button is already gated
+      on ``phi_map``). A draft from here keeps ``[PATIENT]`` and ``[DATE_2]``,
+      which is the honest outcome rather than a silent half-substitution.
+
+    ``approved`` and ``attested`` are True because the text was approved by a
+    reviewer before it was ever filed; ``analyzed`` is True so the review step
+    does not offer to re-detect identifiers in text that has none left.
+    """
+    return Document(
+        name=name,
+        raw_text="",
+        redacted_text=redacted_text,
+        analyzed=True,
+        attested=True,
+        approved=True,
+        phi_map={},
+        entities=[],
+    )
+
+
 def safe_stem(name: str) -> str:
     """Reduce a filename to a safe output stem — no paths, no surprises."""
     stem = Path(str(name or "document")).stem.strip() or "document"

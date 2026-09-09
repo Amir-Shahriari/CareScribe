@@ -318,6 +318,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--train-jsonl", default="",
                     help="training split, for the train/test overlap report "
                          "(defaults to test-jsonl's sibling train.jsonl)")
+    ap.add_argument("--limit", type=int, default=0,
+                    help="evaluate only the first N held-out items (0 = all); "
+                         "the split is vignette-disjoint either way")
     ap.add_argument("--gap-probes", type=int, default=40,
                     help="adversarial 'Not documented.' probes; 0 disables")
     ap.add_argument("--resample", action="store_true",
@@ -331,6 +334,8 @@ def main(argv: list[str] | None = None) -> int:
         items = make_eval_set(args.n, seed=args.seed)
     else:
         items = load_eval_items(args.test_jsonl)
+        if args.limit:
+            items = items[: args.limit]
     base = GgufCompleter(args.base_gguf)
     tuned = GgufCompleter(args.tuned_gguf)
 
@@ -372,3 +377,7 @@ __all__ = [
     "make_eval_set",
     "run",
 ]
+
+
+if __name__ == "__main__":  # pragma: no cover - parity with build_dataset
+    raise SystemExit(main())

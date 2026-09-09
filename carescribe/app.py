@@ -2174,7 +2174,7 @@ def render_filed_documents(patient_id: str) -> None:
     out_dir = patients.patient_output_dir(patient_id)
     with st.expander(f"Filed documents ({len(filed)})", expanded=False):
         for item in filed:
-            row = st.columns([5, 3, 2])
+            row = st.columns([4, 3, 2, 2])
             row[0].markdown(f"`{item.name}`")
             row[1].caption(f"{_FILED_KIND_LABEL.get(item.kind, item.kind)} · {item.modified_at}")
             try:
@@ -2189,10 +2189,46 @@ def render_filed_documents(patient_id: str) -> None:
                 mime=_FILED_KIND_MIME.get(item.kind, "application/octet-stream"),
                 key=f"filed_dl_{patient_id}_{item.name}",
             )
+            if item.kind == "text":
+                if row[3].button(
+                    "Draft from this",
+                    key=f"filed_use_{patient_id}_{item.name}",
+                    help="Load this de-identified text as a document you can "
+                         "generate a note or form from.",
+                ):
+                    use_filed_document(patient_id, item.name)
         st.caption(
             "These are de-identified copies only. The original documents and the "
-            "identity map were never written here."
+            "identity map were never written here — so a draft made from one "
+            "keeps its placeholders and cannot be re-identified. To get a "
+            "re-identified document, upload the original again."
         )
+
+
+def use_filed_document(patient_id: str, name: str) -> None:
+    """Load a filed de-identified document back into the pipeline for drafting.
+
+    The text was approved before it was filed, so it re-enters already approved
+    and goes straight to the generation step. Its placeholders are permanent:
+    the identity map was never written to disk, so re-identification stays
+    disabled for it.
+    """
+    try:
+        text = (patients.patient_output_dir(patient_id) / name).read_text(
+            encoding="utf-8"
+        )
+    except OSError as exc:
+        st.error(f"Could not read `{name}`: {exc}")
+        return
+
+    if not text.strip():
+        st.error(f"`{name}` is empty — nothing to draft from.")
+        return
+
+    document = batch.document_from_deidentified(name, text)
+    documents()[document.name] = document
+    st.session_state.selected = document.name
+    st.rerun()
 
 
 def _document_bytes(patient_id: str, name: str) -> bytes | None:
