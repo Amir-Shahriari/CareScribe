@@ -38,6 +38,7 @@ def make_pair(
     *,
     style_exemplar: str | None = None,
     polished: bool = False,
+    known_placeholders: Sequence[str] = (),
 ) -> Pair:
     messages = build_messages(
         form, placeholdered_document, style_exemplar=style_exemplar
@@ -53,6 +54,9 @@ def make_pair(
             "polished": polished,
             "documented_gaps": list(facts.documented_gaps),
             "vignette_id": facts.vignette_id,
+            "document": placeholdered_document,
+            "known_placeholders": list(known_placeholders),
+            "facts": facts.model_dump(mode="json"),
         },
     )
 
@@ -62,6 +66,8 @@ def make_template_pair(
     form_spec,
     placeholdered_document: str,
     target: str,
+    *,
+    known_placeholders: Sequence[str] = (),
 ) -> Pair:
     """A pair for an uploaded clinic template — the system/user prompt is
     built by the real ``carescribe.core.clinical_forms.build_prompt`` so it
@@ -84,6 +90,9 @@ def make_template_pair(
             "form_id": form_spec.form_id,
             "documented_gaps": list(facts.documented_gaps),
             "vignette_id": facts.vignette_id,
+            "document": placeholdered_document,
+            "known_placeholders": list(known_placeholders),
+            "facts": facts.model_dump(mode="json"),
         },
     )
 
