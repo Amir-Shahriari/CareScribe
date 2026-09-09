@@ -25,7 +25,7 @@ from typing import Callable
 from finetune.assemble.build_target import build_target
 from finetune.assemble.deidentify_notes import deidentify_note, leaked_values
 from finetune.assemble.manifest import build_manifest, write_manifest
-from finetune.assemble.pairs import make_pair, stratified_split, write_jsonl
+from finetune.assemble.pairs import make_pair, split_by_vignette, write_jsonl
 from finetune.assemble.validators import validate
 from finetune.datagen.render_note import render
 from finetune.datagen.sampler import sample_encounters
@@ -157,9 +157,25 @@ def build(
             continue
 
         if as_template:
-            pairs.append(make_template_pair(facts, spec, deid.placeholdered_text, target))
+            pairs.append(
+                make_template_pair(
+                    facts,
+                    spec,
+                    deid.placeholdered_text,
+                    target,
+                    known_placeholders=deid.known_placeholders,
+                )
+            )
         else:
-            pairs.append(make_pair(facts, form, deid.placeholdered_text, target))
+            pairs.append(
+                make_pair(
+                    facts,
+                    form,
+                    deid.placeholdered_text,
+                    target,
+                    known_placeholders=deid.known_placeholders,
+                )
+            )
 
     return {"pairs": pairs, "kept": len(pairs), "dropped": dropped, "reasons": reasons}
 
@@ -194,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     result = build(n, seed=seed, gap_probability=gap)
-    splits = stratified_split(result["pairs"], seed=seed)
+    splits = split_by_vignette(result["pairs"], seed=seed)
     for name, group in splits.items():
         write_jsonl(group, args.out / f"{name}.jsonl")
     manifest = build_manifest(
