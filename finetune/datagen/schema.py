@@ -150,6 +150,10 @@ class EncounterFacts(_Base):
     follow_up: str | None = None
     documented_gaps: list[str] = []
 
+    # Bookkeeping, not clinical content: which vignette skeleton produced this
+    # encounter. Lets whole skeletons be held out of training.
+    vignette_id: str = ""
+
     # Fields a `documented_gaps` entry is allowed to name. `presenting_complaint`
     # is deliberately excluded — an encounter with no complaint is not a valid
     # sample.

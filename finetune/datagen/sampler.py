@@ -73,6 +73,7 @@ def expand(
         impression=list(resolve(vignette.impression, rng)),
         plan=plan,
         follow_up=resolve(vignette.follow_up, rng),
+        vignette_id=vignette.id,
     )
 
     gaps: list[str] = []
