@@ -15,7 +15,7 @@ v1 shipped `models/carescribe-clinical-phi35-v1.Q4_K_M.gguf` (Phi-3.5-mini-instr
 records **ship gate: PASS** with 1.000 on format, faithfulness, placeholder
 integrity and residual-clean, and 0.998 on style match.
 
-Those numbers do not mean what the report implies. Three defects in the v1 data
+Those numbers do not mean what the report implies. Four defects in the v1 data
 and evaluation pipeline were found on 2026-09-09, each verified against the
 committed artefacts:
 
@@ -42,6 +42,14 @@ directory was never created.** Every one of the 25 strata in
 `finetune/data/full/dataset_manifest.json` is `styled=False`. The reported
 0.998 is computed over a corpus in which style never varied.
 
+**D4 — the committed test split is never read.**
+`finetune/eval/run_eval.py::main` calls `make_eval_set(n, seed=1000)`, which
+re-samples the generator over the same ten vignettes; `test.jsonl` is not
+opened. The function's docstring describes it as "a held-out set built exactly
+like the training data (different seed)" — but a different seed over identical
+skeletons is not a holdout. Found 2026-09-09 while planning V1; fixed by the
+V1 plan's Task 4.
+
 Two lesser findings, both real:
 
 - **Gap coverage is thin.** 1,699 of 3,200 pairs (53%) have
@@ -54,7 +62,7 @@ Two lesser findings, both real:
   the format score.
 
 v2 fixes the measurement first, then the corpus, then adds the new capability.
-The order is forced: until D1–D3 are fixed, no change can be shown to help.
+The order is forced: until D1–D4 are fixed, no change can be shown to help.
 
 **New capability.** v2 adds a **multi-document patient roll-up**: condense every
 document belonging to one patient into a single "where this patient is now"
