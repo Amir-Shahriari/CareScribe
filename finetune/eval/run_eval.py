@@ -58,7 +58,12 @@ def make_eval_set(
     forms: tuple[FormType, ...] = _DEFAULT_FORMS,
     gap_probability: float = 0.25,
 ) -> list[EvalItem]:
-    """A held-out set built exactly like the training data (different seed)."""
+    """Build items by re-sampling the generator.
+
+    NOT a held-out set: a different seed re-draws the same vignette skeletons.
+    Use :func:`load_eval_items` against a vignette-disjoint split for any number
+    that will be reported. Kept for smoke tests and dry runs.
+    """
     from finetune.datagen.identifiers import inject
 
     items: list[EvalItem] = []
@@ -76,6 +81,42 @@ def make_eval_set(
         items.append(
             EvalItem(facts, form, deid.placeholdered_text, deid.known_placeholders, target)
         )
+    return items
+
+
+def load_eval_items(path) -> list[EvalItem]:
+    """Rebuild eval items from a committed split file.
+
+    Evaluation must read the split that training held out. Re-sampling the
+    generator with a different seed re-draws the same vignette skeletons, which
+    measures memorisation and reports it as generalisation.
+    """
+    import json
+    from pathlib import Path as _Path
+
+    items: list[EvalItem] = []
+    with _Path(path).open(encoding="utf-8") as fh:
+        for lineno, line in enumerate(fh, 1):
+            line = line.strip()
+            if not line:
+                continue
+            payload = json.loads(line)
+            meta = payload.get("meta", {})
+            for key in ("document", "facts", "known_placeholders"):
+                if key not in meta:
+                    raise ValueError(
+                        f"{path}:{lineno} has no {key!r} in meta — this file "
+                        f"predates the v2 pair format; rebuild the dataset"
+                    )
+            items.append(
+                EvalItem(
+                    facts=EncounterFacts(**meta["facts"]),
+                    form=FormType(meta["form_type"]),
+                    document=meta["document"],
+                    known_placeholders=list(meta["known_placeholders"]),
+                    target=payload["messages"][-1]["content"],
+                )
+            )
     return items
 
 
@@ -254,6 +295,7 @@ __all__ = [
     "HFCompleter",
     "LATENCY_CEILING",
     "RunResult",
+    "load_eval_items",
     "compare",
     "main",
     "make_eval_set",
