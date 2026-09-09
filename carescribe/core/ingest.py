@@ -160,8 +160,34 @@ def _extract_docx(data: bytes) -> str:
         raise IngestError(f"Could not read the DOCX file: {exc}") from exc
 
 
+def _looks_binary(data: bytes) -> bool:
+    """True when these bytes are not plausibly a text document.
+
+    ``cp1252`` and ``latin-1`` map almost every byte to some character, so
+    without this a renamed .docx or .pdf decodes "successfully" into mojibake
+    and is accepted as the document's clinical text. Two cheap signals: a NUL
+    byte never appears in real text, and a high proportion of control
+    characters means whatever this is, it is not prose.
+    """
+    if not data:
+        return False
+    sample = data[:8192]
+    if b"\x00" in sample:
+        return True
+    control = sum(
+        1 for byte in sample if byte < 0x09 or 0x0E <= byte < 0x20 or byte == 0x7F
+    )
+    return control / len(sample) > 0.05
+
+
 def _extract_txt(data: bytes) -> str:
     """Plain text, trying the encodings clinical exports actually use."""
+    if _looks_binary(data):
+        raise IngestError(
+            "This file is not plain text — it looks like a binary document "
+            "that has been renamed. Export it as .txt, or upload the original "
+            ".docx or .pdf instead."
+        )
     for encoding in ("utf-8", "utf-8-sig", "cp1252", "latin-1"):
         try:
             return data.decode(encoding).strip()
