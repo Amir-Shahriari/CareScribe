@@ -82,4 +82,84 @@ VIGNETTES = [
         follow_up="4 weeks with home readings",
         gappable=("investigations", "history"),
     ),
+    Vignette(
+        id="gp_back_pain_new",
+        specialty="general practice",
+        encounter_type=EncounterType.NEW,
+        weight=1.2,
+        demographics={
+            "age_band": Choice(["30-39", "40-49", "50-59"]),
+            "sex": Choice(["M", "F"]),
+            "occupation": Choice(["warehouse operative", "nurse", "driver", "office worker"]),
+        },
+        presenting_complaint=Choice(
+            [
+                "4 days of lower back pain after lifting at work, no leg symptoms",
+                "2 weeks of aching lumbar pain, worse on standing, easing when sitting",
+            ]
+        ),
+        history=[
+            {"label": "onset", "detail": Choice(["lifting a heavy box", "no clear trigger", "a long drive"])},
+            {"label": "red flags", "detail": "no bladder or bowel disturbance, no saddle anaesthesia, no night pain"},
+            {"label": "function", "detail": Choice(["still working with difficulty", "off work since onset"])},
+        ],
+        pmh=Subset(["previous back strain", "obesity", "hypertension"], 0, 2),
+        meds=[med("paracetamol", "1g", "QDS PRN")],
+        allergies=Subset(["ibuprofen"], 0, 1),
+        examination=[
+            {"system": "musculoskeletal", "finding": "lumbar movement", "value": "restricted flexion, paraspinal tenderness"},
+            {"system": "neurological", "finding": "straight leg raise", "value": "negative bilaterally"},
+            {"system": "neurological", "finding": "power and sensation", "value": "normal in both legs"},
+        ],
+        investigations=[],
+        impression=["mechanical lower back pain, no red flags"],
+        plan=[
+            {"action": "analgesia", "detail": "regular paracetamol, topical NSAID if tolerated"},
+            {"action": "activity advice", "detail": "keep moving, avoid bed rest"},
+            {"action": "safety-net", "detail": "return urgently if bladder or bowel symptoms or leg weakness"},
+        ],
+        follow_up=Choice([None, "2 weeks if not improving"]),
+        gappable=("allergies", "investigations", "follow_up"),
+    ),
+    Vignette(
+        id="gp_t2dm_review",
+        specialty="general practice",
+        encounter_type=EncounterType.FOLLOW_UP,
+        weight=1.1,
+        demographics={
+            "age_band": Choice(["50-59", "60-69", "70-79"]),
+            "sex": Choice(["M", "F"]),
+            "occupation": Choice(["retired", "shop manager", "cleaner"]),
+        },
+        presenting_complaint="annual type 2 diabetes review, no new symptoms",
+        history=[
+            {"label": "adherence", "detail": Choice(["takes metformin as prescribed", "occasional missed doses"])},
+            {"label": "hypoglycaemia", "detail": "no hypoglycaemic episodes reported"},
+            {"label": "lifestyle", "detail": Choice(["diet unchanged", "has reduced sugary drinks", "walks daily"])},
+        ],
+        pmh=["type 2 diabetes", Choice(["hypertension", "hypercholesterolaemia"])],
+        meds=[
+            med("metformin", Choice(["500mg", "1g"]), "BD"),
+            med("atorvastatin", Choice(["20mg", "40mg"]), "ON"),
+        ],
+        allergies=[],
+        examination=[
+            {"system": "obs", "finding": "BMI", "value": Range(26, 34, "kg/m2")},
+            {"system": "cardiovascular", "finding": "clinic BP", "value": Range(124, 148, "mmHg systolic")},
+            {"system": "peripheral", "finding": "foot check", "value": "pulses present, monofilament sensation intact"},
+        ],
+        investigations=[
+            {"test": "HbA1c", "value": Range(48, 72, "mmol/mol"), "flag": None},
+            {"test": "eGFR", "value": Range(62, 92, "mL/min/1.73m2"), "flag": None},
+            {"test": "urine ACR", "value": "not elevated", "flag": None},
+        ],
+        impression=["type 2 diabetes, suboptimal glycaemic control"],
+        plan=[
+            {"action": "reinforce lifestyle measures", "detail": "diet and activity advice given"},
+            {"action": "continue metformin", "detail": "no dose change today"},
+            {"action": "retinal screening", "detail": "confirm invitation attended"},
+        ],
+        follow_up="6 months",
+        gappable=("investigations", "history", "follow_up"),
+    ),
 ]
