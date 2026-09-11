@@ -101,6 +101,7 @@ def build(
     gap_probability: float = 0.25,
     template_fraction: float = 0.25,
     inject_fn: InjectFn | None = None,
+    specialty_weights: dict[str, float] | None = None,
 ) -> dict:
     """Return ``{"pairs": [...], "kept": k, "dropped": d, "reasons": {...}}``.
 
@@ -118,7 +119,10 @@ def build(
     note_i = 0  # rotates the built-in note types independently of the template slot
 
     for i, facts in enumerate(
-        sample_encounters(n, seed=seed, gap_probability=gap_probability)
+        sample_encounters(
+            n, seed=seed, gap_probability=gap_probability,
+            specialty_weights=specialty_weights,
+        )
     ):
         note = render(facts, seed=seed + i)
         identified, values = inject(note, seed + i)
@@ -208,8 +212,17 @@ def main(argv: list[str] | None = None) -> int:
     gap = args.gap_probability if args.gap_probability is not None else float(
         (cfg.get("quality", {}) or {}).get("gap_probability", 0.25)
     )
+    # Both of these were declared in datagen.yaml and read by nothing, so a
+    # rebalanced corpus silently came out exactly as before. `sample_encounters`
+    # has always taken `specialty_weights`; build_dataset just never passed it.
+    weights = cfg.get("specialty_weights") or None
+    forms = tuple(
+        FormType(name) for name in (cfg.get("form_types") or [])
+    ) or _DEFAULT_FORMS
 
-    result = build(n, seed=seed, gap_probability=gap)
+    result = build(
+        n, seed=seed, gap_probability=gap, forms=forms, specialty_weights=weights
+    )
     splits = split_by_vignette(result["pairs"], seed=seed)
     for name, group in splits.items():
         write_jsonl(group, args.out / f"{name}.jsonl")
