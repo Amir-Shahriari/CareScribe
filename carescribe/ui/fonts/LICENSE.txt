@@ -1,0 +1,11 @@
+IBM Plex is licensed under the SIL Open Font License, Version 1.1.
+
+Copyright (c) 2017 IBM Corp. https://github.com/IBM/plex
+
+These files are vendored deliberately. The app must make no network request at
+runtime, and the previous stylesheet pulled these faces from fonts.googleapis.com
+on every launch -- before sign-in, and while the app's own docstring said it made
+"no network calls of any kind". Fetching them at build time and shipping them is
+what makes that claim true while keeping the type identity DESIGN.md pins.
+
+Full licence text: https://openfontlicense.org

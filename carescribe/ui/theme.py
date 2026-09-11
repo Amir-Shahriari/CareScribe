@@ -26,15 +26,53 @@ the browser surfaces — is this file.
 
 from __future__ import annotations
 
+import base64
+from functools import lru_cache
+from pathlib import Path
+
 # One superfamily, purpose-built for technical / enterprise products: IBM Plex
 # Sans for the interface, IBM Plex Mono for identifiers, paths and model names.
 # Not Inter — the surface is an instrument, and the type system should read as
 # one designed object rather than the AI-interface default.
-FONT_IMPORT = (
-    "@import url('https://fonts.googleapis.com/css2?"
-    "family=IBM+Plex+Mono:wght@400;500&"
-    "family=IBM+Plex+Sans:wght@400;450;500;600;700&display=swap');"
-)
+FONTS_DIR = Path(__file__).resolve().parent / "fonts"
+
+# The faces used to arrive by `@import url(https://fonts.googleapis.com/...)`,
+# which fired on every launch -- before sign-in, on a machine whose whole promise
+# is that nothing leaves it, while app.py's own docstring said this stage "makes
+# no network calls of any kind". A CSS @import fails silently, so it degraded to
+# the fallback stack with nothing shown and nothing logged: a privacy claim that
+# was quietly false. The faces are now bundled (SIL OFL, see fonts/LICENSE.txt)
+# and inlined as data URIs, because Streamlit serves no static route this
+# stylesheet could point at. 80 KB, read once per process.
+#
+# Dropping to the platform sans would also have closed the hole, and would have
+# cost the type identity this system is built on; vendoring keeps both.
+
+
+@lru_cache(maxsize=1)
+def _font_face_css() -> str:
+    """`@font-face` rules for the bundled faces, as base64 data URIs."""
+    faces = [
+        # IBM Plex Sans ships as one variable face covering the whole range.
+        ("ibm-plex-sans-var.woff2", "IBM Plex Sans", "100 700", "normal"),
+        ("ibm-plex-mono-400.woff2", "IBM Plex Mono", "400", "normal"),
+        ("ibm-plex-mono-500.woff2", "IBM Plex Mono", "500", "normal"),
+    ]
+    rules = []
+    for filename, family, weight, style in faces:
+        path = FONTS_DIR / filename
+        if not path.exists():
+            continue
+        b64 = base64.b64encode(path.read_bytes()).decode("ascii")
+        rules.append(
+            f"@font-face{{font-family:'{family}';font-style:{style};"
+            f"font-weight:{weight};font-display:swap;"
+            f"src:url(data:font/woff2;base64,{b64}) format('woff2');}}"
+        )
+    return "".join(rules)
+
+
+FONT_IMPORT = _font_face_css()
 
 CSS = f"""
 <style>
@@ -52,6 +90,19 @@ CSS = f"""
   --cs-shadow:0 1px 2px rgba(16,24,40,.04), 0 10px 28px rgba(16,24,40,.06);
   --cs-shadow-sm:0 1px 2px rgba(16,24,40,.05), 0 4px 12px rgba(16,24,40,.05);
   --cs-ease:cubic-bezier(.22,1,.36,1);
+
+  /* Type and space were the one part of this system never tokenized: every
+     size was a magic literal repeated at its call site, which is how a scale
+     drifts. Named here so a change has one home. */
+  --cs-text-xs:.72rem; --cs-text-sm:.78rem; --cs-text-base:.9rem;
+  --cs-text-md:.95rem; --cs-text-lg:1rem; --cs-text-xl:1.16rem;
+  --cs-space-1:.35rem; --cs-space-2:.6rem; --cs-space-3:.9rem;
+  --cs-space-4:1.4rem; --cs-space-5:2.1rem; --cs-space-6:2.8rem;
+
+  /* Greys that were hardcoded at their call sites, and so would have survived
+     a palette change untouched. */
+  --cs-panel-alt:#f3f4f6; --cs-inset:var(--cs-inset); --cs-border-strong:var(--cs-border-strong);
+  --cs-scroll:#cbd0da; --cs-scroll-hover:#aab1bf;
 }}
 
 /* ---------- typography ---------- */
@@ -206,7 +257,7 @@ code, kbd, pre, [data-testid="stCode"] *, .stCode *,
 [data-testid="stCode"], pre, [data-testid="stCodeBlock"] {{
   border: 1px solid var(--cs-border) !important;
   border-radius: var(--cs-radius-sm) !important;
-  background: #fafbfd !important;
+  background: var(--cs-inset) !important;
 }}
 
 /* ---------- chips (status pills) ---------- */
@@ -343,7 +394,7 @@ code, kbd, pre, [data-testid="stCode"] *, .stCode *,
 
 /* ---------- tabs: a segmented pill ---------- */
 [data-baseweb="tab-list"] {{
-  background: #f3f4f6; border-radius: 10px; padding: 4px; gap: 4px;
+  background: var(--cs-panel-alt); border-radius: 10px; padding: 4px; gap: 4px;
   border-bottom: 0; display: inline-flex;
 }}
 [data-baseweb="tab"] {{
@@ -393,7 +444,7 @@ code, kbd, pre, [data-testid="stCode"] *, .stCode *,
 .cs-table .cs-mono {{ font-size: 0.8rem; color: var(--cs-ink-soft); overflow-wrap: anywhere; }}
 
 [data-testid="stFileUploaderDropzone"] {{
-  border: 1.5px dashed #cdd2dc; border-radius: 14px; background: #fafbfd;
+  border: 1.5px dashed var(--cs-border-strong); border-radius: 14px; background: var(--cs-inset);
   transition: border-color .16s var(--cs-ease), background .16s var(--cs-ease), color .16s var(--cs-ease);
 }}
 [data-testid="stFileUploaderDropzone"]:hover {{
@@ -405,10 +456,10 @@ code, kbd, pre, [data-testid="stCode"] *, .stCode *,
 
 /* ---------- browser surfaces ---------- */
 ::selection {{ background: rgba(79,70,229,.18); }}
-* {{ scrollbar-width: thin; scrollbar-color: #cbd0da transparent; }}
+* {{ scrollbar-width: thin; scrollbar-color: var(--cs-scroll) transparent; }}
 ::-webkit-scrollbar {{ width: 11px; height: 11px; }}
-::-webkit-scrollbar-thumb {{ background: #cbd0da; border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }}
-::-webkit-scrollbar-thumb:hover {{ background: #aab1bf; background-clip: content-box; }}
+::-webkit-scrollbar-thumb {{ background: var(--cs-scroll); border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }}
+::-webkit-scrollbar-thumb:hover {{ background: var(--cs-scroll-hover); background-clip: content-box; }}
 a {{ color: var(--cs-accent); text-underline-offset: 2px; }}
 </style>
 """
@@ -421,4 +472,4 @@ def inject() -> None:
     st.markdown(CSS, unsafe_allow_html=True)
 
 
-__all__ = ["CSS", "FONT_IMPORT", "inject"]
+__all__ = ["CSS", "FONTS_DIR", "FONT_IMPORT", "inject"]

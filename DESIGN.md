@@ -39,13 +39,28 @@ Light, not by category but by scene: a clinician at a desk, indoors, daylight.
 
 One superfamily, purpose-built for technical/enterprise products — **not Inter**.
 
-- **IBM Plex Sans** — the interface. 400–700.
+**Served locally.** The faces are bundled under `carescribe/ui/fonts/` (SIL
+OFL) and inlined as `@font-face` data URIs by `theme.py`. They used to arrive by
+`@import` from `fonts.googleapis.com`, on every launch, before the sign-in gate,
+on a machine whose whole promise is that nothing leaves it — and a CSS `@import`
+fails silently, so it never showed. Dropping to the platform sans would have
+closed the hole too, and cost the identity; vendoring keeps both. Anything added
+to this stylesheet must resolve locally: `tests/test_ui_is_offline.py` fails on
+a remote origin or an `@import`.
+
+- **IBM Plex Sans** — the interface. One variable face, 100–700.
 - **IBM Plex Mono** (`ss01`) — identifiers, file paths, model names, code, and
   anything read as a value in a column (`font-variant-numeric: tabular-nums`).
 
 Scale (rem): hero title `clamp(1.6, 3.2vw, 2.05)` / -0.03em · card title (`h3`)
 1.16 / 650 · section label (`h4`) 0.82 uppercase 0.02em muted · body 0.9–0.95 ·
 caption 0.78 · sidebar section label 0.72 uppercase 0.08em faint.
+
+Type and space are tokens (`--cs-text-xs…xl`, `--cs-space-1…6`), not literals
+repeated at each call site — the one part of this system that was never
+tokenized, and so the one most likely to drift. The greys that were hardcoded in
+rules (`--cs-panel-alt`, `--cs-inset`, `--cs-border-strong`, `--cs-scroll`) are
+tokens now too, so a palette change cannot miss them.
 
 ## Space & shape
 
@@ -69,6 +84,12 @@ caption 0.78 · sidebar section label 0.72 uppercase 0.08em faint.
 | `privacy_line()` | the compact "all clear" offline box for the sidebar; the loud states stay as `st.warning` / `st.info` |
 | `stat_strip` / `empty_state` | the session summary; the drawn-icon "nothing here yet, do X first" block |
 
+**Residual flags** in the review preview carry two channels, not one: a tint
+*and* an underline style per kind (name solid, id double, date dashed, initials
+dotted). Hue alone put every distinction on the channel a colour-vision
+deficiency removes, on the screen where telling a suspected name from a
+suspected date is the whole task.
+
 **Icons** are drawn SVG (`ICON`), 1.6px stroke, 24-grid, `currentColor` — no
 emoji. `:material/` icons are used where a Streamlit alert takes an `icon=`.
 
@@ -87,6 +108,7 @@ never an inline expander in the narrow panel.
 
 ## What this system is not
 
+No remote asset of any kind — no CDN font, no hosted icon, no tracking pixel.
 No gradient text, no glass-as-decoration, no coloured `border-left` above 1px,
 no zero-blur block shadow, no numbered `01 / 02` eyebrows (the tracker carries
 the sequence), no unicode glyph standing in for an icon.

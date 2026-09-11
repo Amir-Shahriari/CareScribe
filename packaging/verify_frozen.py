@@ -69,6 +69,16 @@ def bundled_app_py(app_dir: Path) -> Path:
     raise FileNotFoundError(f"no bundled carescribe/app.py under {app_dir}")
 
 
+def bundled_fonts(app_py: Path) -> list[Path]:
+    """The vendored type faces, beside the bundled app package.
+
+    They matter because their absence is silent: the stylesheet falls back to
+    the platform sans and the app still runs, looking subtly wrong, which is
+    exactly how the remote `@import` they replaced went unnoticed for so long.
+    """
+    return sorted((app_py.parent / "ui" / "fonts").glob("*.woff2"))
+
+
 def free_port() -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind(("127.0.0.1", 0))
@@ -87,6 +97,13 @@ def main(argv: list[str]) -> int:
     except FileNotFoundError as exc:
         print(f"FAIL  {exc}")
         return 2
+
+    faces = bundled_fonts(app_py)
+    if not faces:
+        print(f"FAIL  no bundled fonts under {app_py.parent / 'ui' / 'fonts'} — "
+              f"the UI would silently fall back to the platform sans")
+        return 2
+    print(f"      bundled fonts: {', '.join(f.name for f in faces)}")
 
     port = free_port()
     cmd = [
