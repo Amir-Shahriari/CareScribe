@@ -520,7 +520,42 @@ _KINSHIP = (
 
 # Labelled identity fields. The value is whatever follows the label on that line,
 # which is exactly where a field value ends — the property NER does not know.
-_NAME_VALUE = r"([A-Z][\w'’\-]*(?:[ \t]+[A-Z][\w'’\-]*){0,3})"
+_NAME_VALUE = r"([A-Z][\w'’\-]*(?:[ ][A-Z][\w'’\-]*){0,3})"
+# The separator between name parts is exactly ONE space. It was `[ \t]+`,
+# which let a value run straight across a column gap: "Worker: Jonathan Blake
+#    Claim No: 22/1234" captured "Jonathan Blake   Claim". Two spaces, or a
+# tab, is how a form separates fields, never how a person spells their name.
+# Four tokens, and it must stay in step with the identical cap in `_trim_span`
+# ("a person's name is at most four tokens"). Raising only this one makes a
+# five-token name match here and then get dropped whole by the trimmer, which
+# redacts nothing at all -- worse than either alternative, and silent.
+
+# Where a labelled value ends. The 2026-09-09 fix replaced a "$" anchor with a
+# bounded lookahead, and its comment claimed a name "is followed by end-of-line,
+# a bracket, a comma, a table pipe or a dash, and by nothing else". A header
+# that aligns its fields with whitespace disproves that:
+#
+#     Name: Jonathan Blake   DOB: 26 July 1996   NHS: 186 085 6845
+#
+# is an ordinary letterhead shape, and it matched none of those terminators, so
+# the patient's own name rode out while the DOB and NHS number beside it were
+# redacted. Measured rules-only over 17 realistic shapes, the three labelled
+# name rules caught 7 -- and RE_LINE was still on the original "$" anchor, so
+# Pattern 3 had never been applied to it at all. Two more terminators close it:
+# a column gap (two or more spaces, or a tab), and whitespace followed by the
+# next "Label:". _NAME_VALUE is greedy and the end-of-line alternative is tried
+# first, so a name that itself contains a double space is still taken in full.
+_VALUE_END = (
+    r"(?=[ \t]*(?:$|[(,|\-–—])"
+    r"|[ \t]{2,}|\t"
+    r"|[ \t]+[A-Za-z][\w'’\-]*(?:[ \t]+[A-Za-z][\w'’\-]*){0,2}[ \t]*:)"
+)
+
+# A single space then another capitalised word: the value the rule just matched
+# is the front of a longer name, not the whole of one. Two or more spaces, or a tab, is a
+# column gap and means the field ended -- neither is matched here.
+_NAME_CONTINUES = re.compile(r"[ ][A-Z][\w'\u2019\-]")
+
 
 PATIENT_LINE = re.compile(
     r"^[ \t]*(?:Patient(?:[ \t]+name)?|Client(?:[ \t]+name)?|Service[ \t]+user|"
@@ -540,7 +575,7 @@ PATIENT_LINE = re.compile(
     # the line to end: a name is followed by end-of-line, a bracket, a comma, a
     # table pipe or a dash, and by nothing else. RELATIVE_LINE carries the same
     # lookahead for the same reason.
-    + _NAME_VALUE + r"(?=[ \t]*(?:$|[(,|\-–—]))",
+    + _NAME_VALUE + _VALUE_END,
     re.IGNORECASE | re.MULTILINE,
 )
 
@@ -558,7 +593,7 @@ RELATIVE_LINE = re.compile(
     rf"^[ \t]*(?:Next[ \t]+of[ \t]+kin|NOK|Emergency[ \t]+contact|Carer|"
     rf"Nearest[ \t]+relative|People[ \t]+who[ \t]+can[ \t]+help|"
     rf"Support[ \t]+person|{_KINSHIP})[ \t]*:[ \t]*" + _NAME_VALUE
-    + r"(?=[ \t]*(?:$|[(,\-–—]))",
+    + _VALUE_END,
     re.IGNORECASE | re.MULTILINE,
 )
 
@@ -577,7 +612,7 @@ _PERSON_TITLE = r"(?:Mr|Mrs|Ms|Miss|Mx|Master|Dr|Prof)"
 # full. Hence the scoped (?i:Re).
 RE_LINE = re.compile(
     r"^[ \t]*(?i:Re)[ \t]*:[ \t]*(?:" + _PERSON_TITLE + r"\.?[ \t]+)?"
-    + _NAME_VALUE + r"[ \t]*$",
+    + _NAME_VALUE + _VALUE_END,
     re.MULTILINE,
 )
 
@@ -591,6 +626,28 @@ follow followup follow-up outcome report letter medication medications
 treatment care plan admission attendance clinic consultation opinion
 advice request update progress notes note history investigation
 """.split())
+
+
+def _looks_like_a_person(value: str) -> bool:
+    """True unless a labelled field's value is a placeholder or a role.
+
+    Checks EVERY token, not just the first. The first-token-only check let
+    "Worker: Case Manager" through -- "case" is not a role word, "manager" is --
+    and let "Full name: Not Provided" through as "Not [PATIENT]", because only
+    the leading "Not" was on the non-name list.
+    """
+    tokens = [token.strip(".,'\u2019-").lower() for token in value.split()]
+    tokens = [token for token in tokens if token]
+    if not tokens:
+        return False
+    if tokens[0] in _ROLE_STOPWORDS:
+        return False
+    if any(token in _ROLE_STOPWORDS for token in tokens):
+        return False
+    # Every token being a filler word means the field holds no name at all.
+    if all(token in _FIELD_PLACEHOLDERS or token in _NOT_A_NAME for token in tokens):
+        return False
+    return True
 
 
 def _is_person_subject(value: str) -> bool:
@@ -1234,7 +1291,14 @@ def structured_spans(text: str) -> list[Span]:
     ):
         for match in pattern.finditer(text):
             value = match.group(1)
-            if value.split()[0].strip(".,'").lower() in _ROLE_STOPWORDS:
+            if not _looks_like_a_person(value):
+                continue
+            if _NAME_CONTINUES.match(text, match.end(1)):
+                # The name ran past the four-token cap. Redacting the part that
+                # fits leaves the real surname sitting beside a placeholder --
+                # "Patient: [PATIENT] Windsor" -- which reads as handled and so
+                # survives review, where a name left plainly in the clear does
+                # not. Take none of it and let NER, or the reviewer, have it.
                 continue
             spans.append(Span(match.start(1), match.end(1), entity_type))
 
@@ -1363,6 +1427,28 @@ _CLINICAL_TERMS = frozenset(
 # Capitalised words that start clinical lines and sentences. NER hands these
 # back inside PERSON and ORGANIZATION spans; they must be trimmed off or the
 # entity value swallows real clinical text.
+# What a labelled identity field contains when it holds no name. Before the
+# value terminator was widened these never matched -- the line had to END at the
+# value, and a form that writes "Patient: Unknown  Status: Discharged" does not.
+# Now they do match, so they have to be named. Two things make this severe
+# rather than cosmetic: the words are clinical content ("Next of kin: Deceased"
+# is a fact, not a name), and `mapping.redact` replaces every occurrence of a
+# matched value across the whole document, so redacting "Unknown" once rewrites
+# every other "unknown" in the note -- including "cause of fall unknown".
+_FIELD_PLACEHOLDERS = frozenset(
+    """
+    unknown unspecified unavailable none nil na n/a nk tba tbc pending
+    self same above below see refer refused declined withheld redacted
+    deceased died decd rip alive living
+    provided applicable recorded documented stated given available disclosed
+    injured worker claimant applicant deponent
+    active inactive open closed ongoing current former previous
+    manager coordinator officer supervisor keyworker
+    anonymous confidential unidentified
+    """.split()
+)
+
+
 _NOT_A_NAME = frozenset(
     """
     follow followup the this that these those she he they it her his their patient

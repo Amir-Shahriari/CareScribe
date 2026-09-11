@@ -91,9 +91,72 @@ def test_the_neighbouring_field_is_still_redacted_too():
     assert "186 085 6845" not in out
 
 
-def test_a_name_containing_a_double_space_is_taken_in_full():
-    """The column-gap terminator must not truncate the value it is bounding."""
-    assert "Blake" not in rules_only("Patient: Jonathan  Blake")
+def test_a_double_space_ends_the_value_rather_than_sitting_inside_a_name():
+    """Two spaces are a column gap, deliberately, even mid-value.
+
+    The alternative was letting a name span a run of whitespace, and that made
+    `Worker: Jonathan Blake   Claim No: 22/1234` capture "Jonathan Blake   Claim"
+    — swallowing the next field's label into the placeholder. A form separates
+    fields with a column gap; a person does not spell their own name with one.
+    So "Jonathan" is taken here and "Blake" is not, and that is the intended
+    reading of an ambiguous line.
+    """
+    out = rules_only("Patient: Jonathan  Blake")
+    assert "Jonathan" not in out
+    assert "Blake" in out
+
+
+def test_a_name_the_rule_cannot_bound_is_left_whole_not_half_redacted():
+    """Four tokens is the cap `_trim_span` also enforces. Past it, take none.
+
+    Redacting the part that fits leaves the real surname beside a placeholder —
+    `Patient: [PATIENT] Windsor` — which reads as handled and so survives
+    review. A name left plainly in the clear does not.
+    """
+    out = rules_only("Patient: Jonathan James Alexander Blake Windsor  DOB: 26/07/1996")
+    assert "[PATIENT] Windsor" not in out
+    assert "Jonathan James Alexander Blake Windsor" in out
+    assert "26/07/1996" not in out  # the rest of the line still redacts
+
+
+PLACEHOLDER_VALUES = [
+    ("Patient: Unknown  Status: Discharged", "Unknown"),
+    ("Carer: Self  Phone: 0433 990 214", "Self"),
+    ("Next of kin: Deceased  Updated: 12/04/2024", "Deceased"),
+    ("Name: See Above  DOB: 26/07/1996", "See Above"),
+    ("Worker: Injured  Status: Open", "Injured"),
+    ("Client: Active  Status: Reviewed", "Active"),
+    ("Full name: Not Provided  DOB: 26 July 1996", "Not Provided"),
+    ("Next of kin: Not Applicable  Phone: N/A", "Not Applicable"),
+    ("Worker: Case Manager  Status: Active", "Case Manager"),
+]
+
+
+@pytest.mark.parametrize("line,value", PLACEHOLDER_VALUES, ids=lambda v: str(v)[:40])
+def test_a_field_holding_no_name_is_not_redacted(line, value):
+    """What real forms put in an identity field when there is no name.
+
+    None of these matched before the terminator was widened — the line had to
+    END at the value, and these lines do not. They are clinical content:
+    "Next of kin: Deceased" is a fact, and "Worker: Case Manager" a role.
+    """
+    assert value in rules_only(line)
+
+
+def test_one_bad_match_does_not_rewrite_the_whole_document():
+    """`mapping.redact` replaces every occurrence of a matched value.
+
+    So redacting "Unknown" in a header once rewrote every other "unknown" in the
+    note — turning "cause of fall unknown" into "[PATIENT]".
+    """
+    out = rules_only(
+        "Patient: Unknown  DOB: 26/07/1996\n"
+        "History: Found collapsed, cause of fall unknown.\n"
+        "Known allergies: Unknown."
+    )
+    assert "cause of fall unknown" in out
+    assert out.count("Unknown") == 2
+    assert "26/07/1996" not in out
 
 
 def test_the_label_must_still_start_the_line():
