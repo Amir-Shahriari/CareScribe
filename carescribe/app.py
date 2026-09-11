@@ -547,8 +547,9 @@ def render_entity_table(document: batch.Document) -> None:
             "listed first here and highlighted in the preview above."
         )
 
+    shown = entity_frame(document)
     edited = st.data_editor(
-        entity_frame(document),
+        shown,
         num_rows="dynamic",
         use_container_width=True,
         height=420,
@@ -580,7 +581,24 @@ def render_entity_table(document: batch.Document) -> None:
         },
     )
 
-    if st.button("Apply table edits", use_container_width=True, key=f"apply_{document.name}"):
+    # An edit sits in the widget until Apply is pressed. Nothing used to say so,
+    # so a reviewer could retype three values, move on, and approve a document
+    # whose entity list never changed -- silent data loss on the one screen
+    # where being wrong writes the wrong text to disk. Say it out loud instead.
+    pending_edits = not edited.fillna("").equals(shown.fillna(""))
+    if pending_edits:
+        st.warning(
+            "You have edits in the table that have not been applied yet. "
+            "Press **Apply table edits** to keep them.",
+            icon=":material/edit_note:",
+        )
+
+    if st.button(
+        "Apply table edits",
+        use_container_width=True,
+        key=f"apply_{document.name}",
+        type="primary" if pending_edits else "secondary",
+    ):
         # 'confidence' is display-only; drop it so rebuild re-derives tiering.
         records = [
             {key: value for key, value in row.items() if key != "confidence"}
@@ -720,12 +738,17 @@ def render_docx_download(document: batch.Document) -> None:
     )
 
 
+# Tint plus an underline style per kind. Hue alone put every distinction on the
+# one channel a colour-vision deficiency takes away, on the screen where telling
+# a suspected name from a suspected date is the entire task. The underline is
+# the redundant channel; the tint still does the "look here" work.
 _FLAG_TINTS = {
-    review_flags.KIND_NAME: "#fff3bf",
-    review_flags.KIND_ID: "#ffd8a8",
-    review_flags.KIND_DATE: "#d0ebff",
-    review_flags.KIND_INITIALS: "#e5dbff",
+    review_flags.KIND_NAME: ("#fff3bf", "solid", "#b45309"),
+    review_flags.KIND_ID: ("#ffd8a8", "double", "#b45309"),
+    review_flags.KIND_DATE: ("#d0ebff", "dashed", "#1d4ed8"),
+    review_flags.KIND_INITIALS: ("#e5dbff", "dotted", "#6d28d9"),
 }
+_FLAG_TINT_DEFAULT = ("#f1f3f5", "solid", "#667085")
 
 
 def document_flags(document: batch.Document) -> list:
@@ -747,8 +770,11 @@ def _review_span_style(span: review_spans.ReviewSpan) -> str:
         # second look", not "this is exposed text", which the solid tints
         # below correctly reserve for residual (never-redacted) candidates.
         return "border-bottom:2px dotted #868e96;padding:0 1px"
-    tint = _FLAG_TINTS.get(span.flag_kind, "#f1f3f5")
-    return f"background:{tint};padding:0 2px;border-radius:2px"
+    tint, underline, rule = _FLAG_TINTS.get(span.flag_kind, _FLAG_TINT_DEFAULT)
+    return (
+        f"background:{tint};padding:0 2px;border-radius:2px;"
+        f"border-bottom:2px {underline} {rule}"
+    )
 
 
 def _render_review_html(document: batch.Document, spans: list) -> str:
@@ -810,7 +836,7 @@ def render_review(document: batch.Document) -> list:
 def render_bulk_actions(document: batch.Document, spans: list) -> None:
     """Clear each class of second-look item in one click.
 
-    Low-confidence entity spans are already redacted, so "Confirm all" only
+    Low-confidence entity spans are already redacted, so "Mark all reviewed" only
     records that the reviewer accepts the placeholders. "Redact all flagged"
     over-redacts every permissive residual candidate — the safe direction.
     Either is optional: neither gates Approve.
@@ -844,7 +870,7 @@ def render_bulk_actions(document: batch.Document, spans: list) -> None:
     left, right = st.columns(2)
     with left:
         if n_e and st.button(
-            f"Confirm all {n_e} redaction(s)",
+            f"Mark all {n_e} redaction(s) reviewed",
             key=f"confirm_all_{document.name}", use_container_width=True,
         ):
             entity_confirmed(document).update(entity_keys)
@@ -1152,11 +1178,35 @@ def render_batch_approve(docs: dict, ready: list) -> None:
         st.divider()
     st.markdown("#### Approve the whole batch")
 
+    # The skip list used to arrive only after the click, so the reviewer learned
+    # that most of the batch was still pending by reading a warning about work
+    # that had not happened. Attestation is per-document and cannot be inferred,
+    # so count it here and let them decide with the number in front of them.
+    attested = [doc for doc in pending if doc.attested]
     st.caption(
         f"{len(pending)} document(s) not yet approved. Each is re-checked by the "
         "safety sweep; only the ones that come back clean, with the "
         "read-and-confirmed box ticked, are written to disk."
     )
+    if not attested:
+        st.info(
+            f"None of these {len(pending)} have been read and confirmed yet, so "
+            "this would write nothing. Open each one, review it, and tick "
+            "**read and confirmed**.",
+            icon=":material/checklist:",
+        )
+    elif len(attested) < len(pending):
+        st.warning(
+            f"**{len(attested)} of {len(pending)}** are read and confirmed and "
+            f"would be written. The other {len(pending) - len(attested)} will be "
+            "skipped until you open and confirm them individually.",
+            icon=":material/checklist:",
+        )
+    else:
+        st.caption(
+            f"All {len(pending)} are read and confirmed, and will be written if "
+            "the sweep comes back clean."
+        )
     if st.button(
         f"✅ Approve all {len(pending)} that pass the safety sweep",
         type="primary", key="approve_batch",
