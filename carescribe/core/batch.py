@@ -1,9 +1,9 @@
 """
 Batch input and approved-output handling.
 
-The single module in CareScribe that writes to the filesystem, which is what
-makes the privacy invariant checkable — the write paths can be enumerated by
-reading one file. There are three, and all of them refuse PHI:
+The module that writes **document-derived** content, which is what makes the
+privacy invariant checkable. There are three such paths, and all of them
+refuse PHI:
 
 * :func:`write_approved` — the approved de-identified text.
 * :func:`write_approved_docx` — the redacted Word document. Redaction runs
@@ -17,6 +17,23 @@ they are about to write and refuse if anything identifying survives.
 
 Reading is separate and read-only — :func:`load_documents` pulls documents into
 memory but never writes a copy of them anywhere.
+
+This module is **not** the only one in the package that touches the disk, and
+saying it was made the enumeration above read as exhaustive when it is not. The
+others, and what each is trusted with:
+
+* :mod:`carescribe.core.patients` / :mod:`carescribe.core.users` — the two
+  rosters, the deliberate identifier carve-outs named in AGENTS.md.
+* :mod:`carescribe.core.exemplars` — de-identified draft field values, appended
+  as house-style examples. Document-derived, so it runs the same
+  :func:`~carescribe.core.deidentify.residual_scan` and refuses on any survivor.
+* :mod:`carescribe.core.reference_library` /
+  :mod:`carescribe.core.template_ingest` — clinician-supplied reference files
+  and form templates, stored as uploaded.
+* :mod:`carescribe.core.settings` — the settings file.
+* :mod:`carescribe.core.applog` — the log. Never document text.
+* :mod:`carescribe.core.model_setup` / :mod:`carescribe.core.desktop` — the
+  downloaded model and app-data directories.
 """
 
 from __future__ import annotations

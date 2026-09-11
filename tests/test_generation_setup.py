@@ -175,12 +175,44 @@ def test_nothing_downloads_on_import_or_launch():
         assert "urlopen" not in source, f"{module.__name__} can reach the network"
 
 
-def test_the_document_pipeline_never_imports_the_downloader():
-    """The one outbound path must not be reachable from the de-id flow."""
+def _imported_names(module) -> set[str]:
+    """Every module name `module` imports, from its AST.
+
+    This used to be `"model_setup" not in inspect.getsource(module)`, which is a
+    substring scan over the whole file: it fired on the word appearing in a
+    docstring or a comment, and it would have missed a real import written any
+    way that avoids the literal spelling. Reading the import statements checks
+    the thing the test is named for.
+    """
+    import ast
     import inspect
 
+    tree = ast.parse(inspect.getsource(module))
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                names.update(alias.name.split("."))
+        elif isinstance(node, ast.ImportFrom):
+            if node.module:
+                names.update(node.module.split("."))
+            for alias in node.names:
+                names.add(alias.name)
+        elif isinstance(node, ast.Call):
+            # importlib.import_module("...") / __import__("...")
+            func = node.func
+            target = getattr(func, "attr", None) or getattr(func, "id", None)
+            if target in {"import_module", "__import__"} and node.args:
+                first = node.args[0]
+                if isinstance(first, ast.Constant) and isinstance(first.value, str):
+                    names.update(first.value.split("."))
+    return names
+
+
+def test_the_document_pipeline_never_imports_the_downloader():
+    """The one outbound path must not be reachable from the de-id flow."""
     for module in (deidentify, batch, carenotes, mapping_module()):
-        assert "model_setup" not in inspect.getsource(module)
+        assert "model_setup" not in _imported_names(module), module.__name__
 
 
 def mapping_module():
