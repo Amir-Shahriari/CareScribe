@@ -194,10 +194,12 @@ class LocalGGUFBackend:
             # raises once this loop pulls the first chunk — which is why the
             # loop has to stay inside this try, not just the call above it.
             finish_reason = None
+            produced = False
             for chunk in completion:
                 choice = chunk.get("choices", [{}])[0]
                 piece = choice.get("delta", {}).get("content")
                 if piece:
+                    produced = True
                     yield piece
                 reason = choice.get("finish_reason")
                 if reason is not None:
@@ -209,6 +211,14 @@ class LocalGGUFBackend:
 
         if finish_reason == "length":
             raise _truncation_error()
+        if not produced:
+            # A run that ends cleanly having produced nothing is a failure, not
+            # an empty draft: downstream, the banner alone gets banked as the
+            # clinician's note. The Ollama path carries the same guard.
+            raise BackendError(
+                "The model returned no output. It may have run out of "
+                "context, or the model may have stopped immediately."
+            )
 
 
 # --------------------------------------------------------------------------

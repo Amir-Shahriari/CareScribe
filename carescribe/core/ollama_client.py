@@ -191,6 +191,12 @@ def generate(
             yield text
             return
 
+        # The same failure as the non-streaming branch above, on the path the
+        # app actually uses: a run that ends cleanly having produced no tokens.
+        # Only an explicit `error` chunk was caught, so a context overflow or a
+        # model that stopped immediately yielded nothing, and the caller banked
+        # the "DRAFT - requires clinician review" banner alone as the note.
+        produced = False
         for raw_line in response:
             line = raw_line.decode("utf-8").strip()
             if not line:
@@ -203,9 +209,15 @@ def generate(
                 raise OllamaError(str(chunk["error"]))
             piece = chunk.get("response")
             if piece:
+                produced = True
                 yield piece
             if chunk.get("done"):
                 break
+        if not produced:
+            raise OllamaError(
+                "The model returned no output. It may have run out of "
+                "context, or the model may have stopped immediately."
+            )
 
 
 __all__ = [

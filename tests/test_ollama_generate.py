@@ -41,11 +41,39 @@ def ndjson(*chunks):
 
 
 def test_generate_is_a_generator_and_defers_the_network(wired):
+    # Give it a real token: an empty stream is now a refusal, not a quiet
+    # success, so the default fixture response would raise before this test
+    # could make its point about laziness.
+    wired.response = FakeResponse(
+        lines=ndjson({"response": "hello"}, {"done": True})
+    )
     gen = ollama_client.generate("llama3.1:8b", "system", "prompt")
     assert inspect.isgenerator(gen)
     assert not hasattr(wired, "request")
-    list(gen)
+    assert list(gen) == ["hello"]
     assert wired.request is not None
+
+
+def test_a_clean_but_empty_stream_is_refused(wired):
+    """The path the app actually uses: streaming, done, no tokens.
+
+    Only an explicit `error` chunk used to be caught, so a context overflow or
+    a model that stopped immediately produced an empty draft that downstream
+    banked as the clinician's note, banner and all.
+    """
+    wired.response = FakeResponse(lines=ndjson({"done": True}))
+    with pytest.raises(ollama_client.OllamaError) as excinfo:
+        list(ollama_client.generate("llama3.1:8b", "system", "prompt"))
+    assert "no output" in str(excinfo.value)
+
+
+def test_a_stream_of_only_empty_pieces_is_refused(wired):
+    """Whitespace-free empty deltas are still nothing."""
+    wired.response = FakeResponse(
+        lines=ndjson({"response": ""}, {"response": ""}, {"done": True})
+    )
+    with pytest.raises(ollama_client.OllamaError):
+        list(ollama_client.generate("llama3.1:8b", "system", "prompt"))
 
 
 def test_daemon_down_and_missing_model(wired, monkeypatch):
