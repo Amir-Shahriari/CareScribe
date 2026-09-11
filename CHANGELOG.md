@@ -5,7 +5,48 @@ This project follows Semantic Versioning.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Two people signed in at once could file into each other's patient folders.**
+  The active account was held in a process-wide variable, but Streamlit serves
+  every session from its own thread inside one process — so the last person to
+  sign in set it for everybody. It is now per session. This was the one
+  guarantee accounts exist to make.
+- De-identification: a labelled identity field holding no name (`Patient:
+  Unknown`, `Carer: Self`, `Next of kin: Deceased`, `Worker: Case Manager`) is
+  no longer treated as a name. Because a redaction applies to every occurrence
+  of a value, one such match also rewrote the word elsewhere in the note —
+  turning "cause of fall unknown" into a placeholder.
+- De-identification: a name too long for the rule to bound is now left visibly
+  alone rather than half-redacted. `Patient: [PATIENT] Windsor` reads as handled
+  and so survived review; a name in the clear does not.
+- Generation: an empty response is refused on the streaming path, which is the
+  one the app actually uses. Only the non-streaming path was guarded, so a
+  context overflow still produced a blank draft with no error.
+- **The interface no longer calls out to the internet.** The stylesheet pulled
+  its typefaces from `fonts.googleapis.com` on every launch — before the sign-in
+  screen, on a machine whose whole promise is that nothing leaves it, while the
+  app's own code said it made "no network calls of any kind" and the masthead
+  showed an "offline" lock. A CSS `@import` fails silently, so nothing ever
+  surfaced it. The faces are now bundled with the app and loaded from disk.
+- De-identification: a name followed by whitespace and then another field —
+  `Name: Jane Smith   DOB: 26 July 1996   NHS: ...`, an ordinary letterhead line
+  — was left in place while the date and NHS number beside it were redacted.
+  Three rules shared the fault. Measured over 17 realistic line shapes with no
+  NER model loaded, the rules caught 7; they now catch all 17.
+- Review: edits typed into the identifier table are no longer lost in silence.
+  They only take effect on **Apply table edits**, and the screen now says so
+  while edits are outstanding.
+- Review: residual-flag kinds are told apart by an underline style as well as a
+  colour, so the distinction survives a colour-vision deficiency.
+- Approving a whole batch now says how many documents are actually read and
+  confirmed *before* the click, instead of listing the skipped ones afterwards.
+- The bulk "Confirm all N redactions" button is now "Mark all N reviewed" — it
+  clears the advisory queue and never was the sign-off that writes a file, which
+  the identically-worded attestation checkbox one line below it is.
+
 ### Added
+
 
 - **Local user accounts.** CareScribe now opens on a sign-in screen. Sign up
   once, and the patients you create are filed under your account: another
