@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `02742def`
+- Built from commit: `f513df78`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -1013,7 +1013,7 @@ Nodes (5): Write the no-PHI audit sidecar for one approved document. Evidence th
   stress_corpus/README.md · relation: references
 
 ## Knowledge Gaps
-- **343 isolated node(s):** `Direction`, `Palette`, `Type`, `Space & shape`, `Components (`carescribe/ui/components.py`)` (+338 more)
+- **343 isolated node(s):** `Fixed`, `Added`, `Fixed`, `Added`, `Added` (+338 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **42 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -1031,6 +1031,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **What is the exact relationship between `stress_corpus/README.md` and `Mental Health Act Assessment Record (doc10)`?**
   _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
 - **Why does `deidentify()` connect `deidentify` to `build_dataset.py`, `test_letterhead_address_leak.py`, `rebuild`, `test_labelled_line_columns.py`, `applog.py`, `mapping.py`, `test_sample_document_identifiers.py`, `deidentify.py`, `write_approved`, `residual_scan`, `test_stress_corpus.py`, `conftest.py`, `create_patient`, `available_forms`, `test_docx_revision_leak.py`, `test_dob_facility_mislabel.py`, `deid`, `test_stress_corpus_rules_only.py`, `test_pipeline_opens_no_socket`, `test_crisis_lines_preserved.py`, `write_review_record`, `test_deid_pipeline.py`, `NoEgress`, `load_documents`, `test_generation_setup.py`, `test_docx_letterhead_leak.py`, `test_full_pipeline_accounts.py`, `test_patient_pipeline.py`?**
-  _High betweenness centrality (0.048) - this node is a cross-community bridge._
-- **Why does `render_review()` connect `Document` to `review_spans`, `app.py`, `theme.py`?**
-  _High betweenness centrality (0.024) - this node is a cross-community bridge._
+  _High betweenness centrality (0.059) - this node is a cross-community bridge._
+- **Why does `FormType` connect `FormType` to `build_dataset.py`, `schema.py`, `expand`, `build_messages`, `EncounterFacts`, `test_train_and_grammar.py`, `test_cardio_vignettes_b.py`, `make_pair`, `make_gap_probes`, `load_eval_items`, `test_gp_vignettes_a.py`, `pairs.py`, `test_eld_vignettes_a.py`, `test_cmht_vignettes_a.py`, `test_resp_vignettes_a.py`, `test_datagen_config_is_live.py`, `test_cardio_vignettes_a.py`, `run_eval.py`, `test_resp_vignettes_b.py`, `test_eld_vignettes_b.py`?**
+  _High betweenness centrality (0.030) - this node is a cross-community bridge._

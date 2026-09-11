@@ -98,15 +98,114 @@
   },
   "nodes": [
     {
+      "label": "CHANGELOG.md",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "changelog",
+      "community": 54,
+      "community_name": "[Unreleased]",
+      "norm_label": "changelog.md"
+    },
+    {
+      "label": "Changelog",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "changelog_changelog",
+      "community": 54,
+      "community_name": "[Unreleased]",
+      "norm_label": "changelog"
+    },
+    {
+      "label": "[Unreleased]",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "changelog_unreleased",
+      "community": 54,
+      "community_name": "[Unreleased]",
+      "norm_label": "[unreleased]"
+    },
+    {
+      "label": "Fixed",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "changelog_fixed",
+      "community": 54,
+      "community_name": "[Unreleased]",
+      "norm_label": "fixed"
+    },
+    {
+      "label": "Added",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L48",
+      "_origin": "ast",
+      "id": "changelog_added",
+      "community": 54,
+      "community_name": "[Unreleased]",
+      "norm_label": "added"
+    },
+    {
+      "label": "Fixed",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L75",
+      "_origin": "ast",
+      "id": "changelog_fixed_75",
+      "community": 54,
+      "community_name": "[Unreleased]",
+      "norm_label": "fixed"
+    },
+    {
+      "label": "Added",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L100",
+      "_origin": "ast",
+      "id": "changelog_added_100",
+      "community": 54,
+      "community_name": "[Unreleased]",
+      "norm_label": "added"
+    },
+    {
+      "label": "[0.1.0] - 2026-09-01",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L122",
+      "_origin": "ast",
+      "id": "changelog_0_1_0_2026_09_01",
+      "community": 54,
+      "community_name": "[Unreleased]",
+      "norm_label": "[0.1.0] - 2026-09-01"
+    },
+    {
+      "label": "Added",
+      "file_type": "document",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L124",
+      "_origin": "ast",
+      "id": "changelog_added_124",
+      "community": 54,
+      "community_name": "[Unreleased]",
+      "norm_label": "added"
+    },
+    {
       "label": "report.py",
       "file_type": "code",
       "source_file": "finetune/eval/report.py",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "finetune_eval_report",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "report.py"
+      "norm_label": "report.py",
+      "id": "finetune_eval_report"
     },
     {
       "label": "_row()",
@@ -115,10 +214,10 @@
       "source_location": "L17",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_report_row",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "_row()"
+      "norm_label": "_row()",
+      "id": "finetune_eval_report_row"
     },
     {
       "label": "build_report()",
@@ -127,10 +226,10 @@
       "source_location": "L27",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_report_build_report",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "build_report()"
+      "norm_label": "build_report()",
+      "id": "finetune_eval_report_build_report"
     },
     {
       "label": "write_report()",
@@ -139,10 +238,10 @@
       "source_location": "L121",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_report_write_report",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "write_report()"
+      "norm_label": "write_report()",
+      "id": "finetune_eval_report_write_report"
     },
     {
       "label": "Path",
@@ -150,10 +249,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "path",
       "community": 105,
       "community_name": "Path",
-      "norm_label": "path"
+      "norm_label": "path",
+      "id": "path"
     },
     {
       "label": "EVAL_REPORT.md + eval_report.json from a base-vs-tuned comparison. The report\u2026",
@@ -161,10 +260,10 @@
       "source_file": "finetune/eval/report.py",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "finetune_eval_report_rationale_1",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "eval_report.md + eval_report.json from a base-vs-tuned comparison. the report..."
+      "norm_label": "eval_report.md + eval_report.json from a base-vs-tuned comparison. the report...",
+      "id": "finetune_eval_report_rationale_1"
     },
     {
       "label": "run_eval.py",
@@ -172,10 +271,10 @@
       "source_file": "finetune/eval/run_eval.py",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "finetune_eval_run_eval",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "run_eval.py"
+      "norm_label": "run_eval.py",
+      "id": "finetune_eval_run_eval"
     },
     {
       "label": "Completer",
@@ -185,10 +284,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_completer",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "completer"
+      "norm_label": "completer",
+      "id": "finetune_eval_run_eval_completer"
     },
     {
       "label": "Protocol",
@@ -196,10 +295,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "protocol",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "protocol"
+      "norm_label": "protocol",
+      "id": "protocol"
     },
     {
       "label": ".complete()",
@@ -208,10 +307,10 @@
       "source_location": "L39",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_completer_complete",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": ".complete()"
+      "norm_label": ".complete()",
+      "id": "finetune_eval_run_eval_completer_complete"
     },
     {
       "label": "EvalItem",
@@ -221,10 +320,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_evalitem",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "evalitem"
+      "norm_label": "evalitem",
+      "id": "finetune_eval_run_eval_evalitem"
     },
     {
       "label": ".messages()",
@@ -233,10 +332,10 @@
       "source_location": "L50",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_evalitem_messages",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": ".messages()"
+      "norm_label": ".messages()",
+      "id": "finetune_eval_run_eval_evalitem_messages"
     },
     {
       "label": ".messages_pair()",
@@ -245,10 +344,10 @@
       "source_location": "L53",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_evalitem_messages_pair",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": ".messages_pair()"
+      "norm_label": ".messages_pair()",
+      "id": "finetune_eval_run_eval_evalitem_messages_pair"
     },
     {
       "label": "make_eval_set()",
@@ -257,10 +356,10 @@
       "source_location": "L59",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_make_eval_set",
       "community": 2,
       "community_name": "build_dataset.py",
-      "norm_label": "make_eval_set()"
+      "norm_label": "make_eval_set()",
+      "id": "finetune_eval_run_eval_make_eval_set"
     },
     {
       "label": "FormType",
@@ -268,10 +367,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "formtype",
       "community": 52,
       "community_name": "load_eval_items",
-      "norm_label": "formtype"
+      "norm_label": "formtype",
+      "id": "formtype"
     },
     {
       "label": "load_eval_items()",
@@ -280,10 +379,10 @@
       "source_location": "L92",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_load_eval_items",
       "community": 52,
       "community_name": "load_eval_items",
-      "norm_label": "load_eval_items()"
+      "norm_label": "load_eval_items()",
+      "id": "finetune_eval_run_eval_load_eval_items"
     },
     {
       "label": "RunResult",
@@ -293,10 +392,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_runresult",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "runresult"
+      "norm_label": "runresult",
+      "id": "finetune_eval_run_eval_runresult"
     },
     {
       "label": "run()",
@@ -305,10 +404,10 @@
       "source_location": "L137",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_run",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "run()"
+      "norm_label": "run()",
+      "id": "finetune_eval_run_eval_run"
     },
     {
       "label": "compare()",
@@ -317,10 +416,10 @@
       "source_location": "L161",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_compare",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "compare()"
+      "norm_label": "compare()",
+      "id": "finetune_eval_run_eval_compare"
     },
     {
       "label": "GgufCompleter",
@@ -330,10 +429,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_ggufcompleter",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "ggufcompleter"
+      "norm_label": "ggufcompleter",
+      "id": "finetune_eval_run_eval_ggufcompleter"
     },
     {
       "label": ".__init__()",
@@ -342,10 +441,10 @@
       "source_location": "L187",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_ggufcompleter_init",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": ".__init__()"
+      "norm_label": ".__init__()",
+      "id": "finetune_eval_run_eval_ggufcompleter_init"
     },
     {
       "label": ".complete()",
@@ -354,10 +453,10 @@
       "source_location": "L194",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_ggufcompleter_complete",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": ".complete()"
+      "norm_label": ".complete()",
+      "id": "finetune_eval_run_eval_ggufcompleter_complete"
     },
     {
       "label": "CallableCompleter",
@@ -367,10 +466,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_callablecompleter",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "callablecompleter"
+      "norm_label": "callablecompleter",
+      "id": "finetune_eval_run_eval_callablecompleter"
     },
     {
       "label": ".__init__()",
@@ -379,10 +478,10 @@
       "source_location": "L209",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_callablecompleter_init",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": ".__init__()"
+      "norm_label": ".__init__()",
+      "id": "finetune_eval_run_eval_callablecompleter_init"
     },
     {
       "label": ".complete()",
@@ -391,10 +490,10 @@
       "source_location": "L212",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_callablecompleter_complete",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": ".complete()"
+      "norm_label": ".complete()",
+      "id": "finetune_eval_run_eval_callablecompleter_complete"
     },
     {
       "label": "HFCompleter",
@@ -404,10 +503,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_hfcompleter",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "hfcompleter"
+      "norm_label": "hfcompleter",
+      "id": "finetune_eval_run_eval_hfcompleter"
     },
     {
       "label": ".__init__()",
@@ -416,10 +515,10 @@
       "source_location": "L224",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_hfcompleter_init",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": ".__init__()"
+      "norm_label": ".__init__()",
+      "id": "finetune_eval_run_eval_hfcompleter_init"
     },
     {
       "label": ".complete()",
@@ -428,10 +527,10 @@
       "source_location": "L241",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_hfcompleter_complete",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": ".complete()"
+      "norm_label": ".complete()",
+      "id": "finetune_eval_run_eval_hfcompleter_complete"
     },
     {
       "label": "_overlap_for()",
@@ -440,10 +539,10 @@
       "source_location": "L266",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_overlap_for",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "_overlap_for()"
+      "norm_label": "_overlap_for()",
+      "id": "finetune_eval_run_eval_overlap_for"
     },
     {
       "label": "_confabulation_for()",
@@ -452,10 +551,10 @@
       "source_location": "L287",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_confabulation_for",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "_confabulation_for()"
+      "norm_label": "_confabulation_for()",
+      "id": "finetune_eval_run_eval_confabulation_for"
     },
     {
       "label": "_judge_for()",
@@ -464,10 +563,10 @@
       "source_location": "L307",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_judge_for",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "_judge_for()"
+      "norm_label": "_judge_for()",
+      "id": "finetune_eval_run_eval_judge_for"
     },
     {
       "label": "main()",
@@ -476,10 +575,10 @@
       "source_location": "L353",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_main",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "main()"
+      "norm_label": "main()",
+      "id": "finetune_eval_run_eval_main"
     },
     {
       "label": "Run a model over an eval set and score it on the four metrics. A \"model\" here\u2026",
@@ -487,10 +586,10 @@
       "source_file": "finetune/eval/run_eval.py",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_rationale_1",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "run a model over an eval set and score it on the four metrics. a \"model\" here..."
+      "norm_label": "run a model over an eval set and score it on the four metrics. a \"model\" here...",
+      "id": "finetune_eval_run_eval_rationale_1"
     },
     {
       "label": "``(system, user)`` for a :class:`Completer` call.",
@@ -498,10 +597,10 @@
       "source_file": "finetune/eval/run_eval.py",
       "source_location": "L54",
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_rationale_54",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "``(system, user)`` for a :class:`completer` call."
+      "norm_label": "``(system, user)`` for a :class:`completer` call.",
+      "id": "finetune_eval_run_eval_rationale_54"
     },
     {
       "label": "Build items by re-sampling the generator. NOT a held-out set: a different seed\u2026",
@@ -509,10 +608,10 @@
       "source_file": "finetune/eval/run_eval.py",
       "source_location": "L66",
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_rationale_66",
       "community": 2,
       "community_name": "build_dataset.py",
-      "norm_label": "build items by re-sampling the generator. not a held-out set: a different seed..."
+      "norm_label": "build items by re-sampling the generator. not a held-out set: a different seed...",
+      "id": "finetune_eval_run_eval_rationale_66"
     },
     {
       "label": "Rebuild eval items from a committed split file. Evaluation must read the split\u2026",
@@ -520,10 +619,10 @@
       "source_file": "finetune/eval/run_eval.py",
       "source_location": "L93",
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_rationale_93",
       "community": 52,
       "community_name": "load_eval_items",
-      "norm_label": "rebuild eval items from a committed split file. evaluation must read the split..."
+      "norm_label": "rebuild eval items from a committed split file. evaluation must read the split...",
+      "id": "finetune_eval_run_eval_rationale_93"
     },
     {
       "label": "Ship-gate verdict: tuned \u2265 base on every target metric, latency \u2264 1.15\u00d7.",
@@ -531,10 +630,10 @@
       "source_file": "finetune/eval/run_eval.py",
       "source_location": "L162",
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_rationale_162",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "ship-gate verdict: tuned \u2265 base on every target metric, latency \u2264 1.15\u00d7."
+      "norm_label": "ship-gate verdict: tuned \u2265 base on every target metric, latency \u2264 1.15\u00d7.",
+      "id": "finetune_eval_run_eval_rationale_162"
     },
     {
       "label": "Adapter over a local GGUF via llama-cpp-python. Greedy, temperature 0.",
@@ -542,10 +641,10 @@
       "source_file": "finetune/eval/run_eval.py",
       "source_location": "L185",
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_rationale_185",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "adapter over a local gguf via llama-cpp-python. greedy, temperature 0."
+      "norm_label": "adapter over a local gguf via llama-cpp-python. greedy, temperature 0.",
+      "id": "finetune_eval_run_eval_rationale_185"
     },
     {
       "label": "Wrap a plain ``(system, user) -> str`` function as a Completer.",
@@ -553,10 +652,10 @@
       "source_file": "finetune/eval/run_eval.py",
       "source_location": "L207",
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_rationale_207",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "wrap a plain ``(system, user) -> str`` function as a completer."
+      "norm_label": "wrap a plain ``(system, user) -> str`` function as a completer.",
+      "id": "finetune_eval_run_eval_rationale_207"
     },
     {
       "label": "Greedy generation from a HF model, optionally with a LoRA adapter. Much faster\u2026",
@@ -564,10 +663,10 @@
       "source_file": "finetune/eval/run_eval.py",
       "source_location": "L217",
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_rationale_217",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "greedy generation from a hf model, optionally with a lora adapter. much faster..."
+      "norm_label": "greedy generation from a hf model, optionally with a lora adapter. much faster...",
+      "id": "finetune_eval_run_eval_rationale_217"
     },
     {
       "label": "Nearest-train-neighbour similarity for the evaluated targets. Reported so a\u2026",
@@ -575,10 +674,10 @@
       "source_file": "finetune/eval/run_eval.py",
       "source_location": "L267",
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_rationale_267",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "nearest-train-neighbour similarity for the evaluated targets. reported so a..."
+      "norm_label": "nearest-train-neighbour similarity for the evaluated targets. reported so a...",
+      "id": "finetune_eval_run_eval_rationale_267"
     },
     {
       "label": "Confabulation rate on adversarial \"Not documented.\" probes.",
@@ -586,10 +685,10 @@
       "source_file": "finetune/eval/run_eval.py",
       "source_location": "L288",
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_rationale_288",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "confabulation rate on adversarial \"not documented.\" probes."
+      "norm_label": "confabulation rate on adversarial \"not documented.\" probes.",
+      "id": "finetune_eval_run_eval_rationale_288"
     },
     {
       "label": "Second-grader agreement on faithfulness (D2). `validators` aligns a draft back\u2026",
@@ -597,10 +696,10 @@
       "source_file": "finetune/eval/run_eval.py",
       "source_location": "L308",
       "_origin": "ast",
-      "id": "finetune_eval_run_eval_rationale_308",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "second-grader agreement on faithfulness (d2). `validators` aligns a draft back..."
+      "norm_label": "second-grader agreement on faithfulness (d2). `validators` aligns a draft back...",
+      "id": "finetune_eval_run_eval_rationale_308"
     },
     {
       "label": "test_judge_wiring.py",
@@ -608,10 +707,10 @@
       "source_file": "finetune/tests/test_judge_wiring.py",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "test_judge_wiring.py"
+      "norm_label": "test_judge_wiring.py",
+      "id": "finetune_tests_test_judge_wiring"
     },
     {
       "label": "_Item",
@@ -621,10 +720,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_item",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "_item"
+      "norm_label": "_item",
+      "id": "finetune_tests_test_judge_wiring_item"
     },
     {
       "label": ".__init__()",
@@ -633,10 +732,10 @@
       "source_location": "L25",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_item_init",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": ".__init__()"
+      "norm_label": ".__init__()",
+      "id": "finetune_tests_test_judge_wiring_item_init"
     },
     {
       "label": "_result()",
@@ -645,10 +744,10 @@
       "source_location": "L29",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_result",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "_result()"
+      "norm_label": "_result()",
+      "id": "finetune_tests_test_judge_wiring_result"
     },
     {
       "label": "_score()",
@@ -657,10 +756,10 @@
       "source_location": "L33",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_score",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "_score()"
+      "norm_label": "_score()",
+      "id": "finetune_tests_test_judge_wiring_score"
     },
     {
       "label": "DraftScore",
@@ -668,10 +767,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "draftscore",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "draftscore"
+      "norm_label": "draftscore",
+      "id": "draftscore"
     },
     {
       "label": "fixture",
@@ -679,10 +778,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "fixture",
       "community": 35,
       "community_name": "fixture",
-      "norm_label": "fixture"
+      "norm_label": "fixture",
+      "id": "fixture"
     },
     {
       "label": "args()",
@@ -691,10 +790,10 @@
       "source_location": "L38",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_args",
       "community": 35,
       "community_name": "fixture",
-      "norm_label": "args()"
+      "norm_label": "args()",
+      "id": "finetune_tests_test_judge_wiring_args"
     },
     {
       "label": "test_run_keeps_the_drafts_it_scored()",
@@ -703,10 +802,10 @@
       "source_location": "L42",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_test_run_keeps_the_drafts_it_scored",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "test_run_keeps_the_drafts_it_scored()"
+      "norm_label": "test_run_keeps_the_drafts_it_scored()",
+      "id": "finetune_tests_test_judge_wiring_test_run_keeps_the_drafts_it_scored"
     },
     {
       "label": "test_judge_is_skipped_unless_asked()",
@@ -715,10 +814,10 @@
       "source_location": "L57",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_test_judge_is_skipped_unless_asked",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "test_judge_is_skipped_unless_asked()"
+      "norm_label": "test_judge_is_skipped_unless_asked()",
+      "id": "finetune_tests_test_judge_wiring_test_judge_is_skipped_unless_asked"
     },
     {
       "label": "test_disagreement_with_the_rule_grader_is_counted()",
@@ -727,10 +826,10 @@
       "source_location": "L62",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_test_disagreement_with_the_rule_grader_is_counted",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "test_disagreement_with_the_rule_grader_is_counted()"
+      "norm_label": "test_disagreement_with_the_rule_grader_is_counted()",
+      "id": "finetune_tests_test_judge_wiring_test_disagreement_with_the_rule_grader_is_counted"
     },
     {
       "label": "test_an_unparsable_reply_is_reported_not_scored()",
@@ -739,10 +838,10 @@
       "source_location": "L83",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_test_an_unparsable_reply_is_reported_not_scored",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "test_an_unparsable_reply_is_reported_not_scored()"
+      "norm_label": "test_an_unparsable_reply_is_reported_not_scored()",
+      "id": "finetune_tests_test_judge_wiring_test_an_unparsable_reply_is_reported_not_scored"
     },
     {
       "label": "test_the_judge_signature_cannot_accept_facts()",
@@ -751,10 +850,10 @@
       "source_location": "L96",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_test_the_judge_signature_cannot_accept_facts",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "test_the_judge_signature_cannot_accept_facts()"
+      "norm_label": "test_the_judge_signature_cannot_accept_facts()",
+      "id": "finetune_tests_test_judge_wiring_test_the_judge_signature_cannot_accept_facts"
     },
     {
       "label": "test_no_fact_value_reaches_what_the_judge_is_actually_sent()",
@@ -763,10 +862,10 @@
       "source_location": "L103",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_test_no_fact_value_reaches_what_the_judge_is_actually_sent",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "test_no_fact_value_reaches_what_the_judge_is_actually_sent()"
+      "norm_label": "test_no_fact_value_reaches_what_the_judge_is_actually_sent()",
+      "id": "finetune_tests_test_judge_wiring_test_no_fact_value_reaches_what_the_judge_is_actually_sent"
     },
     {
       "label": "test_a_length_mismatch_is_refused_not_silently_truncated()",
@@ -775,10 +874,10 @@
       "source_location": "L140",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_test_a_length_mismatch_is_refused_not_silently_truncated",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "test_a_length_mismatch_is_refused_not_silently_truncated()"
+      "norm_label": "test_a_length_mismatch_is_refused_not_silently_truncated()",
+      "id": "finetune_tests_test_judge_wiring_test_a_length_mismatch_is_refused_not_silently_truncated"
     },
     {
       "label": "test_the_report_renders_a_judge_section()",
@@ -787,10 +886,10 @@
       "source_location": "L148",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_test_the_report_renders_a_judge_section",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "test_the_report_renders_a_judge_section()"
+      "norm_label": "test_the_report_renders_a_judge_section()",
+      "id": "finetune_tests_test_judge_wiring_test_the_report_renders_a_judge_section"
     },
     {
       "label": "test_the_report_omits_the_section_when_no_judge_ran()",
@@ -799,10 +898,10 @@
       "source_location": "L164",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_test_the_report_omits_the_section_when_no_judge_ran",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "test_the_report_omits_the_section_when_no_judge_ran()"
+      "norm_label": "test_the_report_omits_the_section_when_no_judge_ran()",
+      "id": "finetune_tests_test_judge_wiring_test_the_report_omits_the_section_when_no_judge_ran"
     },
     {
       "label": "test_the_report_keeps_the_two_models_apart_when_they_share_a_name()",
@@ -811,10 +910,10 @@
       "source_location": "L170",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_test_the_report_keeps_the_two_models_apart_when_they_share_a_name",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "test_the_report_keeps_the_two_models_apart_when_they_share_a_name()"
+      "norm_label": "test_the_report_keeps_the_two_models_apart_when_they_share_a_name()",
+      "id": "finetune_tests_test_judge_wiring_test_the_report_keeps_the_two_models_apart_when_they_share_a_name"
     },
     {
       "label": "The independent judge is actually reachable from a run, and stays blind.\u2026",
@@ -822,10 +921,10 @@
       "source_file": "finetune/tests/test_judge_wiring.py",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_rationale_1",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "the independent judge is actually reachable from a run, and stays blind...."
+      "norm_label": "the independent judge is actually reachable from a run, and stays blind....",
+      "id": "finetune_tests_test_judge_wiring_rationale_1"
     },
     {
       "label": "Just enough EvalItem for `_judge_for`: a source note and nothing else.",
@@ -833,10 +932,10 @@
       "source_file": "finetune/tests/test_judge_wiring.py",
       "source_location": "L23",
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_rationale_23",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "just enough evalitem for `_judge_for`: a source note and nothing else."
+      "norm_label": "just enough evalitem for `_judge_for`: a source note and nothing else.",
+      "id": "finetune_tests_test_judge_wiring_rationale_23"
     },
     {
       "label": "Without the drafts, nothing downstream can grade them a second way.",
@@ -844,10 +943,10 @@
       "source_file": "finetune/tests/test_judge_wiring.py",
       "source_location": "L43",
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_rationale_43",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "without the drafts, nothing downstream can grade them a second way."
+      "norm_label": "without the drafts, nothing downstream can grade them a second way.",
+      "id": "finetune_tests_test_judge_wiring_rationale_43"
     },
     {
       "label": "A draft the rules passed and the judge rejected is the number we want.",
@@ -855,10 +954,10 @@
       "source_file": "finetune/tests/test_judge_wiring.py",
       "source_location": "L63",
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_rationale_63",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "a draft the rules passed and the judge rejected is the number we want."
+      "norm_label": "a draft the rules passed and the judge rejected is the number we want.",
+      "id": "finetune_tests_test_judge_wiring_rationale_63"
     },
     {
       "label": "There must be no parameter through which they could be passed.",
@@ -866,10 +965,10 @@
       "source_file": "finetune/tests/test_judge_wiring.py",
       "source_location": "L97",
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_rationale_97",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "there must be no parameter through which they could be passed."
+      "norm_label": "there must be no parameter through which they could be passed.",
+      "id": "finetune_tests_test_judge_wiring_rationale_97"
     },
     {
       "label": "Capture the real prompt and look for the facts in it. An earlier version of\u2026",
@@ -877,10 +976,10 @@
       "source_file": "finetune/tests/test_judge_wiring.py",
       "source_location": "L104",
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_rationale_104",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "capture the real prompt and look for the facts in it. an earlier version of..."
+      "norm_label": "capture the real prompt and look for the facts in it. an earlier version of...",
+      "id": "finetune_tests_test_judge_wiring_rationale_104"
     },
     {
       "label": "zip() would drop items and under-report the rate with no error.",
@@ -888,10 +987,10 @@
       "source_file": "finetune/tests/test_judge_wiring.py",
       "source_location": "L141",
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_rationale_141",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "zip() would drop items and under-report the rate with no error."
+      "norm_label": "zip() would drop items and under-report the rate with no error.",
+      "id": "finetune_tests_test_judge_wiring_rationale_141"
     },
     {
       "label": "Deriving the side from name equality collapsed both rows onto base. Nothing in\u2026",
@@ -899,10 +998,10 @@
       "source_file": "finetune/tests/test_judge_wiring.py",
       "source_location": "L171",
       "_origin": "ast",
-      "id": "finetune_tests_test_judge_wiring_rationale_171",
       "community": 84,
       "community_name": "run_eval.py",
-      "norm_label": "deriving the side from name equality collapsed both rows onto base. nothing in..."
+      "norm_label": "deriving the side from name equality collapsed both rows onto base. nothing in...",
+      "id": "finetune_tests_test_judge_wiring_rationale_171"
     },
     {
       "label": "test_run_eval_wiring.py",
@@ -910,10 +1009,10 @@
       "source_file": "finetune/tests/test_run_eval_wiring.py",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "finetune_tests_test_run_eval_wiring",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "test_run_eval_wiring.py"
+      "norm_label": "test_run_eval_wiring.py",
+      "id": "finetune_tests_test_run_eval_wiring"
     },
     {
       "label": "_write_split()",
@@ -922,10 +1021,10 @@
       "source_location": "L13",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_run_eval_wiring_write_split",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "_write_split()"
+      "norm_label": "_write_split()",
+      "id": "finetune_tests_test_run_eval_wiring_write_split"
     },
     {
       "label": "_args()",
@@ -934,10 +1033,10 @@
       "source_location": "L23",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_run_eval_wiring_args",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "_args()"
+      "norm_label": "_args()",
+      "id": "finetune_tests_test_run_eval_wiring_args"
     },
     {
       "label": "test_messages_pair_gives_a_system_and_user_string()",
@@ -946,10 +1045,10 @@
       "source_location": "L29",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_run_eval_wiring_test_messages_pair_gives_a_system_and_user_string",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "test_messages_pair_gives_a_system_and_user_string()"
+      "norm_label": "test_messages_pair_gives_a_system_and_user_string()",
+      "id": "finetune_tests_test_run_eval_wiring_test_messages_pair_gives_a_system_and_user_string"
     },
     {
       "label": "test_overlap_finds_the_sibling_train_split()",
@@ -958,10 +1057,10 @@
       "source_location": "L36",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_run_eval_wiring_test_overlap_finds_the_sibling_train_split",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "test_overlap_finds_the_sibling_train_split()"
+      "norm_label": "test_overlap_finds_the_sibling_train_split()",
+      "id": "finetune_tests_test_run_eval_wiring_test_overlap_finds_the_sibling_train_split"
     },
     {
       "label": "test_overlap_is_absent_when_there_is_no_train_split()",
@@ -970,10 +1069,10 @@
       "source_location": "L45",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_run_eval_wiring_test_overlap_is_absent_when_there_is_no_train_split",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "test_overlap_is_absent_when_there_is_no_train_split()"
+      "norm_label": "test_overlap_is_absent_when_there_is_no_train_split()",
+      "id": "finetune_tests_test_run_eval_wiring_test_overlap_is_absent_when_there_is_no_train_split"
     },
     {
       "label": "test_overlap_is_skipped_when_resampling()",
@@ -982,10 +1081,10 @@
       "source_location": "L51",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_run_eval_wiring_test_overlap_is_skipped_when_resampling",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "test_overlap_is_skipped_when_resampling()"
+      "norm_label": "test_overlap_is_skipped_when_resampling()",
+      "id": "finetune_tests_test_run_eval_wiring_test_overlap_is_skipped_when_resampling"
     },
     {
       "label": "test_confabulation_is_absent_when_probes_are_disabled()",
@@ -994,10 +1093,10 @@
       "source_location": "L59",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_run_eval_wiring_test_confabulation_is_absent_when_probes_are_disabled",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "test_confabulation_is_absent_when_probes_are_disabled()"
+      "norm_label": "test_confabulation_is_absent_when_probes_are_disabled()",
+      "id": "finetune_tests_test_run_eval_wiring_test_confabulation_is_absent_when_probes_are_disabled"
     },
     {
       "label": "test_confabulation_scores_both_models()",
@@ -1006,10 +1105,10 @@
       "source_location": "L63",
       "_callable": true,
       "_origin": "ast",
-      "id": "finetune_tests_test_run_eval_wiring_test_confabulation_scores_both_models",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "test_confabulation_scores_both_models()"
+      "norm_label": "test_confabulation_scores_both_models()",
+      "id": "finetune_tests_test_run_eval_wiring_test_confabulation_scores_both_models"
     },
     {
       "label": "main() reads the held-out split, and reports overlap and confabulation.",
@@ -1017,10 +1116,10 @@
       "source_file": "finetune/tests/test_run_eval_wiring.py",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "finetune_tests_test_run_eval_wiring_rationale_1",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "main() reads the held-out split, and reports overlap and confabulation."
+      "norm_label": "main() reads the held-out split, and reports overlap and confabulation.",
+      "id": "finetune_tests_test_run_eval_wiring_rationale_1"
     },
     {
       "label": "A resampled set has no committed train split to compare against.",
@@ -1028,10 +1127,10 @@
       "source_file": "finetune/tests/test_run_eval_wiring.py",
       "source_location": "L52",
       "_origin": "ast",
-      "id": "finetune_tests_test_run_eval_wiring_rationale_52",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "a resampled set has no committed train split to compare against."
+      "norm_label": "a resampled set has no committed train split to compare against.",
+      "id": "finetune_tests_test_run_eval_wiring_rationale_52"
     },
     {
       "label": "Writing \"Not documented.\" never confabulates; inventing content does. Both\u2026",
@@ -1039,10 +1138,10 @@
       "source_file": "finetune/tests/test_run_eval_wiring.py",
       "source_location": "L64",
       "_origin": "ast",
-      "id": "finetune_tests_test_run_eval_wiring_rationale_64",
       "community": 140,
       "community_name": "test_run_eval_wiring.py",
-      "norm_label": "writing \"not documented.\" never confabulates; inventing content does. both..."
+      "norm_label": "writing \"not documented.\" never confabulates; inventing content does. both...",
+      "id": "finetune_tests_test_run_eval_wiring_rationale_64"
     },
     {
       "label": "batch.py",
@@ -40969,105 +41068,6 @@
       "id": "agents_task_spec_shape"
     },
     {
-      "label": "CHANGELOG.md",
-      "file_type": "document",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 54,
-      "community_name": "[Unreleased]",
-      "norm_label": "changelog.md",
-      "id": "changelog"
-    },
-    {
-      "label": "Changelog",
-      "file_type": "document",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 54,
-      "community_name": "[Unreleased]",
-      "norm_label": "changelog",
-      "id": "changelog_changelog"
-    },
-    {
-      "label": "[Unreleased]",
-      "file_type": "document",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L6",
-      "_origin": "ast",
-      "community": 54,
-      "community_name": "[Unreleased]",
-      "norm_label": "[unreleased]",
-      "id": "changelog_unreleased"
-    },
-    {
-      "label": "Fixed",
-      "file_type": "document",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L8",
-      "_origin": "ast",
-      "community": 54,
-      "community_name": "[Unreleased]",
-      "norm_label": "fixed",
-      "id": "changelog_fixed"
-    },
-    {
-      "label": "Added",
-      "file_type": "document",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L32",
-      "_origin": "ast",
-      "community": 54,
-      "community_name": "[Unreleased]",
-      "norm_label": "added",
-      "id": "changelog_added"
-    },
-    {
-      "label": "Fixed",
-      "file_type": "document",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L59",
-      "_origin": "ast",
-      "community": 54,
-      "community_name": "[Unreleased]",
-      "norm_label": "fixed",
-      "id": "changelog_fixed_59"
-    },
-    {
-      "label": "Added",
-      "file_type": "document",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L84",
-      "_origin": "ast",
-      "community": 54,
-      "community_name": "[Unreleased]",
-      "norm_label": "added",
-      "id": "changelog_added_84"
-    },
-    {
-      "label": "[0.1.0] - 2026-09-01",
-      "file_type": "document",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L106",
-      "_origin": "ast",
-      "community": 54,
-      "community_name": "[Unreleased]",
-      "norm_label": "[0.1.0] - 2026-09-01",
-      "id": "changelog_0_1_0_2026_09_01"
-    },
-    {
-      "label": "Added",
-      "file_type": "document",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L108",
-      "_origin": "ast",
-      "community": 54,
-      "community_name": "[Unreleased]",
-      "norm_label": "added",
-      "id": "changelog_added_108"
-    },
-    {
       "label": "download-and-install.md",
       "file_type": "document",
       "source_file": "docs/download-and-install.md",
@@ -45703,6 +45703,94 @@
   ],
   "links": [
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "changelog",
+      "target": "changelog_changelog",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L122",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "changelog_changelog",
+      "target": "changelog_0_1_0_2026_09_01",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "changelog_changelog",
+      "target": "changelog_unreleased",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "changelog_unreleased",
+      "target": "changelog_added",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L100",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "changelog_unreleased",
+      "target": "changelog_added_100",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "changelog_unreleased",
+      "target": "changelog_fixed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L75",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "changelog_unreleased",
+      "target": "changelog_fixed_75",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L124",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "changelog_0_1_0_2026_09_01",
+      "target": "changelog_added_124",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -45710,9 +45798,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report",
-      "target": "finetune_eval_metrics",
-      "confidence_score": 1.0
+      "target": "finetune_eval_metrics"
     },
     {
       "relation": "contains",
@@ -45721,9 +45809,9 @@
       "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report",
-      "target": "finetune_eval_report_build_report",
-      "confidence_score": 1.0
+      "target": "finetune_eval_report_build_report"
     },
     {
       "relation": "contains",
@@ -45732,9 +45820,9 @@
       "source_location": "L17",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report",
-      "target": "finetune_eval_report_row",
-      "confidence_score": 1.0
+      "target": "finetune_eval_report_row"
     },
     {
       "relation": "contains",
@@ -45743,9 +45831,9 @@
       "source_location": "L121",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report",
-      "target": "finetune_eval_report_write_report",
-      "confidence_score": 1.0
+      "target": "finetune_eval_report_write_report"
     },
     {
       "relation": "imports_from",
@@ -45755,9 +45843,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report",
-      "target": "finetune_eval_run_eval",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval"
     },
     {
       "relation": "imports",
@@ -45767,9 +45855,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report",
-      "target": "finetune_eval_run_eval_compare",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_compare"
     },
     {
       "relation": "imports",
@@ -45779,9 +45867,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report",
-      "target": "finetune_eval_run_eval_runresult",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_runresult"
     },
     {
       "relation": "rationale_for",
@@ -45790,9 +45878,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report_rationale_1",
-      "target": "finetune_eval_report",
-      "confidence_score": 1.0
+      "target": "finetune_eval_report"
     },
     {
       "relation": "imports_from",
@@ -45814,9 +45902,9 @@
       "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_eval_report",
-      "confidence_score": 1.0
+      "target": "finetune_eval_report"
     },
     {
       "relation": "calls",
@@ -45826,9 +45914,9 @@
       "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report_build_report",
-      "target": "finetune_eval_report_row",
-      "confidence_score": 1.0
+      "target": "finetune_eval_report_row"
     },
     {
       "relation": "calls",
@@ -45838,9 +45926,9 @@
       "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report_build_report",
-      "target": "finetune_eval_run_eval_compare",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_compare"
     },
     {
       "relation": "references",
@@ -45850,9 +45938,9 @@
       "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report_build_report",
-      "target": "finetune_eval_run_eval_runresult",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_runresult"
     },
     {
       "relation": "calls",
@@ -45862,9 +45950,9 @@
       "source_location": "L124",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report_write_report",
-      "target": "finetune_eval_report_build_report",
-      "confidence_score": 1.0
+      "target": "finetune_eval_report_build_report"
     },
     {
       "relation": "imports",
@@ -45898,9 +45986,9 @@
       "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_eval_report_build_report",
-      "confidence_score": 1.0
+      "target": "finetune_eval_report_build_report"
     },
     {
       "relation": "calls",
@@ -45910,9 +45998,9 @@
       "source_location": "L184",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_the_report_keeps_the_two_models_apart_when_they_share_a_name",
-      "target": "finetune_eval_report_build_report",
-      "confidence_score": 1.0
+      "target": "finetune_eval_report_build_report"
     },
     {
       "relation": "calls",
@@ -45922,9 +46010,9 @@
       "source_location": "L165",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_the_report_omits_the_section_when_no_judge_ran",
-      "target": "finetune_eval_report_build_report",
-      "confidence_score": 1.0
+      "target": "finetune_eval_report_build_report"
     },
     {
       "relation": "calls",
@@ -45934,9 +46022,9 @@
       "source_location": "L155",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_the_report_renders_a_judge_section",
-      "target": "finetune_eval_report_build_report",
-      "confidence_score": 1.0
+      "target": "finetune_eval_report_build_report"
     },
     {
       "relation": "references",
@@ -45946,9 +46034,9 @@
       "source_location": "L121",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report_write_report",
-      "target": "finetune_eval_run_eval_runresult",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_runresult"
     },
     {
       "relation": "references",
@@ -45958,9 +46046,9 @@
       "source_location": "L121",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_report_write_report",
-      "target": "path",
-      "confidence_score": 1.0
+      "target": "path"
     },
     {
       "relation": "imports",
@@ -45970,9 +46058,9 @@
       "source_location": "L357",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_report_write_report",
-      "confidence_score": 1.0
+      "target": "finetune_eval_report_write_report"
     },
     {
       "relation": "calls",
@@ -45982,9 +46070,9 @@
       "source_location": "L408",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_main",
-      "target": "finetune_eval_report_write_report",
-      "confidence_score": 1.0
+      "target": "finetune_eval_report_write_report"
     },
     {
       "relation": "references",
@@ -46390,9 +46478,9 @@
       "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_assemble_build_target",
-      "confidence_score": 1.0
+      "target": "finetune_assemble_build_target"
     },
     {
       "relation": "imports_from",
@@ -46402,9 +46490,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_assemble_deidentify_notes",
-      "confidence_score": 1.0
+      "target": "finetune_assemble_deidentify_notes"
     },
     {
       "relation": "imports_from",
@@ -46414,9 +46502,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_assemble_validators",
-      "confidence_score": 1.0
+      "target": "finetune_assemble_validators"
     },
     {
       "relation": "imports_from",
@@ -46426,9 +46514,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_datagen_render_note",
-      "confidence_score": 1.0
+      "target": "finetune_datagen_render_note"
     },
     {
       "relation": "imports_from",
@@ -46438,9 +46526,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_datagen_sampler",
-      "confidence_score": 1.0
+      "target": "finetune_datagen_sampler"
     },
     {
       "relation": "imports_from",
@@ -46450,9 +46538,9 @@
       "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_datagen_schema",
-      "confidence_score": 1.0
+      "target": "finetune_datagen_schema"
     },
     {
       "relation": "imports_from",
@@ -46462,9 +46550,9 @@
       "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_metrics",
-      "confidence_score": 1.0
+      "target": "finetune_eval_metrics"
     },
     {
       "relation": "contains",
@@ -46473,9 +46561,9 @@
       "source_location": "L206",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_callablecompleter",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_callablecompleter"
     },
     {
       "relation": "contains",
@@ -46484,9 +46572,9 @@
       "source_location": "L161",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_compare",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_compare"
     },
     {
       "relation": "contains",
@@ -46495,9 +46583,9 @@
       "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_completer",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_completer"
     },
     {
       "relation": "contains",
@@ -46506,9 +46594,9 @@
       "source_location": "L287",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_confabulation_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_confabulation_for"
     },
     {
       "relation": "contains",
@@ -46517,9 +46605,9 @@
       "source_location": "L43",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_evalitem",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_evalitem"
     },
     {
       "relation": "contains",
@@ -46528,9 +46616,9 @@
       "source_location": "L184",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_ggufcompleter",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_ggufcompleter"
     },
     {
       "relation": "contains",
@@ -46539,9 +46627,9 @@
       "source_location": "L216",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_hfcompleter",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_hfcompleter"
     },
     {
       "relation": "contains",
@@ -46550,9 +46638,9 @@
       "source_location": "L307",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_judge_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_judge_for"
     },
     {
       "relation": "contains",
@@ -46561,9 +46649,9 @@
       "source_location": "L92",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_load_eval_items",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_load_eval_items"
     },
     {
       "relation": "contains",
@@ -46572,9 +46660,9 @@
       "source_location": "L353",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_main",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_main"
     },
     {
       "relation": "contains",
@@ -46583,9 +46671,9 @@
       "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_make_eval_set",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_make_eval_set"
     },
     {
       "relation": "contains",
@@ -46594,9 +46682,9 @@
       "source_location": "L266",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_overlap_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_overlap_for"
     },
     {
       "relation": "contains",
@@ -46605,9 +46693,9 @@
       "source_location": "L137",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_run",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_run"
     },
     {
       "relation": "contains",
@@ -46616,9 +46704,9 @@
       "source_location": "L129",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_eval_run_eval_runresult",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_runresult"
     },
     {
       "relation": "imports_from",
@@ -46628,9 +46716,9 @@
       "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval",
-      "target": "finetune_integrate_prompt_template",
-      "confidence_score": 1.0
+      "target": "finetune_integrate_prompt_template"
     },
     {
       "relation": "rationale_for",
@@ -46639,9 +46727,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_rationale_1",
-      "target": "finetune_eval_run_eval",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval"
     },
     {
       "relation": "imports_from",
@@ -46663,9 +46751,9 @@
       "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_eval_run_eval",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval"
     },
     {
       "relation": "imports_from",
@@ -46687,9 +46775,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_eval_run_eval",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval"
     },
     {
       "relation": "imports",
@@ -46733,9 +46821,9 @@
       "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_completer",
-      "target": "finetune_eval_run_eval_completer_complete",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_completer_complete"
     },
     {
       "relation": "inherits",
@@ -46744,9 +46832,9 @@
       "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_completer",
-      "target": "protocol",
-      "confidence_score": 1.0
+      "target": "protocol"
     },
     {
       "relation": "references",
@@ -46756,9 +46844,9 @@
       "source_location": "L137",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_run",
-      "target": "finetune_eval_run_eval_completer",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_completer"
     },
     {
       "relation": "imports",
@@ -46815,9 +46903,9 @@
       "source_location": "L50",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_evalitem",
-      "target": "finetune_eval_run_eval_evalitem_messages",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_evalitem_messages"
     },
     {
       "relation": "method",
@@ -46826,9 +46914,9 @@
       "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_evalitem",
-      "target": "finetune_eval_run_eval_evalitem_messages_pair",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_evalitem_messages_pair"
     },
     {
       "relation": "references",
@@ -46838,9 +46926,9 @@
       "source_location": "L92",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_load_eval_items",
-      "target": "finetune_eval_run_eval_evalitem",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_evalitem"
     },
     {
       "relation": "references",
@@ -46850,9 +46938,9 @@
       "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_make_eval_set",
-      "target": "finetune_eval_run_eval_evalitem",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_evalitem"
     },
     {
       "relation": "references",
@@ -46862,9 +46950,9 @@
       "source_location": "L137",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_run",
-      "target": "finetune_eval_run_eval_evalitem",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_evalitem"
     },
     {
       "relation": "calls",
@@ -46886,9 +46974,9 @@
       "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_evalitem_messages_pair",
-      "target": "finetune_eval_run_eval_evalitem_messages",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_evalitem_messages"
     },
     {
       "relation": "calls",
@@ -46898,9 +46986,9 @@
       "source_location": "L143",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_run",
-      "target": "finetune_eval_run_eval_evalitem_messages",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_evalitem_messages"
     },
     {
       "relation": "calls",
@@ -46910,9 +46998,9 @@
       "source_location": "L298",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_confabulation_for",
-      "target": "finetune_eval_run_eval_evalitem_messages_pair",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_evalitem_messages_pair"
     },
     {
       "relation": "rationale_for",
@@ -46921,9 +47009,9 @@
       "source_location": "L54",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_rationale_54",
-      "target": "finetune_eval_run_eval_evalitem_messages_pair",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_evalitem_messages_pair"
     },
     {
       "relation": "calls",
@@ -46933,9 +47021,9 @@
       "source_location": "L389",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_main",
-      "target": "finetune_eval_run_eval_make_eval_set",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_make_eval_set"
     },
     {
       "relation": "calls",
@@ -47017,9 +47105,9 @@
       "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_make_eval_set",
-      "target": "formtype",
-      "confidence_score": 1.0
+      "target": "formtype"
     },
     {
       "relation": "rationale_for",
@@ -47028,9 +47116,9 @@
       "source_location": "L66",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_rationale_66",
-      "target": "finetune_eval_run_eval_make_eval_set",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_make_eval_set"
     },
     {
       "relation": "imports",
@@ -47064,9 +47152,9 @@
       "source_location": "L119",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_load_eval_items",
-      "target": "formtype",
-      "confidence_score": 1.0
+      "target": "formtype"
     },
     {
       "relation": "calls",
@@ -47088,9 +47176,9 @@
       "source_location": "L391",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_main",
-      "target": "finetune_eval_run_eval_load_eval_items",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_load_eval_items"
     },
     {
       "relation": "calls",
@@ -47100,9 +47188,9 @@
       "source_location": "L283",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_overlap_for",
-      "target": "finetune_eval_run_eval_load_eval_items",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_load_eval_items"
     },
     {
       "relation": "rationale_for",
@@ -47111,9 +47199,9 @@
       "source_location": "L93",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_rationale_93",
-      "target": "finetune_eval_run_eval_load_eval_items",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_load_eval_items"
     },
     {
       "relation": "imports",
@@ -47207,9 +47295,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_eval_run_eval_load_eval_items",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_load_eval_items"
     },
     {
       "relation": "calls",
@@ -47219,9 +47307,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_messages_pair_gives_a_system_and_user_string",
-      "target": "finetune_eval_run_eval_load_eval_items",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_load_eval_items"
     },
     {
       "relation": "calls",
@@ -47231,9 +47319,9 @@
       "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_overlap_finds_the_sibling_train_split",
-      "target": "finetune_eval_run_eval_load_eval_items",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_load_eval_items"
     },
     {
       "relation": "calls",
@@ -47243,9 +47331,9 @@
       "source_location": "L47",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_overlap_is_absent_when_there_is_no_train_split",
-      "target": "finetune_eval_run_eval_load_eval_items",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_load_eval_items"
     },
     {
       "relation": "calls",
@@ -47255,9 +47343,9 @@
       "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_overlap_is_skipped_when_resampling",
-      "target": "finetune_eval_run_eval_load_eval_items",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_load_eval_items"
     },
     {
       "relation": "references",
@@ -47267,9 +47355,9 @@
       "source_location": "L161",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_compare",
-      "target": "finetune_eval_run_eval_runresult",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_runresult"
     },
     {
       "relation": "references",
@@ -47279,9 +47367,9 @@
       "source_location": "L307",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_judge_for",
-      "target": "finetune_eval_run_eval_runresult",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_runresult"
     },
     {
       "relation": "references",
@@ -47291,9 +47379,9 @@
       "source_location": "L137",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_run",
-      "target": "finetune_eval_run_eval_runresult",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_runresult"
     },
     {
       "relation": "imports",
@@ -47315,9 +47403,9 @@
       "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_eval_run_eval_runresult",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_runresult"
     },
     {
       "relation": "uses",
@@ -47326,9 +47414,9 @@
       "source_location": "L19",
       "weight": 0.8,
       "_origin": "ast",
+      "confidence_score": 0.5,
       "source": "finetune_tests_test_judge_wiring_item",
-      "target": "finetune_eval_run_eval_runresult",
-      "confidence_score": 0.5
+      "target": "finetune_eval_run_eval_runresult"
     },
     {
       "relation": "calls",
@@ -47338,9 +47426,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_result",
-      "target": "finetune_eval_run_eval_runresult",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_runresult"
     },
     {
       "relation": "calls",
@@ -47350,9 +47438,9 @@
       "source_location": "L397",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_main",
-      "target": "finetune_eval_run_eval_run",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_run"
     },
     {
       "relation": "calls",
@@ -47386,9 +47474,9 @@
       "source_location": "L145",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_run",
-      "target": "finetune_eval_run_eval_hfcompleter_complete",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_hfcompleter_complete"
     },
     {
       "relation": "imports",
@@ -47469,9 +47557,9 @@
       "source_location": "L162",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_rationale_162",
-      "target": "finetune_eval_run_eval_compare",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_compare"
     },
     {
       "relation": "imports",
@@ -47504,9 +47592,9 @@
       "source_location": "L194",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_ggufcompleter",
-      "target": "finetune_eval_run_eval_ggufcompleter_complete",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_ggufcompleter_complete"
     },
     {
       "relation": "method",
@@ -47515,9 +47603,9 @@
       "source_location": "L187",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_ggufcompleter",
-      "target": "finetune_eval_run_eval_ggufcompleter_init",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_ggufcompleter_init"
     },
     {
       "relation": "calls",
@@ -47527,9 +47615,9 @@
       "source_location": "L394",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_main",
-      "target": "finetune_eval_run_eval_ggufcompleter",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_ggufcompleter"
     },
     {
       "relation": "rationale_for",
@@ -47538,9 +47626,9 @@
       "source_location": "L185",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_rationale_185",
-      "target": "finetune_eval_run_eval_ggufcompleter",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_ggufcompleter"
     },
     {
       "relation": "method",
@@ -47549,9 +47637,9 @@
       "source_location": "L212",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_callablecompleter",
-      "target": "finetune_eval_run_eval_callablecompleter_complete",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_callablecompleter_complete"
     },
     {
       "relation": "method",
@@ -47560,9 +47648,9 @@
       "source_location": "L209",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_callablecompleter",
-      "target": "finetune_eval_run_eval_callablecompleter_init",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_callablecompleter_init"
     },
     {
       "relation": "rationale_for",
@@ -47571,9 +47659,9 @@
       "source_location": "L207",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_rationale_207",
-      "target": "finetune_eval_run_eval_callablecompleter",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_callablecompleter"
     },
     {
       "relation": "imports",
@@ -47654,9 +47742,9 @@
       "source_location": "L241",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_hfcompleter",
-      "target": "finetune_eval_run_eval_hfcompleter_complete",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_hfcompleter_complete"
     },
     {
       "relation": "method",
@@ -47665,9 +47753,9 @@
       "source_location": "L224",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_hfcompleter",
-      "target": "finetune_eval_run_eval_hfcompleter_init",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_hfcompleter_init"
     },
     {
       "relation": "rationale_for",
@@ -47676,9 +47764,9 @@
       "source_location": "L217",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_rationale_217",
-      "target": "finetune_eval_run_eval_hfcompleter",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_hfcompleter"
     },
     {
       "relation": "calls",
@@ -47688,9 +47776,9 @@
       "source_location": "L298",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_confabulation_for",
-      "target": "finetune_eval_run_eval_hfcompleter_complete",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_hfcompleter_complete"
     },
     {
       "relation": "calls",
@@ -47700,9 +47788,9 @@
       "source_location": "L404",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_main",
-      "target": "finetune_eval_run_eval_overlap_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_overlap_for"
     },
     {
       "relation": "calls",
@@ -47723,9 +47811,9 @@
       "source_location": "L267",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_rationale_267",
-      "target": "finetune_eval_run_eval_overlap_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_overlap_for"
     },
     {
       "relation": "imports",
@@ -47735,9 +47823,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_eval_run_eval_overlap_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_overlap_for"
     },
     {
       "relation": "calls",
@@ -47747,9 +47835,9 @@
       "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_overlap_finds_the_sibling_train_split",
-      "target": "finetune_eval_run_eval_overlap_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_overlap_for"
     },
     {
       "relation": "calls",
@@ -47759,9 +47847,9 @@
       "source_location": "L48",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_overlap_is_absent_when_there_is_no_train_split",
-      "target": "finetune_eval_run_eval_overlap_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_overlap_for"
     },
     {
       "relation": "calls",
@@ -47771,9 +47859,9 @@
       "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_overlap_is_skipped_when_resampling",
-      "target": "finetune_eval_run_eval_overlap_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_overlap_for"
     },
     {
       "relation": "calls",
@@ -47807,9 +47895,9 @@
       "source_location": "L405",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_main",
-      "target": "finetune_eval_run_eval_confabulation_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_confabulation_for"
     },
     {
       "relation": "rationale_for",
@@ -47818,9 +47906,9 @@
       "source_location": "L288",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_rationale_288",
-      "target": "finetune_eval_run_eval_confabulation_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_confabulation_for"
     },
     {
       "relation": "imports",
@@ -47830,9 +47918,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_eval_run_eval_confabulation_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_confabulation_for"
     },
     {
       "relation": "calls",
@@ -47842,9 +47930,9 @@
       "source_location": "L60",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_confabulation_is_absent_when_probes_are_disabled",
-      "target": "finetune_eval_run_eval_confabulation_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_confabulation_for"
     },
     {
       "relation": "calls",
@@ -47854,9 +47942,9 @@
       "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_confabulation_scores_both_models",
-      "target": "finetune_eval_run_eval_confabulation_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_confabulation_for"
     },
     {
       "relation": "calls",
@@ -47890,9 +47978,9 @@
       "source_location": "L406",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_main",
-      "target": "finetune_eval_run_eval_judge_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_judge_for"
     },
     {
       "relation": "rationale_for",
@@ -47901,9 +47989,9 @@
       "source_location": "L308",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_eval_run_eval_rationale_308",
-      "target": "finetune_eval_run_eval_judge_for",
-      "confidence_score": 1.0
+      "target": "finetune_eval_run_eval_judge_for"
     },
     {
       "relation": "calls",
@@ -48021,9 +48109,9 @@
       "source_location": "L17",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_eval_metrics",
-      "confidence_score": 1.0
+      "target": "finetune_eval_metrics"
     },
     {
       "relation": "contains",
@@ -48032,9 +48120,9 @@
       "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_args",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_args"
     },
     {
       "relation": "contains",
@@ -48043,9 +48131,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_item",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_item"
     },
     {
       "relation": "contains",
@@ -48054,9 +48142,9 @@
       "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_result",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_result"
     },
     {
       "relation": "contains",
@@ -48065,9 +48153,9 @@
       "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_score",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_score"
     },
     {
       "relation": "contains",
@@ -48076,9 +48164,9 @@
       "source_location": "L140",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_test_a_length_mismatch_is_refused_not_silently_truncated",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_a_length_mismatch_is_refused_not_silently_truncated"
     },
     {
       "relation": "contains",
@@ -48087,9 +48175,9 @@
       "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_test_an_unparsable_reply_is_reported_not_scored",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_an_unparsable_reply_is_reported_not_scored"
     },
     {
       "relation": "contains",
@@ -48098,9 +48186,9 @@
       "source_location": "L62",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_test_disagreement_with_the_rule_grader_is_counted",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_disagreement_with_the_rule_grader_is_counted"
     },
     {
       "relation": "contains",
@@ -48109,9 +48197,9 @@
       "source_location": "L57",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_test_judge_is_skipped_unless_asked",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_judge_is_skipped_unless_asked"
     },
     {
       "relation": "contains",
@@ -48120,9 +48208,9 @@
       "source_location": "L103",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_test_no_fact_value_reaches_what_the_judge_is_actually_sent",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_no_fact_value_reaches_what_the_judge_is_actually_sent"
     },
     {
       "relation": "contains",
@@ -48131,9 +48219,9 @@
       "source_location": "L42",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_test_run_keeps_the_drafts_it_scored",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_run_keeps_the_drafts_it_scored"
     },
     {
       "relation": "contains",
@@ -48142,9 +48230,9 @@
       "source_location": "L96",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_test_the_judge_signature_cannot_accept_facts",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_the_judge_signature_cannot_accept_facts"
     },
     {
       "relation": "contains",
@@ -48153,9 +48241,9 @@
       "source_location": "L170",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_test_the_report_keeps_the_two_models_apart_when_they_share_a_name",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_the_report_keeps_the_two_models_apart_when_they_share_a_name"
     },
     {
       "relation": "contains",
@@ -48164,9 +48252,9 @@
       "source_location": "L164",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_test_the_report_omits_the_section_when_no_judge_ran",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_the_report_omits_the_section_when_no_judge_ran"
     },
     {
       "relation": "contains",
@@ -48175,9 +48263,9 @@
       "source_location": "L148",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring",
-      "target": "finetune_tests_test_judge_wiring_test_the_report_renders_a_judge_section",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_the_report_renders_a_judge_section"
     },
     {
       "relation": "rationale_for",
@@ -48186,9 +48274,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_rationale_1",
-      "target": "finetune_tests_test_judge_wiring",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring"
     },
     {
       "relation": "method",
@@ -48197,9 +48285,9 @@
       "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_item",
-      "target": "finetune_tests_test_judge_wiring_item_init",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_item_init"
     },
     {
       "relation": "rationale_for",
@@ -48208,9 +48296,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_rationale_23",
-      "target": "finetune_tests_test_judge_wiring_item",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_item"
     },
     {
       "relation": "calls",
@@ -48220,9 +48308,9 @@
       "source_location": "L142",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_a_length_mismatch_is_refused_not_silently_truncated",
-      "target": "finetune_tests_test_judge_wiring_item",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_item"
     },
     {
       "relation": "calls",
@@ -48232,9 +48320,9 @@
       "source_location": "L88",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_an_unparsable_reply_is_reported_not_scored",
-      "target": "finetune_tests_test_judge_wiring_item",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_item"
     },
     {
       "relation": "calls",
@@ -48244,9 +48332,9 @@
       "source_location": "L72",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_disagreement_with_the_rule_grader_is_counted",
-      "target": "finetune_tests_test_judge_wiring_item",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_item"
     },
     {
       "relation": "calls",
@@ -48256,9 +48344,9 @@
       "source_location": "L143",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_a_length_mismatch_is_refused_not_silently_truncated",
-      "target": "finetune_tests_test_judge_wiring_result",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_result"
     },
     {
       "relation": "calls",
@@ -48268,9 +48356,9 @@
       "source_location": "L90",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_an_unparsable_reply_is_reported_not_scored",
-      "target": "finetune_tests_test_judge_wiring_result",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_result"
     },
     {
       "relation": "calls",
@@ -48280,9 +48368,9 @@
       "source_location": "L75",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_disagreement_with_the_rule_grader_is_counted",
-      "target": "finetune_tests_test_judge_wiring_result",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_result"
     },
     {
       "relation": "calls",
@@ -48292,9 +48380,9 @@
       "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_judge_is_skipped_unless_asked",
-      "target": "finetune_tests_test_judge_wiring_result",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_result"
     },
     {
       "relation": "calls",
@@ -48304,9 +48392,9 @@
       "source_location": "L131",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_no_fact_value_reaches_what_the_judge_is_actually_sent",
-      "target": "finetune_tests_test_judge_wiring_result",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_result"
     },
     {
       "relation": "calls",
@@ -48316,9 +48404,9 @@
       "source_location": "L185",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_the_report_keeps_the_two_models_apart_when_they_share_a_name",
-      "target": "finetune_tests_test_judge_wiring_result",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_result"
     },
     {
       "relation": "calls",
@@ -48328,9 +48416,9 @@
       "source_location": "L165",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_the_report_omits_the_section_when_no_judge_ran",
-      "target": "finetune_tests_test_judge_wiring_result",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_result"
     },
     {
       "relation": "calls",
@@ -48340,9 +48428,9 @@
       "source_location": "L156",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_the_report_renders_a_judge_section",
-      "target": "finetune_tests_test_judge_wiring_result",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_result"
     },
     {
       "relation": "references",
@@ -48352,9 +48440,9 @@
       "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_score",
-      "target": "draftscore",
-      "confidence_score": 1.0
+      "target": "draftscore"
     },
     {
       "relation": "calls",
@@ -48364,9 +48452,9 @@
       "source_location": "L143",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_a_length_mismatch_is_refused_not_silently_truncated",
-      "target": "finetune_tests_test_judge_wiring_score",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_score"
     },
     {
       "relation": "calls",
@@ -48376,9 +48464,9 @@
       "source_location": "L90",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_an_unparsable_reply_is_reported_not_scored",
-      "target": "finetune_tests_test_judge_wiring_score",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_score"
     },
     {
       "relation": "calls",
@@ -48388,9 +48476,9 @@
       "source_location": "L73",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_disagreement_with_the_rule_grader_is_counted",
-      "target": "finetune_tests_test_judge_wiring_score",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_score"
     },
     {
       "relation": "calls",
@@ -48400,9 +48488,9 @@
       "source_location": "L131",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_no_fact_value_reaches_what_the_judge_is_actually_sent",
-      "target": "finetune_tests_test_judge_wiring_score",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_score"
     },
     {
       "relation": "calls",
@@ -48412,9 +48500,9 @@
       "source_location": "L185",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_the_report_keeps_the_two_models_apart_when_they_share_a_name",
-      "target": "finetune_tests_test_judge_wiring_score",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_score"
     },
     {
       "relation": "calls",
@@ -48424,9 +48512,9 @@
       "source_location": "L165",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_the_report_omits_the_section_when_no_judge_ran",
-      "target": "finetune_tests_test_judge_wiring_score",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_score"
     },
     {
       "relation": "calls",
@@ -48436,9 +48524,9 @@
       "source_location": "L156",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_test_the_report_renders_a_judge_section",
-      "target": "finetune_tests_test_judge_wiring_score",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_score"
     },
     {
       "relation": "references",
@@ -48448,9 +48536,9 @@
       "weight": 1.0,
       "context": "decorator",
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_args",
-      "target": "fixture",
-      "confidence_score": 1.0
+      "target": "fixture"
     },
     {
       "relation": "references",
@@ -48483,9 +48571,9 @@
       "source_location": "L43",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_rationale_43",
-      "target": "finetune_tests_test_judge_wiring_test_run_keeps_the_drafts_it_scored",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_run_keeps_the_drafts_it_scored"
     },
     {
       "relation": "rationale_for",
@@ -48494,9 +48582,9 @@
       "source_location": "L63",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_rationale_63",
-      "target": "finetune_tests_test_judge_wiring_test_disagreement_with_the_rule_grader_is_counted",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_disagreement_with_the_rule_grader_is_counted"
     },
     {
       "relation": "rationale_for",
@@ -48505,9 +48593,9 @@
       "source_location": "L97",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_rationale_97",
-      "target": "finetune_tests_test_judge_wiring_test_the_judge_signature_cannot_accept_facts",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_the_judge_signature_cannot_accept_facts"
     },
     {
       "relation": "rationale_for",
@@ -48516,9 +48604,9 @@
       "source_location": "L104",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_rationale_104",
-      "target": "finetune_tests_test_judge_wiring_test_no_fact_value_reaches_what_the_judge_is_actually_sent",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_no_fact_value_reaches_what_the_judge_is_actually_sent"
     },
     {
       "relation": "rationale_for",
@@ -48527,9 +48615,9 @@
       "source_location": "L141",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_rationale_141",
-      "target": "finetune_tests_test_judge_wiring_test_a_length_mismatch_is_refused_not_silently_truncated",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_a_length_mismatch_is_refused_not_silently_truncated"
     },
     {
       "relation": "rationale_for",
@@ -48538,9 +48626,9 @@
       "source_location": "L171",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_judge_wiring_rationale_171",
-      "target": "finetune_tests_test_judge_wiring_test_the_report_keeps_the_two_models_apart_when_they_share_a_name",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_judge_wiring_test_the_report_keeps_the_two_models_apart_when_they_share_a_name"
     },
     {
       "relation": "imports_from",
@@ -48550,9 +48638,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_assemble_pairs",
-      "confidence_score": 1.0
+      "target": "finetune_assemble_pairs"
     },
     {
       "relation": "imports_from",
@@ -48562,9 +48650,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_datagen_sampler",
-      "confidence_score": 1.0
+      "target": "finetune_datagen_sampler"
     },
     {
       "relation": "imports_from",
@@ -48574,9 +48662,9 @@
       "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_datagen_schema",
-      "confidence_score": 1.0
+      "target": "finetune_datagen_schema"
     },
     {
       "relation": "contains",
@@ -48585,9 +48673,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_tests_test_run_eval_wiring_args",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_args"
     },
     {
       "relation": "contains",
@@ -48596,9 +48684,9 @@
       "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_tests_test_run_eval_wiring_test_confabulation_is_absent_when_probes_are_disabled",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_test_confabulation_is_absent_when_probes_are_disabled"
     },
     {
       "relation": "contains",
@@ -48607,9 +48695,9 @@
       "source_location": "L63",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_tests_test_run_eval_wiring_test_confabulation_scores_both_models",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_test_confabulation_scores_both_models"
     },
     {
       "relation": "contains",
@@ -48618,9 +48706,9 @@
       "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_tests_test_run_eval_wiring_test_messages_pair_gives_a_system_and_user_string",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_test_messages_pair_gives_a_system_and_user_string"
     },
     {
       "relation": "contains",
@@ -48629,9 +48717,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_tests_test_run_eval_wiring_test_overlap_finds_the_sibling_train_split",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_test_overlap_finds_the_sibling_train_split"
     },
     {
       "relation": "contains",
@@ -48640,9 +48728,9 @@
       "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_tests_test_run_eval_wiring_test_overlap_is_absent_when_there_is_no_train_split",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_test_overlap_is_absent_when_there_is_no_train_split"
     },
     {
       "relation": "contains",
@@ -48651,9 +48739,9 @@
       "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_tests_test_run_eval_wiring_test_overlap_is_skipped_when_resampling",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_test_overlap_is_skipped_when_resampling"
     },
     {
       "relation": "contains",
@@ -48662,9 +48750,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring",
-      "target": "finetune_tests_test_run_eval_wiring_write_split",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_write_split"
     },
     {
       "relation": "rationale_for",
@@ -48673,9 +48761,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_rationale_1",
-      "target": "finetune_tests_test_run_eval_wiring",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring"
     },
     {
       "relation": "calls",
@@ -48685,9 +48773,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_messages_pair_gives_a_system_and_user_string",
-      "target": "finetune_tests_test_run_eval_wiring_write_split",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_write_split"
     },
     {
       "relation": "calls",
@@ -48697,9 +48785,9 @@
       "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_overlap_finds_the_sibling_train_split",
-      "target": "finetune_tests_test_run_eval_wiring_write_split",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_write_split"
     },
     {
       "relation": "calls",
@@ -48709,9 +48797,9 @@
       "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_overlap_is_absent_when_there_is_no_train_split",
-      "target": "finetune_tests_test_run_eval_wiring_write_split",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_write_split"
     },
     {
       "relation": "calls",
@@ -48721,9 +48809,9 @@
       "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_overlap_is_skipped_when_resampling",
-      "target": "finetune_tests_test_run_eval_wiring_write_split",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_write_split"
     },
     {
       "relation": "calls",
@@ -48769,9 +48857,9 @@
       "source_location": "L60",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_confabulation_is_absent_when_probes_are_disabled",
-      "target": "finetune_tests_test_run_eval_wiring_args",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_args"
     },
     {
       "relation": "calls",
@@ -48781,9 +48869,9 @@
       "source_location": "L88",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_confabulation_scores_both_models",
-      "target": "finetune_tests_test_run_eval_wiring_args",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_args"
     },
     {
       "relation": "calls",
@@ -48793,9 +48881,9 @@
       "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_overlap_finds_the_sibling_train_split",
-      "target": "finetune_tests_test_run_eval_wiring_args",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_args"
     },
     {
       "relation": "calls",
@@ -48805,9 +48893,9 @@
       "source_location": "L48",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_overlap_is_absent_when_there_is_no_train_split",
-      "target": "finetune_tests_test_run_eval_wiring_args",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_args"
     },
     {
       "relation": "calls",
@@ -48817,9 +48905,9 @@
       "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_test_overlap_is_skipped_when_resampling",
-      "target": "finetune_tests_test_run_eval_wiring_args",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_args"
     },
     {
       "relation": "rationale_for",
@@ -48828,9 +48916,9 @@
       "source_location": "L52",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_rationale_52",
-      "target": "finetune_tests_test_run_eval_wiring_test_overlap_is_skipped_when_resampling",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_test_overlap_is_skipped_when_resampling"
     },
     {
       "relation": "rationale_for",
@@ -48839,9 +48927,9 @@
       "source_location": "L64",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "finetune_tests_test_run_eval_wiring_rationale_64",
-      "target": "finetune_tests_test_run_eval_wiring_test_confabulation_scores_both_models",
-      "confidence_score": 1.0
+      "target": "finetune_tests_test_run_eval_wiring_test_confabulation_scores_both_models"
     },
     {
       "relation": "calls",
@@ -129480,94 +129568,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L1",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "changelog",
-      "target": "changelog_changelog"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L106",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "changelog_changelog",
-      "target": "changelog_0_1_0_2026_09_01"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "changelog_changelog",
-      "target": "changelog_unreleased"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L32",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "changelog_unreleased",
-      "target": "changelog_added"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L84",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "changelog_unreleased",
-      "target": "changelog_added_84"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L8",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "changelog_unreleased",
-      "target": "changelog_fixed"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L59",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "changelog_unreleased",
-      "target": "changelog_fixed_59"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "CHANGELOG.md",
-      "source_location": "L108",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "changelog_0_1_0_2026_09_01",
-      "target": "changelog_added_108"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "docs/download-and-install.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -133553,5 +133553,5 @@
       "source_file": "stress_corpus/doc01_community_mh_letter.txt"
     }
   ],
-  "built_at_commit": "02742def644eb66c56a45695f3b06ec5b78f7ea3"
+  "built_at_commit": "f513df78eddcd560845c2f17004bfe97f59b1daf"
 }
