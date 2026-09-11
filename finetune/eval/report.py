@@ -32,6 +32,7 @@ def build_report(
     tuned_name: str = "tuned",
     overlap: dict | None = None,
     confabulation: dict | None = None,
+    judge: dict | None = None,
 ) -> tuple[str, dict]:
     verdict = compare(base, tuned)
     ship = verdict["ship"]
@@ -70,6 +71,27 @@ def build_report(
             "the source leaves undocumented. Lower is better.",
         ]
 
+    if judge is not None:
+        lines += ["", "## Independent judge (faithfulness, second grader)", ""]
+        lines.append(f"- judge model: `{judge.get('model', 'unknown')}`")
+        for name, side in ((base_name, judge.get("base") or {}),
+                           (tuned_name, judge.get("tuned") or {})):
+            rate = side.get("supported")
+            shown = "not computable" if rate is None else f"{rate:.3f}"
+            lines.append(
+                f"- {name}: supported {shown} "
+                f"({side.get('rules_ok_judge_bad', 0)} drafts the rule grader "
+                f"passed and the judge rejected, {side.get('unparsed', 0)} "
+                f"unparsed replies)"
+            )
+        lines += [
+            "",
+            "`validators` scores a draft against the same `EncounterFacts` that "
+            "rendered the reference. This grader sees only the source note and "
+            "the draft. The rules-passed/judge-rejected count is the number "
+            "that matters: it is where the self-marking was hiding.",
+        ]
+
     if overlap is not None:
         lines += ["", "## Train/test overlap", ""]
         if overlap.get("median") is None:
@@ -88,6 +110,7 @@ def build_report(
         "ship": ship,
         "overlap": overlap,
         "confabulation": confabulation,
+        "judge": judge,
         "verdict": verdict,
         "base": {"metrics": base.metrics, "median_seconds": base.median_seconds},
         "tuned": {"metrics": tuned.metrics, "median_seconds": tuned.median_seconds},

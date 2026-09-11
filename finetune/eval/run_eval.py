@@ -13,7 +13,7 @@ every target metric, and latency no worse than 1.15×.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable, Iterable, Protocol
 
 from finetune.assemble.build_target import build_target
@@ -131,17 +131,20 @@ class RunResult:
     median_seconds: float
     n: int
     scores: list[DraftScore]
+    drafts: list[str] = field(default_factory=list)
 
 
 def run(model: Completer, items: Iterable[EvalItem]) -> RunResult:
     items = list(items)
     scores: list[DraftScore] = []
+    drafts: list[str] = []
     durations: list[float] = []
     for item in items:
         msgs = item.messages()
         started = time.monotonic()
         draft = model.complete(msgs[0]["content"], msgs[1]["content"])
         durations.append(time.monotonic() - started)
+        drafts.append(draft)
         scores.append(
             score_draft(
                 draft,
@@ -152,7 +155,7 @@ def run(model: Completer, items: Iterable[EvalItem]) -> RunResult:
         )
     durations.sort()
     median = durations[len(durations) // 2] if durations else 0.0
-    return RunResult(aggregate(scores), median, len(items), scores)
+    return RunResult(aggregate(scores), median, len(items), scores, drafts)
 
 
 def compare(base: RunResult, tuned: RunResult) -> dict:
@@ -301,6 +304,52 @@ def _confabulation_for(args, base, tuned) -> dict | None:
     }
 
 
+def _judge_for(args, items, base: RunResult, tuned: RunResult) -> dict | None:
+    """Second-grader agreement on faithfulness (D2).
+
+    `validators` aligns a draft back to the same `EncounterFacts` that
+    `build_target` rendered the reference from, so a high faithfulness score is
+    consistent with "reproduced the scaffold". This grader sees only the source
+    note and the draft. What is worth reading is the DISAGREEMENT: drafts the
+    rule grader passed and the judge rejected are where the self-marking was
+    hiding.
+    """
+    from finetune.eval.judge import OllamaJudge, judge_draft
+
+    if not args.judge:
+        return None
+    judge = OllamaJudge(model=args.judge_model)
+    items = list(items)
+    out: dict = {"model": args.judge_model, "n": len(items)}
+    for name, result in (("base", base), ("tuned", tuned)):
+        # zip() truncates silently, which would drop items from the rate with
+        # no error and no log. The three sequences are built in one loop in
+        # run(); if they ever disagree, say so rather than under-reporting.
+        if not len(items) == len(result.drafts) == len(result.scores):
+            raise ValueError(
+                f"{name}: {len(items)} items but {len(result.drafts)} drafts "
+                f"and {len(result.scores)} scores -- cannot align them"
+            )
+        supported = unparsed = rules_ok_judge_bad = 0
+        graded = list(zip(items, result.drafts, result.scores))
+        for item, draft, score in graded:
+            verdict = judge_draft(item.document, draft, complete=judge.complete)
+            if verdict.supported is None:
+                unparsed += 1
+                continue
+            if verdict.supported:
+                supported += 1
+            elif score.faithfulness == 1.0:
+                rules_ok_judge_bad += 1
+        scored = len(graded) - unparsed
+        out[name] = {
+            "supported": round(supported / scored, 4) if scored else None,
+            "rules_ok_judge_bad": rules_ok_judge_bad,
+            "unparsed": unparsed,
+        }
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     import argparse
 
@@ -323,6 +372,12 @@ def main(argv: list[str] | None = None) -> int:
                          "the split is vignette-disjoint either way")
     ap.add_argument("--gap-probes", type=int, default=40,
                     help="adversarial 'Not documented.' probes; 0 disables")
+    ap.add_argument("--judge", action="store_true",
+                    help="also grade faithfulness with an independent judge "
+                         "that never sees EncounterFacts (needs Ollama)")
+    ap.add_argument("--judge-model", default="qwen3.8:27b",
+                    help="Ollama model for --judge; must not be the model "
+                         "under test")
     ap.add_argument("--resample", action="store_true",
                     help="re-sample instead of reading the held-out split "
                          "(NOT held out; smoke tests only)")
@@ -348,9 +403,11 @@ def main(argv: list[str] | None = None) -> int:
 
     overlap = _overlap_for(args, items)
     confab = _confabulation_for(args, base, tuned)
+    judged = _judge_for(args, items, base_run, tuned_run)
 
     ship = write_report(
-        base_run, tuned_run, args.out, overlap=overlap, confabulation=confab
+        base_run, tuned_run, args.out, overlap=overlap, confabulation=confab,
+        judge=judged,
     )
     print(f"eval items: {len(items)}   regression docs: {len(reg_items)}")
     if overlap and overlap.get("median") is not None:
@@ -358,6 +415,12 @@ def main(argv: list[str] | None = None) -> int:
               f"{overlap['n_above_0_6']} of {overlap['n']} above 0.6")
     if confab:
         print(f"confabulation: base {confab['base']}, tuned {confab['tuned']}")
+    if judged:
+        print(f"judge ({judged['model']}): base supported "
+              f"{judged['base']['supported']}, tuned "
+              f"{judged['tuned']['supported']}; rules-passed/judge-failed "
+              f"base {judged['base']['rules_ok_judge_bad']}, tuned "
+              f"{judged['tuned']['rules_ok_judge_bad']}")
     print(f"regression failures: {reg_fail or 'none'}")
     print(f"SHIP GATE: {'PASS' if ship and not reg_fail else 'FAIL'}  -> {args.out}/")
     return 0 if (ship and not reg_fail) else 1

@@ -61,17 +61,32 @@ def test_confabulation_is_absent_when_probes_are_disabled():
 
 
 def test_confabulation_scores_both_models():
-    """A model that echoes the target never confabulates; one that invents does."""
+    """Writing "Not documented." never confabulates; inventing content does.
 
-    class Echo:
-        def complete(self, system, user):
-            return "**Follow-up**\nNot documented.\n"
+    Both fakes answer under the headings each probe actually gaps, looked up
+    from the probe itself. An earlier version hardcoded `**Follow-up**`, which
+    stopped measuring anything the moment new vignettes changed what
+    `make_gap_probes(3, seed=2000)` draws: neither model wrote under a gapped
+    heading at all, so both scored 0.0 and the test failed for the wrong reason.
+    """
+    from finetune.eval.gap_probe import gapped_headings, make_gap_probes
 
-    class Inventor:
-        def complete(self, system, user):
-            return "**Follow-up**\nReview in six weeks.\n"
+    probes = make_gap_probes(3, seed=2000)
+    assert probes, "no gap probes generated"
+    assert all(gapped_headings(p.target) for p in probes)
 
-    result = _confabulation_for(_args(gap_probes=3), Echo(), Inventor())
+    def _model(body):
+        def complete(_self, system, user):
+            probe = next(p for p in probes if p.messages_pair()[1] == user)
+            return "\n".join(
+                f"**{heading}**\n{body}\n" for heading in gapped_headings(probe.target)
+            )
+
+        return type("Fake", (), {"complete": complete})()
+
+    result = _confabulation_for(
+        _args(gap_probes=3), _model("Not documented."), _model("Review in six weeks.")
+    )
     assert result["n"] == 3
     assert result["base"] == 0.0
     assert result["tuned"] > 0.0
