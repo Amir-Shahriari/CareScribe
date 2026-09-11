@@ -2,30 +2,108 @@
 <html>
 <head>
 <meta charset="utf-8" />
+<style id="fonts"></style>
 <style>
+  /* This iframe is its own document: the app's stylesheet does not reach it,
+     so the tokens it needs are restated here rather than inherited. */
+  :root {
+    --ink: #101828;
+    --muted: #667085;
+    --faint: #98a2b3;
+    --border: #e7e9ee;
+    --panel: #f7f8fa;
+    --accent: #4f46e5;
+    --accent-soft: #eef2ff;
+    --radius: 11px;
+  }
   html, body { margin: 0; padding: 0; }
   body {
-    font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+    font-family: "IBM Plex Mono", ui-monospace, "Cascadia Code", "Consolas", monospace;
+    font-feature-settings: "ss01";
     font-size: 0.82rem;
     line-height: 1.6;
+    color: var(--ink);
   }
+
+  /* --- toolbar: find, match count, step through highlights --- */
+  #bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.78rem;
+  }
+  #find {
+    flex: 1 1 190px;
+    min-width: 0;
+    padding: 6px 10px;
+    font: inherit;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  #find::placeholder { color: var(--faint); }
+  #find:focus-visible, .btn:focus-visible, mark:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .btn {
+    padding: 6px 10px;
+    font: inherit;
+    color: var(--ink);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .btn:hover:not(:disabled) { background: var(--accent-soft); border-color: var(--accent); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  #count { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* --- the document itself --- */
   #doc {
     white-space: pre-wrap;
     padding: 10px;
-    max-height: 360px;
+    /* Was a flat 360px, which put most real letters behind a scroll with no
+       way to search them.
+
+       Deliberately a fixed px height, not a vh one: this is a Streamlit
+       component iframe whose height the host sets from our own
+       scrollHeight. A vh unit here resolves against that same height, so
+       "58vh" would feed back into the value that produced it and settle on
+       the clamp floor -- smaller than what it replaced. Height that depends
+       on the parent viewport is not knowable from inside this frame. */
+    height: 520px;
     overflow: auto;
-    border: 1px solid rgba(128, 128, 128, .35);
+    border: 1px solid var(--border);
     border-radius: 6px;
+    background: #fff;
   }
-  mark {
-    cursor: pointer;
-  }
-  mark:hover {
-    outline: 2px solid #495057;
+  mark { cursor: pointer; border-radius: 2px; }
+  mark:hover { outline: 2px solid #495057; }
+  /* The one highlight the reviewer is standing on. */
+  mark.cs-current { outline: 2px solid var(--accent); outline-offset: 1px; }
+  /* Find matches are drawn without touching the redaction marks' own colours. */
+  .cs-hit { background: #fde68a; border-radius: 2px; }
+  .cs-hit-current { background: #f59e0b; color: #fff; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    mark { transition: outline-color .12s cubic-bezier(.22,1,.36,1); }
   }
 </style>
 </head>
 <body>
+<div id="bar">
+  <input id="find" type="search" placeholder="Find in this document…"
+         aria-label="Find in this document" autocomplete="off" spellcheck="false" />
+  <button class="btn" id="prev" type="button" aria-label="Previous match" disabled>↑</button>
+  <button class="btn" id="next" type="button" aria-label="Next match" disabled>↓</button>
+  <span id="count" role="status" aria-live="polite"></span>
+  <button class="btn" id="jump" type="button">Next highlight</button>
+</div>
 <div id="doc"></div>
 <script>
   // Streamlit's component postMessage protocol, hand-rolled -- no external
@@ -51,19 +129,178 @@
     );
   }
 
+  var doc = document.getElementById("doc");
+  var findInput = document.getElementById("find");
+  var prevBtn = document.getElementById("prev");
+  var nextBtn = document.getElementById("next");
+  var jumpBtn = document.getElementById("jump");
+  var countEl = document.getElementById("count");
+
+  var baseHtml = "";     // the render's HTML, untouched by find
+  var hits = [];         // current find matches, in document order
+  var hitIndex = -1;
+  var markIndex = -1;    // position in the highlight walk
+
+  function marks() {
+    return doc.querySelectorAll("mark[data-span-id]");
+  }
+
+  // --- highlights: clickable AND keyboard-operable ------------------------
+  function wireMarks() {
+    var list = marks();
+    for (var i = 0; i < list.length; i++) {
+      (function (mark) {
+        // A mark was mouse-only before: no tabindex, no role, no key handler,
+        // on the richest interaction in the review step.
+        mark.setAttribute("tabindex", "0");
+        mark.setAttribute("role", "button");
+        mark.addEventListener("click", function () {
+          sendValue(mark.getAttribute("data-span-id"));
+        });
+        mark.addEventListener("keydown", function (event) {
+          if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+            event.preventDefault();
+            sendValue(mark.getAttribute("data-span-id"));
+          }
+        });
+      })(list[i]);
+    }
+    jumpBtn.disabled = list.length === 0;
+    jumpBtn.textContent = list.length
+      ? "Next highlight (" + list.length + ")"
+      : "No highlights";
+  }
+
+  function stepHighlight() {
+    var list = marks();
+    if (!list.length) return;
+    var previous = doc.querySelector("mark.cs-current");
+    if (previous) previous.classList.remove("cs-current");
+    markIndex = (markIndex + 1) % list.length;
+    var target = list[markIndex];
+    target.classList.add("cs-current");
+    target.scrollIntoView({ block: "center" });
+    target.focus();
+  }
+
+  // --- find in page -------------------------------------------------------
+  function escapeRegExp(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function clearFind() {
+    hits = [];
+    hitIndex = -1;
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    countEl.textContent = "";
+  }
+
+  function runFind() {
+    var term = findInput.value;
+    // Restore the untouched render before every search so find highlighting
+    // never compounds, and never eats the redaction marks.
+    doc.innerHTML = baseHtml;
+    wireMarks();
+    markIndex = -1;
+
+    if (!term || term.length < 2) {
+      clearFind();
+      setFrameHeight();
+      return;
+    }
+
+    var pattern = new RegExp(escapeRegExp(term), "gi");
+    var walker = document.createTreeWalker(doc, NodeFilter.SHOW_TEXT, null);
+    var textNodes = [];
+    var node;
+    while ((node = walker.nextNode())) textNodes.push(node);
+
+    for (var i = 0; i < textNodes.length; i++) {
+      var text = textNodes[i].nodeValue;
+      if (!pattern.test(text)) continue;
+      pattern.lastIndex = 0;
+      var frag = document.createDocumentFragment();
+      var last = 0;
+      var match;
+      while ((match = pattern.exec(text)) !== null) {
+        if (match.index > last) {
+          frag.appendChild(document.createTextNode(text.slice(last, match.index)));
+        }
+        var span = document.createElement("span");
+        span.className = "cs-hit";
+        span.textContent = match[0];
+        frag.appendChild(span);
+        last = match.index + match[0].length;
+        if (match[0].length === 0) pattern.lastIndex++;
+      }
+      if (last < text.length) {
+        frag.appendChild(document.createTextNode(text.slice(last)));
+      }
+      textNodes[i].parentNode.replaceChild(frag, textNodes[i]);
+    }
+
+    hits = Array.prototype.slice.call(doc.querySelectorAll(".cs-hit"));
+    hitIndex = hits.length ? 0 : -1;
+    prevBtn.disabled = hits.length < 2;
+    nextBtn.disabled = hits.length < 2;
+    showHit();
+    setFrameHeight();
+  }
+
+  function showHit() {
+    if (!hits.length) {
+      countEl.textContent = "No matches";
+      return;
+    }
+    for (var i = 0; i < hits.length; i++) hits[i].classList.remove("cs-hit-current");
+    var current = hits[hitIndex];
+    current.classList.add("cs-hit-current");
+    current.scrollIntoView({ block: "center" });
+    countEl.textContent = (hitIndex + 1) + " of " + hits.length;
+  }
+
+  function stepHit(delta) {
+    if (!hits.length) return;
+    hitIndex = (hitIndex + delta + hits.length) % hits.length;
+    showHit();
+  }
+
+  var findTimer = null;
+  findInput.addEventListener("input", function () {
+    clearTimeout(findTimer);
+    findTimer = setTimeout(runFind, 140);
+  });
+  findInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      if (hits.length) stepHit(event.shiftKey ? -1 : 1);
+      else runFind();
+    } else if (event.key === "Escape") {
+      findInput.value = "";
+      runFind();
+    }
+  });
+  prevBtn.addEventListener("click", function () { stepHit(-1); });
+  nextBtn.addEventListener("click", function () { stepHit(1); });
+  jumpBtn.addEventListener("click", stepHighlight);
+
+  var fontsInstalled = false;
+
   function onRender(event) {
     var args = (event.data && event.data.args) || {};
-    var doc = document.getElementById("doc");
-    doc.innerHTML = args.html || "";
-    var marks = doc.querySelectorAll("mark[data-span-id]");
-    for (var i = 0; i < marks.length; i++) {
-      marks[i].addEventListener("click", (function (mark) {
-        return function () {
-          sendValue(mark.getAttribute("data-span-id"));
-        };
-      })(marks[i]));
+    // The app's stylesheet cannot cross into this iframe, so the faces are
+    // handed over as @font-face rules and installed once.
+    if (!fontsInstalled && args.font_css) {
+      document.getElementById("fonts").textContent = args.font_css;
+      fontsInstalled = true;
     }
-    setFrameHeight();
+    baseHtml = args.html || "";
+    doc.innerHTML = baseHtml;
+    wireMarks();
+    markIndex = -1;
+    if (findInput.value) runFind();
+    else { clearFind(); setFrameHeight(); }
   }
 
   window.addEventListener("message", function (event) {
