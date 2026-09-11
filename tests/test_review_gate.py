@@ -10,6 +10,7 @@ Everything here is fabricated.
 """
 
 import json
+import re
 
 import pytest
 
@@ -234,8 +235,32 @@ def test_the_sidecar_contains_no_mapping(record):
     assert "[MRN]" not in flat
 
 
+def test_the_sidecar_clock_is_only_a_clock(tmp_path, monkeypatch):
+    """`reviewed_at` is the one field not derived from the document.
+
+    It is excluded from the identifier scan below, so it has to be pinned to a
+    bare ISO timestamp here — otherwise the exclusion could hide a real leak.
+    """
+    monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path / "out")
+    path = batch.write_review_record(
+        "corpus.txt", entities=[],
+        flags_shown=0, flags_redacted=0, flags_dismissed=0,
+    )
+    record = json.loads(path.read_text(encoding="utf-8"))
+    assert re.fullmatch(
+        r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00", record["reviewed_at"]
+    ), record["reviewed_at"]
+
+
 def test_no_corpus_identifier_reaches_the_sidecar(tmp_path, monkeypatch):
-    """The real test: nothing the corpus calls an identifier may appear."""
+    """The real test: nothing the corpus calls an identifier may appear.
+
+    `reviewed_at` is dropped before the scan. It is the wall clock, not
+    document-derived, and the corpus lists times like `11:02` as identifiers —
+    so a raw substring scan failed for one minute a day, six times a day,
+    entirely spuriously. `test_the_sidecar_clock_is_only_a_clock` keeps that
+    exclusion honest; every other field is still scanned.
+    """
     monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path / "out")
     key = json.loads(
         (batch._PACKAGE_ROOT.parent / "stress_corpus" / "answer_key.json")
@@ -251,7 +276,9 @@ def test_no_corpus_identifier_reaches_the_sidecar(tmp_path, monkeypatch):
         "corpus.txt", entities=entities,
         flags_shown=0, flags_redacted=0, flags_dismissed=0,
     )
-    written = path.read_text(encoding="utf-8")
+    record = json.loads(path.read_text(encoding="utf-8"))
+    record.pop("reviewed_at")
+    written = json.dumps(record, ensure_ascii=False)
     for document in key["documents"]:
         for value in document["must_redact"]:
             assert value not in written, value
@@ -261,3 +288,40 @@ def test_the_app_registers_the_new_state_keys_for_wiping():
     """A dismissal key holds the span text, so it must be wiped with the rest."""
     for key in ("entity_confirmed", "flag_dismissed", "flag_redacted"):
         assert key in carescribe_app.PHI_KEYS
+
+
+def test_the_set_of_timestamp_colliding_identifiers_has_not_grown():
+    """A guard against the clock-collision bug coming back at a new scan site.
+
+    Several tests grep written artefacts for corpus identifiers as raw
+    substrings. Two broke because `reviewed_at` is an ISO timestamp and the
+    corpus lists bare times as identifiers, so the stamp "contained" one --
+    504 seconds a day, about 1 run in 172. Those two now exclude the field.
+    Other scan sites (test_patient_pipeline, test_full_pipeline_accounts) do
+    not, and are safe only because no identifier they scan takes a colliding
+    shape today.
+
+    These six are the known, legitimate collisions -- real times in the corpus
+    documents, which cannot simply be renamed. The list may shrink, never grow:
+    adding a seventh means some scan site is now one unlucky second away from a
+    spurious failure, and the fix is to exclude the generated clock there --
+    see `_scannable()` in tests/test_desktop_packaging.py.
+    """
+    known = {"09:14", "10:15", "11:02", "14:30", "14:32", "16:50"}
+    key = json.loads(
+        (batch._PACKAGE_ROOT.parent / "stress_corpus" / "answer_key.json")
+        .read_text(encoding="utf-8")
+    )
+    values = {v for document in key["documents"] for v in document["must_redact"]}
+
+    stamps = [
+        f"2026-09-10T{h:02d}:{m:02d}:{s:02d}+00:00"
+        for h in range(24) for m in range(60) for s in (0, 14, 30, 32, 50, 59)
+    ]
+    colliding = {v for v in values if any(v in stamp for stamp in stamps)}
+
+    assert colliding <= known, (
+        f"new timestamp-colliding identifier(s): {sorted(colliding - known)}. "
+        f"Every test that greps written output for these must exclude generated "
+        f"clock fields first -- see _scannable() in tests/test_desktop_packaging.py."
+    )

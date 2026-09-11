@@ -174,6 +174,29 @@ def test_the_backend_ladder_prefers_local_over_cloud(monkeypatch):
 # Task 6 — nothing sensitive lands in the app-data directory
 # ==========================================================================
 
+def _scannable(path):
+    """A written file's text, with the review sidecar's own clock removed.
+
+    `reviewed_at` is the only thing written that is not derived from the
+    document, and the corpus lists bare times (`14:30`, `11:02`, ...) as
+    identifiers — so `2026-09-10T11:14:30+00:00` contains one by coincidence.
+    That is 504 seconds a day, about 1 run in 172, failing for no real reason.
+    `test_the_sidecar_clock_is_only_a_clock` in test_review_gate.py pins the
+    field to a bare ISO timestamp so dropping it here cannot hide a leak.
+    """
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    if path.suffix != ".json":
+        return text
+    try:
+        record = json.loads(text)
+    except ValueError:
+        return text
+    if not isinstance(record, dict) or "reviewed_at" not in record:
+        return text
+    record.pop("reviewed_at")
+    return json.dumps(record, ensure_ascii=False)
+
+
 def test_no_corpus_identifier_reaches_any_written_file(tmp_path, monkeypatch):
     """Run every corpus document through and grep everything written."""
     monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path / "appdata" / "deidentified")
@@ -199,9 +222,7 @@ def test_no_corpus_identifier_reaches_any_written_file(tmp_path, monkeypatch):
     written = list((tmp_path / "appdata").rglob("*"))
     assert written, "nothing was written"
     blob = "\n".join(
-        path.read_text(encoding="utf-8", errors="ignore")
-        for path in written
-        if path.is_file()
+        _scannable(path) for path in written if path.is_file()
     )
     for entry in key["documents"]:
         for value in entry["must_redact"]:
