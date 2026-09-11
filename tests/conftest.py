@@ -24,6 +24,23 @@ SIGNED_IN_USER_ID = "u_" + "0" * 32
 SIGNED_IN_SESSION = {"user_id": SIGNED_IN_USER_ID, "username": "test user"}
 
 
+@pytest.fixture(autouse=True)
+def _reset_account_scope():
+    """No test may inherit the account another one left scoped.
+
+    The active account is thread-local ambient state. A test that sets it and
+    does not clear it leaves this thread scoped for every test that follows,
+    which is how `test_selecting_a_patient_files_the_approval_in_their_folder`
+    came to pass in the full suite and fail on its own: it never set the scope
+    at all, and was quietly reading one an earlier test had left behind.
+    """
+    from carescribe.core import patients
+
+    patients.set_active_user(None)
+    yield
+    patients.set_active_user(None)
+
+
 @pytest.fixture(scope="session")
 def raw_text() -> str:
     return DISCHARGE_SUMMARY

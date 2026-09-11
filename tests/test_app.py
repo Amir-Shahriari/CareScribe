@@ -287,7 +287,16 @@ def test_selecting_a_patient_files_the_approval_in_their_folder(tmp_path, monkey
     monkeypatch.setattr(batch, "OUTPUT_DIR", tmp_path / "flat")
     monkeypatch.setenv("CARESCRIBE_PATIENTS_DIR", str(tmp_path / "patients"))
     from carescribe.core import patients
+    from tests.conftest import SIGNED_IN_USER_ID
 
+    # `run_app` runs the script as SIGNED_IN_USER_ID, so the patient has to be
+    # created in that account. This used to be omitted and the test still
+    # passed, because the active account was a plain module global: the app
+    # thread's scope leaked back to this one, and across tests. Once that became
+    # thread-local — which is what stops two concurrent clinicians filing into
+    # each other's folders — the omission showed up as the app resetting the
+    # selection and writing to the scratch folder instead.
+    patients.set_active_user(SIGNED_IN_USER_ID)
     patient = patients.create_patient("Test Patient")
     document = _clean_auto_doc()
     document.attested = True

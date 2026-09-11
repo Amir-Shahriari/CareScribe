@@ -26,6 +26,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import threading
 import shutil
 import uuid
 from dataclasses import dataclass
@@ -52,13 +53,31 @@ _USER_ID_RE = re.compile(r"^u_[0-9a-f]{32}$")
 # Which account's patients the store currently resolves to. ``None`` means the
 # flat, pre-accounts layout: patients sit directly in the base.
 #
-# This is module state, not a parameter, because it must reach every existing
+# It is ambient state, not a parameter, because it must reach every existing
 # call site (``create_patient``, ``filed_documents``, ...) without changing any
 # of their signatures — the scoping happens once, in ``patients_root()``, and
-# everything above it is untouched. Streamlit runs one script top-to-bottom per
-# rerun, and ``app.main()`` sets this before anything reads the store, so a
-# second browser session cannot observe the first one's value mid-read.
-_active_user: str | None = None
+# everything above it is untouched.
+#
+# It is THREAD-LOCAL, and that is load-bearing. This was a plain module global,
+# with a comment reasoning that "Streamlit runs one script top-to-bottom per
+# rerun, so a second browser session cannot observe the first one's value
+# mid-read". That is true of one session and false of two: Streamlit serves
+# every concurrent session from its own ScriptRunner thread inside a SINGLE
+# process, so a module global is shared by all of them, and any file I/O in a
+# store call releases the GIL and lets another session's thread run in between.
+# Two clinicians signed into two accounts against one running instance — which
+# is what happens with two browser tabs, or the shared fixed port the README's
+# own run command uses — could therefore file a document into each other's
+# folder, which is the single guarantee the accounts feature exists to make.
+#
+# Thread-local is the smallest fix that restores it: ``auth.apply_scope()``
+# re-asserts the value at the top of every rerun, on that session's own thread,
+# so a pooled or recycled thread is corrected before anything reads the store.
+_scope = threading.local()
+
+
+def _get_active_user() -> str | None:
+    return getattr(_scope, "active_user", None)
 
 ROSTER_FILENAME = "patient.json"
 DOCUMENTS_SUBDIR = "documents"
@@ -114,18 +133,20 @@ def set_active_user(user_id: str | None) -> None:
     tests and the migration path below want. A malformed id raises rather than
     silently resolving somewhere unexpected — an id decides a directory.
     """
-    global _active_user
     if user_id is None or user_id == "":
-        _active_user = None
+        _scope.active_user = None
         return
     if not isinstance(user_id, str) or not _USER_ID_RE.match(user_id):
         raise PatientError(f"Not a user id: {user_id!r}")
-    _active_user = user_id
+    _scope.active_user = user_id
 
 
 def active_user() -> str | None:
-    """The account the store is currently scoped to, or ``None``."""
-    return _active_user
+    """The account the store is currently scoped to, or ``None``.
+
+    Per session-thread: another session's account is not visible here.
+    """
+    return _get_active_user()
 
 
 def patients_root() -> Path:
@@ -136,7 +157,8 @@ def patients_root() -> Path:
     stays correct without knowing accounts exist.
     """
     base = store_base()
-    return base / _active_user if _active_user else base
+    scoped = _get_active_user()
+    return base / scoped if scoped else base
 
 
 def _valid_id(patient_id: str) -> str:
